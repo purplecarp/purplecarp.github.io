@@ -24,6 +24,24 @@
         margin-left: auto;
         margin-right: auto;
       }
+      
+      .btn-gallery {
+        background-color: #818181 !important;
+        color: white !important;
+        border-radius: 5px;
+        font-weight: 500;
+        text-transform: uppercase;
+        box-shadow: 0 3px 10px rgba(129, 129, 129, 0.3);
+        transition: all 0.3s ease;
+      }
+      
+      .btn-gallery:hover {
+        background-color: #2f2f2f !important;
+        color: white !important;
+        text-decoration: none;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 252, 252, 0.4);
+      }
     </style>
     <!--fonts google-->
     <link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700' rel='stylesheet' type='text/css'>
@@ -55,28 +73,25 @@
         <nav class="menu">
           <div class="menu-list">
             <a data-scroll="" href="#home" class="active">
-              <span>Home</span>
+              <span>首頁</span>
             </a>
             <a data-scroll="" href="#about">
               <span>關於我</span>
             </a>
-            <a data-scroll="" href="#employement">
-              <span>經歷</span>
+            <a data-scroll="" href="#experience">
+              <span>教學經驗</span>
             </a>
-            <a data-scroll="" href="#skill">
-              <span>技能</span>
+            <a href="teaching-gallery.html" class="sub-menu-item">
+              <span>查看教學剪影</span>
             </a>
-            <a data-scroll="" href="#education">
-              <span>教學經歷</span>
+            <a data-scroll="" href="#skills">
+              <span>專業技能</span>
             </a>
-            <a data-scroll="" href="#education2">
-              <span>實習歷程</span>
+            <a data-scroll="" href="#achievements">
+              <span>成果展示</span>
             </a>
-            <a data-scroll="" href="#testimonial">
-              <span>教育哲學</span>
-            </a>
-            <a data-scroll="" href="#blog">
-              <span>發表與活動經歷</span>
+            <a data-scroll="" href="#philosophy">
+              <span>教育理念</span>
             </a>
             <a data-scroll="" href="#contact">
               <span>聯絡方式</span>
@@ -158,17 +173,22 @@
 
  
 
-        <!--EMPLOYEMENT-->
-        <section class="grey-bg" id="employement">
+        <!--EXPERIENCE-->
+        <section class="grey-bg" id="experience">
           <div class="container">
             <div class="row">
               <div class="col-md-3">
                 <h3 class="title-small">
-                  <span>經歷</span>
+                  <span>教學經驗</span>
                 </h3>
                 <p class="content-detail">
-		過去經歷總覽
+		完整的教學與實習經歷
                 </p>
+                <div style="margin-top: 30px;">
+                  <a href="teaching-gallery.html" class="btn-gallery" style="display: inline-block; padding: 12px 24px; background-color: #818181; color: white; text-decoration: none; border-radius: 5px; font-size: 14px; letter-spacing: 1px; transition: all 0.3s ease;">
+                    📸 查看教學剪影
+                  </a>
+                </div>
               </div>
               <div class="col-md-9 content-right">
                 <div class="row">
@@ -183,7 +203,10 @@
                             <hr>
                             <div class="text-detail">
                               <p>
-                                新北市立中和高級中學 物理科 代理教師
+                                新北市立中和高級中學<br/>
+                                物理科代理教師<br/>
+                                    <small style="color: #999;">• 學術職涯營隊協助</small><br/>
+                                    <small style="color: #999;">• 日本教育交流活動</small>
                               </p>
                             </div>
                           </div>
@@ -201,7 +224,11 @@
                             <hr>
                             <div class="text-detail">
                               <p>
-                                新北市立中和高級中學 物理科 實習教師
+                                新北市立中和高級中學<br/>
+                                物理科實習教師<br/>
+                                                <small style="color: #999;">• 學測破百誓師活動</small><br/>
+                                                <small style="color: #999;">• 外籍生華語學習課輔</small><br/>
+                                                <small style="color: #999;">• 日本高中教育交流活動</small>
                               </p>
                             </div>
                           </div>
@@ -219,7 +246,8 @@
                             </h2>
                             <hr>
                             <div class="text-detail">
-                              <p>國立臺灣大學光電工程學研究所 碩士班
+                              <p>國立臺灣大學光電工程學研究所<br/>
+                              碩士班 + 教學助理
                               </p>
                             </div>
                           </div>
@@ -236,7 +264,8 @@
                             </h2>
                             <hr>
                             <div class="text-detail">
-                              <p>國立臺灣師範大學物理學系 學士班
+                              <p>國立臺灣師範大學物理學系<br/>
+                              學士班 + 師資培育
                               </p>
                             </div>
                           </div>
@@ -250,26 +279,36 @@
             </div>
           </div>
         </section>
-        <!--/.EMPLOYEMENT END-->
+        <!--/.EXPERIENCE END-->
 
         <!--SKILLS-->
-        <section class="white-bg" id="skill">
+        <section class="white-bg" id="skills">
           <div class="container">
             <div class="row">
               <div class="col-md-3">
                 <h3 class="title-small">
-                  <span>技能</span>
+                  <span>專業技能</span>
                 </h3>
                 <p class="content-detail">
+                  <p>教學專業</p>
                   <p>資訊能力</p>
                   <p>程式語言</p>
                   <p>影音剪輯</p>
                   <p>生活科技</p>
+                  <p>國際交流</p>
                 </p>
               </div>
               <div class="col-md-9 content-right">
                 <!--SKILLST-->
                 <div class="skillst">
+                  <div class="skillbar" data-percent="80%">
+                    <div class="title head-sm">
+                      教學專業：素養導向、數位融入、國際交流
+                    </div>
+                    <div class="count-bar">
+                      <div class="count"></div>
+                    </div>
+                  </div>
                   <div class="skillbar" data-percent="80%">
                     <div class="title head-sm">
                       資訊能力：Office、Linux
@@ -302,6 +341,14 @@
                       <div class="count"></div>
                     </div>
                   </div>
+                  <div class="skillbar" data-percent="65%">
+                    <div class="title head-sm">
+                      國際交流：日文講義製作、跨文化教學
+                    </div>
+                    <div class="count-bar">
+                      <div class="count"></div>
+                    </div>
+                  </div>
                   
                 </div>
                 <!--/.SKILLST END-->
@@ -310,235 +357,8 @@
           </div>
         </section>
         <!--/.SKILLS END-->
-        <!--EDUCATION-->
-        <section class="grey-bg" id="education">
-          <div class="container">
-          <div class="container">
-            <div class="row">
-              <div class="col-md-3">
-                <h3 class="title-small">
-                  <span>教學經歷</span>
-                </h3>
-                <p class="content-detail">
-                  <p>教學助理</p>
-                  <p>課輔活動</p>
-                  <p>教育實習</p>
-                  <p>生活科技</p>
-                
-                </p>
-              </div>
-              <div class="col-md-9 content-right">
-                <div class="row">
-                  <ul class="listing-item">
-                    <li>
-                      <div class="col-md-12 col-sm-12">
-                        <div class="wrap-card">
-                          <div class="card">
-                            <h2 class="year">
-                              教學助理
-                            </h2>
-                            <hr>
-                            <div class="text-detail">
-                              <p>
-                                就讀研究所期間：擔任<strong>光學傳播散射模擬</strong>與<strong>數值方法</strong>課程之教學助理，課堂學生組成有光電所及電機系大學部的學生為主
-                                授課內容為使用程式語言模擬馬克士威方程探討光學或電磁學議題，課堂中偶有外籍學生參與，因此必須有簡易的英語溝通能力。
-                                <div style="display: flex; justify-content: center; gap: 16px;">
-                              <img alt="photo1" class="images center-img" src="images/ta.jpg" width="280">
-                              <img alt="photo1" class="images center-img" src="images/ta.png" width="280">
-
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </li>
-
-                    <li>
-                      <div class="col-md-12 col-sm-12">
-                        <div class="wrap-card">
-                          <div class="card">
-                            <h2 class="year">
-                              課輔活動
-                            </h2>
-                            <hr>
-                            <div class="text-detail">
-                              <p>
-                                因大學期間受領師資培育獎學金，有機會至臺北市立雙園國中進行每周二次的課後輔導活動，學生組成為國二或國三，進行方式多為一對一問答，協助學生釐清理化及數學上的課業問題。
-                              </p>
-                              <img alt="photo1" class="images" src="images/te1.jpg" height="250" margin:auto>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </li>
-
-                    <li>
-                      <div class="col-md-12 col-sm-12">
-                        <div class="wrap-card">
-                          <div class="card">
-                            <h2 class="year">
-                              教學實習 @ 國立臺灣師範大學附屬中學
-                            </h2>
-                            <hr>
-                            <div class="text-detail">
-                              <p>
-                                於大四下學期進行教學實習，對高一班級進行一次段考之授課(總節數約12堂)，課程內容穿插靜電學等演示實驗，授課方法除傳統板書教學外，嘗試簡報數位授課或kahoot問答等數位工具。
-                              </p>
-                              <center><img alt="photo2" class="images" src="images/b1.png" height="220" ></center>
-                              <center><img alt="photo2" class="images" src="images/b2.png" height="220" ></center>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </li>
-
-
-                  </ul>
-                  
-
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-        <!--/.EDUCATION END-->
-        <!--EDUCATION2-->
-        <section class="grey-bg" id="education2">
-          <div class="container">
-            <div class="row">
-              <div class="col-md-3">
-                <h3 class="title-small">
-                  <span>實習歷程</span>
-                </h3>
-                <p class="content-detail">
-
-                
-                </p>
-              </div>
-              <div class="col-md-9 content-right">
-                <div class="row">
-                  <ul class="listing-item">
-                    <li>
-                      <div class="col-md-12 col-sm-12">
-                        <div class="wrap-card">
-                          <div class="card">
-                            <h2 class="year">
-                              教學
-                            </h2>
-                            <hr>
-                            <div class="text-detail">
-                              <p><strong>素養導向</strong>：融入生活常見的現象、物品演示概念</p>
-                              <p><strong>數位輔助</strong>：平板教學輔助概念解釋、即時量測數據</p>
-                              <p><strong>教材製作</strong>：利用簡易可得的材料製作器材</p>
-                              <p><strong>拔尖扶弱教學計畫</strong>：利用每周放學，加強高意願低成就之學生學習知能。</p>                           
-
-
-                                  <center></p>在高三班級進行物理演示實景</p></center>
-
-                                    
-                                    <center><img alt="photo1" class="images" src="images/c1.png" height="260" margin:auto></center>
-
-                                    
-                                    <center><img alt="photo1" class="images" src="images/c2.png" height="260" margin:auto></center>
-
-
-                                  <center></p>為高二升高三的同學進行物理扶弱計畫</p></center>
-
-                                    <center><img alt="photo1" class="images" src="images/c3.jpg" height="280" margin:auto></center>
-
-                                    <center><img alt="photo1" class="images" src="images/c4.jpg" height="280" margin:auto></center>
-
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </li>
-
-                    <li>
-                      <div class="col-md-12 col-sm-12">
-                        <div class="wrap-card">
-                          <div class="card">
-                            <h2 class="year">
-                              行政
-                            </h2>
-                            <hr>
-                            <div class="text-detail">
-                              <p>協助外籍生相關活動、華語文補救教學、學測破百誓師大會、學術職涯探索營隊、學科能力競賽、校慶運動會。</p>
-			      <p>於教務處設備組實習，熟悉教室與教學設備使用及管理</p>
-
-
-                                    <center></p>協助進行活動紀錄與攝錄影</p></center>
-                                    <center><img alt="photo1" class="images" src="images/d1.jpg" height="280" margin:auto></center>
-
-                                    <center></p>與其他實習教師一同策畫學測破百誓師活動</p></center>
-                                    <center><img alt="photo1" class="images" src="images/d2.jpg" height="280" margin:auto></center>
-
-                                    <center></p>透過桌遊讓外籍生練習中文</p></center>
-                                    <center><img alt="photo1" class="images" src="images/d3.png" height="280" margin:auto></center>
-
-                                    <center></p>協助學校照料學科能力競賽選手出校比賽</p></center>
-                                    <center><img alt="photo1" class="images" src="images/d4.png" height="280" margin:auto></center>
-
-
-                              <center><p>剪輯學測誓師活動的開幕影片</p></center>
-                              <iframe width="560" height="250" src="https://www.youtube.com/embed/LOO4SDutnz4?si=7E9uVio13qvy_ekm" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </li>
-
-                    <li>
-                      <div class="col-md-12 col-sm-12">
-                        <div class="wrap-card">
-                          <div class="card">
-                            <h2 class="year">
-                              課程設計
-                            </h2>
-                            <hr>
-                            <div class="text-detail">
-                              <p>探究式課程：熱容、熱輻射、起電棒的機構設計...</p>
-                              <p>素養導向課程：為何有些車子有後雨刷？</p>
-                              <p>跨領域課程：透過深度學習預測物理模型...</p>
-                              <p>主題式課程：TSMC如何在半導體業佔有一席之地?</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </li>
-                    <li>
-                      <div class="col-md-12 col-sm-12">
-                        <div class="wrap-card">
-                          <div class="card">
-                            <h2 class="year">
-                              研習活動經歷
-                            </h2>
-                            <hr>
-                            <div class="text-detail">
-                              <p>專題探究式課程設計</p>
-                              <p>生成式AI於教學現場的應用：文本編修、整理</p>
-                              <p>運算思維教學工作坊</p>
-                              <p>輔導知能：霸凌事件、學生自（殺）傷、特殊教育</p>
-                              <p>法律知能：師生管教、著作權及新興法律議題</p>
-                              <p>複合式防災研習</p>
-                              <p>性別平等</p>
-                            </div>
-                          </div>
-                        </div>
-                      </div>
-                    </li>
-
-
-                  </ul>
-                  
-
-                </div>
-              </div>
-            </div>
-          </div>
-        </section>
-        <!--/.EDUCATION2 END-->
-        <!--TESTIMONIAL-->
-        <section id="testimonial">
+        <!--PHILOSOPHY-->
+        <section id="philosophy">
           <div class="container">
             <div class="row wrap-testimonial">
               <div class="col-md-10 col-md-offset-1">
@@ -562,21 +382,20 @@
               </div>
             </div>
           </div>
-          <div class="mask-testimonial"></div>
         </section>
-        <!--/.TESTMONIAL END-->
+        <!--/.PHILOSOPHY END-->
 
-        <!--BLOG-->
-        <section class="grey-bg" id="blog">
+        <!--ACHIEVEMENTS-->
+        <section class="grey-bg" id="achievements">
           <div class="container">
             <div class="row">
               <div class="col-md-12">
                 <h3 class="title-small-center text-center">
-                  <span>發表與活動經歷</span>
+                  <span>成果展示</span>
                 </h3>
                 <div class="row">
                   <div class="col-md-6 col-md-offset-3" style="text-align: center">
-壁報論文發表、其他獲獎經歷
+論文發表與獲獎經歷
                   </div>
                 </div>
                 <!--GRID BLOG-->
@@ -684,7 +503,7 @@
             </div>
           </div>
         </section>
-        <!--/.BLOG END-->
+        <!--/.ACHIEVEMENTS END-->
 
         <!--CONTACT-->
         <section id="contact" class="white-bg">
