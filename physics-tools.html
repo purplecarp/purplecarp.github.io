@@ -1,0 +1,1680 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="utf-8">
+    <title>普物實驗小工具 - 李宜閎</title>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <meta content="物理實驗數據分析工具" name="description">
+    <!--Fav-->
+    <link href="images/fish.png" rel="shortcut icon">
+    
+    <!--styles-->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <link href="css/responsive.css" rel="stylesheet">
+    
+    <!--fonts google-->
+    <link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Roboto:400,300,500,700' rel='stylesheet' type='text/css'>
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <style>
+      body {
+        background-color: #f5f5f5;
+        padding-top: 20px;
+      }
+      
+      .back-btn {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        padding: 10px 20px;
+        background-color: #818181;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        z-index: 1000;
+        font-family: '微軟正黑體', 'Microsoft JhengHei', sans-serif;
+      }
+      
+      .back-btn:hover {
+        background-color: #2f2f2f;
+        color: white;
+        text-decoration: none;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      }
+      
+      .page-header {
+        text-align: center;
+        padding: 40px 0 30px;
+        background: white;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+      
+      .page-title {
+        font-size: 36px;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 10px;
+        font-family: 'Roboto Slab', serif;
+      }
+      
+      .page-subtitle {
+        font-size: 18px;
+        color: #666;
+        font-family: '微軟正黑體', 'Microsoft JhengHei', sans-serif;
+      }
+      
+      .tool-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      
+      .tool-card {
+        background: white;
+        border-radius: 8px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      }
+      
+      .tool-tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+      }
+      
+      .tab-btn {
+        padding: 12px 24px;
+        background-color: #e0e0e0;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        font-family: '微軟正黑體', 'Microsoft JhengHei', sans-serif;
+      }
+      
+      .tab-btn:hover {
+        background-color: #bdbdbd;
+      }
+      
+      .tab-btn.active {
+        background-color: #818181;
+        color: white;
+      }
+      
+      .tool-content {
+        display: none;
+      }
+      
+      .tool-content.active {
+        display: block;
+      }
+      
+      .input-group {
+        margin-bottom: 20px;
+      }
+      
+      .input-group label {
+        display: block;
+        margin-bottom: 8px;
+        font-weight: 500;
+        color: #333;
+        font-size: 14px;
+        font-family: '微軟正黑體', 'Microsoft JhengHei', sans-serif;
+      }
+      
+      .input-group input,
+      .input-group textarea {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 14px;
+        font-family: '微軟正黑體', 'Microsoft JhengHei', sans-serif;
+      }
+      
+      .input-group textarea {
+        min-height: 120px;
+        resize: vertical;
+        font-family: 'Courier New', monospace;
+      }
+      
+      .calculate-btn {
+        background-color: #818181;
+        color: white;
+        border: none;
+        padding: 12px 30px;
+        border-radius: 5px;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-family: '微軟正黑體', 'Microsoft JhengHei', sans-serif;
+      }
+      
+      .calculate-btn:hover {
+        background-color: #2f2f2f;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      }
+      
+      .result-box {
+        margin-top: 30px;
+        padding: 20px;
+        background-color: #f9f9f9;
+        border-radius: 5px;
+        border-left: 4px solid #818181;
+      }
+      
+      .result-box h4 {
+        margin-top: 0;
+        margin-bottom: 15px;
+        color: #333;
+        font-size: 18px;
+        font-family: '微軟正黑體', 'Microsoft JhengHei', sans-serif;
+      }
+      
+      .result-item {
+        margin-bottom: 10px;
+        font-size: 14px;
+        line-height: 1.6;
+        font-family: '微軟正黑體', 'Microsoft JhengHei', sans-serif;
+      }
+      
+      .hint-text {
+        font-size: 13px;
+        color: #666;
+        font-style: italic;
+        margin-top: 5px;
+        font-family: '微軟正黑體', 'Microsoft JhengHei', sans-serif;
+      }
+      
+      .footer-links {
+        text-align: center;
+        padding: 30px 0;
+        margin-top: 50px;
+        border-top: 1px solid #ddd;
+      }
+      
+      .footer-links a {
+        color: #818181;
+        text-decoration: none;
+        margin: 0 15px;
+        font-size: 14px;
+        transition: color 0.3s ease;
+        font-family: '微軟正黑體', 'Microsoft JhengHei', sans-serif;
+      }
+      
+      .footer-links a:hover {
+        color: #2f2f2f;
+      }
+      
+      .chart-container {
+        position: relative;
+        height: 400px;
+        margin-top: 20px;
+        padding: 15px;
+        background-color: white;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+      }
+      
+      .chart-controls {
+        display: flex;
+        gap: 15px;
+        flex-wrap: wrap;
+        margin-top: 15px;
+        padding: 15px;
+        background-color: #f9f9f9;
+        border-radius: 5px;
+      }
+      
+      .chart-controls .input-group {
+        margin-bottom: 0;
+        flex: 1;
+        min-width: 150px;
+      }
+      
+      .control-section {
+        width: 100%;
+        margin-top: 10px;
+        padding: 15px;
+        background-color: white;
+        border-radius: 5px;
+        border: 1px solid #ddd;
+      }
+      
+      .control-section h5 {
+        margin: 0 0 10px 0;
+        padding-bottom: 5px;
+        border-bottom: 2px solid #818181;
+        color: #333;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      
+      .control-section h5:hover {
+        color: #818181;
+      }
+      
+      .control-content {
+        display: none;
+        margin-top: 10px;
+      }
+      
+      .control-content.active {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+      }
+      
+      .control-row {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+        width: 100%;
+      }
+      
+      .control-item {
+        flex: 1;
+        min-width: 150px;
+      }
+      
+      .control-item label {
+        display: block;
+        margin-bottom: 5px;
+        font-size: 13px;
+        color: #555;
+      }
+      
+      .control-item input,
+      .control-item select {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 13px;
+      }
+      
+      .control-item input[type="checkbox"] {
+        width: auto;
+        margin-right: 5px;
+      }
+      
+      .download-btn {
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        font-size: 14px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-family: '微軟正黑體', 'Microsoft JhengHei', sans-serif;
+        margin-top: 10px;
+      }
+      
+      .download-btn:hover {
+        background-color: #45a049;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(76, 175, 80, 0.3);
+      }
+      
+      .data-table-container {
+        margin: 20px 0;
+        max-height: 400px;
+        overflow-y: auto;
+        border: 1px solid #ddd;
+        border-radius: 5px;
+        background-color: white;
+      }
+      
+      .data-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      
+      .data-table th {
+        background-color: #818181;
+        color: white;
+        padding: 12px;
+        text-align: center;
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        font-weight: 500;
+      }
+      
+      .data-table td {
+        padding: 8px;
+        text-align: center;
+        border-bottom: 1px solid #eee;
+      }
+      
+      .data-table tr:hover {
+        background-color: #f5f5f5;
+      }
+      
+      .data-table input {
+        width: 100%;
+        padding: 6px;
+        border: 1px solid #ddd;
+        border-radius: 3px;
+        text-align: center;
+        font-family: 'Courier New', monospace;
+      }
+      
+      .data-table input:focus {
+        outline: none;
+        border-color: #818181;
+        box-shadow: 0 0 0 2px rgba(129, 129, 129, 0.1);
+      }
+      
+      .delete-row-btn {
+        background-color: #f44336;
+        color: white;
+        border: none;
+        padding: 6px 12px;
+        border-radius: 3px;
+        cursor: pointer;
+        font-size: 12px;
+        transition: all 0.3s ease;
+      }
+      
+      .delete-row-btn:hover {
+        background-color: #d32f2f;
+      }
+      
+      .add-row-btn {
+        background-color: #2196F3;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 500;
+        margin-top: 10px;
+        transition: all 0.3s ease;
+      }
+      
+      .add-row-btn:hover {
+        background-color: #1976D2;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(33, 150, 243, 0.3);
+      }
+      
+      .table-actions {
+        display: flex;
+        gap: 10px;
+        margin-top: 10px;
+        flex-wrap: wrap;
+      }
+    </style>
+  </head>
+  
+  <body>
+    <!-- 返回按鈕 -->
+    <a href="index.html" class="back-btn">
+      ← 返回首頁
+    </a>
+    
+    <!-- 頁面標題 -->
+    <div class="page-header">
+      <div class="container">
+        <h1 class="page-title">普物實驗小工具</h1>
+        <p class="page-subtitle">數據分析與計算工具</p>
+      </div>
+    </div>
+    
+    <!-- 工具內容 -->
+    <div class="tool-container">
+      <div class="tool-card">
+        <!-- 功能選單 -->
+        <div class="tool-tabs">
+          <button class="tab-btn active" onclick="switchTab('uncertainty')">不確定度與統計</button>
+          <button class="tab-btn" onclick="switchTab('regression')">回歸直線</button>
+          <button class="tab-btn" onclick="switchTab('propagation')">不確定度傳遞</button>
+          <button class="tab-btn" onclick="switchTab('equation')">二元一次方程式</button>
+        </div>
+        
+        <!-- 不確定度計算與統計 -->
+        <div id="uncertainty" class="tool-content active">
+          <h3>不確定度計算與基本統計</h3>
+          <div class="input-group">
+            <label>輸入數據（每行一個數值）：</label>
+            <textarea id="uncertaintyData" placeholder="例如：&#10;10.5&#10;10.3&#10;10.6&#10;10.4"></textarea>
+            <p class="hint-text">請輸入測量數據，每個數值一行</p>
+          </div>
+          <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+            <div class="input-group" style="flex: 1; min-width: 200px;">
+              <label>儀器最小刻度：</label>
+              <input type="number" id="minScale" step="any" value="0.1" placeholder="例如：0.1">
+              <p class="hint-text">儀器的最小刻度值（用於計算儀器不確定度）</p>
+            </div>
+            <div class="input-group" style="flex: 1; min-width: 200px;">
+              <label>小數點位數：</label>
+              <input type="number" id="decimalPlaces" min="0" max="10" step="1" value="2" placeholder="例如：2">
+              <p class="hint-text">結果顯示的小數點位數</p>
+            </div>
+          </div>
+          <button class="calculate-btn" onclick="calculateUncertainty()">計算</button>
+          <div id="uncertaintyResult" class="result-box" style="display: none;">
+            <h4>計算結果</h4>
+            <div id="uncertaintyOutput"></div>
+          </div>
+        </div>
+        
+        <!-- 回歸直線 -->
+        <div id="regression" class="tool-content">
+          <h3>線性回歸分析</h3>
+          
+          <!-- 數據表格 -->
+          <div class="data-table-container">
+            <table class="data-table" id="dataTable">
+              <thead>
+                <tr>
+                  <th style="width: 50px;">#</th>
+                  <th>X 值</th>
+                  <th>Y 值</th>
+                  <th style="width: 80px;">操作</th>
+                </tr>
+              </thead>
+              <tbody id="dataTableBody">
+                <!-- 動態生成行 -->
+              </tbody>
+            </table>
+          </div>
+          
+          <div class="table-actions">
+            <button class="add-row-btn" onclick="addDataRow()">➕ 新增數據點</button>
+            <button class="add-row-btn" onclick="fillSampleData()">📝 填入範例數據</button>
+            <button class="add-row-btn" onclick="quickInput()">⚡ 快速輸入</button>
+            <button class="add-row-btn" onclick="clearAllData()">🗑️ 清除所有數據</button>
+            <button class="add-row-btn" onclick="downloadCSV()">💾 下載CSV</button>
+          </div>
+          
+          <div style="margin-top: 15px; display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
+            <label>
+              <input type="checkbox" id="autoUpdate" checked>
+              自動更新圖表（輸入數據後自動重繪）
+            </label>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <label>小數點位數：</label>
+              <input type="number" id="regressionDecimalPlaces" min="0" max="10" step="1" value="6" style="width: 80px;" placeholder="6">
+            </div>
+          </div>
+          
+          <button class="calculate-btn" onclick="calculateRegression()" style="margin-top: 15px;">計算與繪圖</button>
+          
+          <!-- 圖表顯示 -->
+          <div id="regressionChart" style="display: none;">
+            <div class="chart-container">
+              <canvas id="regressionCanvas"></canvas>
+            </div>
+            
+            <!-- 基本控制 -->
+            <div class="chart-controls">
+              <div class="input-group" style="flex: 2; min-width: 250px;">
+                <label>圖表標題：</label>
+                <input type="text" id="chartTitle" value="線性回歸分析" onchange="updateChart()">
+              </div>
+              <div class="input-group">
+                <label>X 軸標籤：</label>
+                <input type="text" id="xAxisLabel" value="X" onchange="updateChart()">
+              </div>
+              <div class="input-group">
+                <label>Y 軸標籤：</label>
+                <input type="text" id="yAxisLabel" value="Y" onchange="updateChart()">
+              </div>
+              <div class="input-group">
+                <label>下載背景：</label>
+                <select id="downloadBackground" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                  <option value="white">白色背景</option>
+                  <option value="transparent">透明背景</option>
+                </select>
+              </div>
+              <button class="download-btn" onclick="downloadChart()">⬇️ 下載圖表 (PNG)</button>
+            </div>
+            
+            <!-- 進階控制 -->
+            <div class="control-section">
+              <h5 onclick="toggleSection('fontControl')">
+                🔤 字體設定
+                <span id="fontControlIcon">▼</span>
+              </h5>
+              <div id="fontControl" class="control-content">
+                <div class="control-item">
+                  <label>標題字體大小：</label>
+                  <input type="number" id="titleFontSize" value="18" min="10" max="36" onchange="updateChart()">
+                </div>
+                <div class="control-item">
+                  <label>標題字體粗細：</label>
+                  <select id="titleFontWeight" onchange="updateChart()">
+                    <option value="normal">正常</option>
+                    <option value="bold" selected>粗體</option>
+                  </select>
+                </div>
+                <div class="control-item">
+                  <label>坐標軸字體大小：</label>
+                  <input type="number" id="axisLabelFontSize" value="14" min="8" max="24" onchange="updateChart()">
+                </div>
+                <div class="control-item">
+                  <label>坐標軸刻度字體：</label>
+                  <input type="number" id="axisTickFontSize" value="12" min="8" max="20" onchange="updateChart()">
+                </div>
+              </div>
+            </div>
+            
+            <div class="control-section">
+              <h5 onclick="toggleSection('gridControl')">
+                🗄 網格線設定
+                <span id="gridControlIcon">▼</span>
+              </h5>
+              <div id="gridControl" class="control-content">
+                <div class="control-item">
+                  <label>
+                    <input type="checkbox" id="showXGrid" checked onchange="updateChart()">
+                    X軸主網格線
+                  </label>
+                </div>
+                <div class="control-item">
+                  <label>
+                    <input type="checkbox" id="showYGrid" checked onchange="updateChart()">
+                    Y軸主網格線
+                  </label>
+                </div>
+                <div class="control-item">
+                  <label>
+                    <input type="checkbox" id="showXMinorGrid" onchange="updateChart()">
+                    X軸次網格線
+                  </label>
+                </div>
+                <div class="control-item">
+                  <label>
+                    <input type="checkbox" id="showYMinorGrid" onchange="updateChart()">
+                    Y軸次網格線
+                  </label>
+                </div>
+              </div>
+            </div>
+            
+            <div class="control-section">
+              <h5 onclick="toggleSection('axisControl')">
+                📊 坐標軸設定
+                <span id="axisControlIcon">▼</span>
+              </h5>
+              <div id="axisControl" class="control-content">
+                <div class="control-item">
+                  <label>X軸主間隔：</label>
+                  <input type="number" id="xAxisStep" step="any" placeholder="自動" onchange="updateChart()">
+                </div>
+                <div class="control-item">
+                  <label>Y軸主間隔：</label>
+                  <input type="number" id="yAxisStep" step="any" placeholder="自動" onchange="updateChart()">
+                </div>
+                <div class="control-item">
+                  <label>X軸次間隔數：</label>
+                  <input type="number" id="xMinorTicks" value="5" min="0" max="10" onchange="updateChart()">
+                </div>
+                <div class="control-item">
+                  <label>Y軸次間隔數：</label>
+                  <input type="number" id="yMinorTicks" value="5" min="0" max="10" onchange="updateChart()">
+                </div>
+              </div>
+            </div>
+            
+            <div class="control-section">
+              <h5 onclick="toggleSection('dataPointControl')">
+                ● 數據點設定
+                <span id="dataPointControlIcon">▼</span>
+              </h5>
+              <div id="dataPointControl" class="control-content">
+                <div class="control-item">
+                  <label>數據點大小：</label>
+                  <input type="number" id="pointRadius" value="6" min="2" max="15" onchange="updateChart()">
+                </div>
+                <div class="control-item">
+                  <label>數據點樣式：</label>
+                  <select id="pointStyle" onchange="updateChart()">
+                    <option value="circle" selected>圓形</option>
+                    <option value="rect">方形</option>
+                    <option value="triangle">三角形</option>
+                    <option value="cross">十字</option>
+                    <option value="star">星形</option>
+                  </select>
+                </div>
+                <div class="control-item">
+                  <label>數據點顏色：</label>
+                  <input type="color" id="pointColor" value="#818181" onchange="updateChart()">
+                </div>
+                <div class="control-item">
+                  <label>數據點邊框寬度：</label>
+                  <input type="number" id="pointBorderWidth" value="2" min="0" max="5" onchange="updateChart()">
+                </div>
+              </div>
+            </div>
+            
+            <div class="control-section">
+              <h5 onclick="toggleSection('regressionLineControl')">
+                📊 回歸直線設定
+                <span id="regressionLineControlIcon">▼</span>
+              </h5>
+              <div id="regressionLineControl" class="control-content">
+                <div class="control-item">
+                  <label>
+                    <input type="checkbox" id="showRegressionLine" checked onchange="updateChart()">
+                    顯示回歸直線
+                  </label>
+                </div>
+                <div class="control-item">
+                  <label>直線寬度：</label>
+                  <input type="number" id="lineWidth" value="2" min="1" max="10" onchange="updateChart()">
+                </div>
+                <div class="control-item">
+                  <label>直線樣式：</label>
+                  <select id="lineStyle" onchange="updateChart()">
+                    <option value="solid" selected>實線</option>
+                    <option value="dashed">虛線</option>
+                    <option value="dotted">點線</option>
+                  </select>
+                </div>
+                <div class="control-item">
+                  <label>直線顏色：</label>
+                  <input type="color" id="lineColor" value="#ff6384" onchange="updateChart()">
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div id="regressionResult" class="result-box" style="display: none;">
+            <h4>計算結果</h4>
+            <div id="regressionOutput"></div>
+          </div>
+        </div>
+        
+        <!-- 不確定度傳遞 -->
+        <div id="propagation" class="tool-content">
+          <h3>不確定度傳遞計算</h3>
+          <div class="input-group">
+            <label>選擇公式類型：</label>
+            <select id="propagationType" onchange="updatePropagationInputs()" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+              <option value="add">加法/減法: f = A ± B</option>
+              <option value="multiply">乘法/除法: f = A × B 或 A / B</option>
+              <option value="power">冪次: f = A^n</option>
+              <option value="custom">自訂公式</option>
+            </select>
+          </div>
+          <div id="propagationInputs">
+            <div class="input-group">
+              <label>A 值：</label>
+              <input type="number" id="propA" step="any">
+            </div>
+            <div class="input-group">
+              <label>A 的不確定度 (ΔA)：</label>
+              <input type="number" id="propDeltaA" step="any">
+            </div>
+            <div class="input-group">
+              <label>B 值：</label>
+              <input type="number" id="propB" step="any">
+            </div>
+            <div class="input-group">
+              <label>B 的不確定度 (ΔB)：</label>
+              <input type="number" id="propDeltaB" step="any">
+            </div>
+          </div>
+          <button class="calculate-btn" onclick="calculatePropagation()">計算</button>
+          <div id="propagationResult" class="result-box" style="display: none;">
+            <h4>計算結果</h4>
+            <div id="propagationOutput"></div>
+          </div>
+        </div>
+        
+        <!-- 二元一次方程式 -->
+        <div id="equation" class="tool-content">
+          <h3>二元一次聯立方程式求解</h3>
+          <p style="margin-bottom: 20px; color: #666;">求解方程式組：<br>
+          a₁x + b₁y = c₁<br>
+          a₂x + b₂y = c₂</p>
+          <div class="input-group">
+            <label>第一式 - a₁（x 的係數）：</label>
+            <input type="number" id="eqA1" step="any" placeholder="例如：2">
+          </div>
+          <div class="input-group">
+            <label>第一式 - b₁（y 的係數）：</label>
+            <input type="number" id="eqB1" step="any" placeholder="例如：3">
+          </div>
+          <div class="input-group">
+            <label>第一式 - c₁（常數項）：</label>
+            <input type="number" id="eqC1" step="any" placeholder="例如：13">
+          </div>
+          <div class="input-group">
+            <label>第二式 - a₂（x 的係數）：</label>
+            <input type="number" id="eqA2" step="any" placeholder="例如：4">
+          </div>
+          <div class="input-group">
+            <label>第二式 - b₂（y 的係數）：</label>
+            <input type="number" id="eqB2" step="any" placeholder="例如：-1">
+          </div>
+          <div class="input-group">
+            <label>第二式 - c₂（常數項）：</label>
+            <input type="number" id="eqC2" step="any" placeholder="例如：5">
+          </div>
+          <button class="calculate-btn" onclick="solveEquations()">求解</button>
+          <div id="equationResult" class="result-box" style="display: none;">
+            <h4>計算結果</h4>
+            <div id="equationOutput"></div>
+          </div>
+        </div>
+        
+      </div>
+      
+      <!-- 頁尾連結 -->
+      <div class="footer-links">
+        <a href="https://line.me/ti/p/07D9gJpuT6" target="_blank">聯絡作者</a>
+        <span style="color: #ccc;">|</span>
+        <a href="https://sites.google.com/view/ntnu-general-phy-lab/%E6%AA%94%E6%A1%88%E5%88%86%E4%BA%AB/%E5%AF%A6%E9%A9%97%E5%85%A7%E5%AE%B9" target="_blank">普物實驗講義</a>
+        <span style="color: #ccc;">|</span>
+        <a href="https://drive.google.com/file/d/11-np-5bq9sse7b9Eb7KIk0qJ6ilK6iNH/view?usp=drive_link" target="_blank">普物實驗工具(電腦版)</a>
+        <span style="color: #ccc;">|</span>
+        <a href="index.html">返回首頁</a>
+      </div>
+    </div>
+    
+    <script>
+      // 切換功能分頁
+      function switchTab(tabName) {
+        // 隱藏所有內容
+        const contents = document.querySelectorAll('.tool-content');
+        contents.forEach(content => content.classList.remove('active'));
+        
+        // 移除所有按鈕的 active 狀態
+        const buttons = document.querySelectorAll('.tab-btn');
+        buttons.forEach(btn => btn.classList.remove('active'));
+        
+        // 顯示選中的內容
+        document.getElementById(tabName).classList.add('active');
+        
+        // 設置按鈕為 active
+        event.target.classList.add('active');
+      }
+      
+      // 不確定度計算與統計
+      function calculateUncertainty() {
+        const dataText = document.getElementById('uncertaintyData').value;
+        const data = dataText.split('\n')
+          .map(line => parseFloat(line.trim()))
+          .filter(num => !isNaN(num));
+        
+        if (data.length === 0) {
+          alert('請輸入有效的數據！');
+          return;
+        }
+        
+        const minScale = parseFloat(document.getElementById('minScale').value) || 0.1;
+        const decimalPlaces = parseInt(document.getElementById('decimalPlaces').value) || 2;
+        
+        // 排序數據用於計算中位數和最大最小值
+        const sortedData = [...data].sort((a, b) => a - b);
+        
+        const n = data.length;
+        const sum = data.reduce((acc, val) => acc + val, 0);
+        const mean = sum / n;
+        const min = sortedData[0];
+        const max = sortedData[n - 1];
+        const range = max - min;
+        
+        // 計算中位數
+        let median;
+        if (n % 2 === 0) {
+          median = (sortedData[n/2 - 1] + sortedData[n/2]) / 2;
+        } else {
+          median = sortedData[Math.floor(n/2)];
+        }
+        
+        // 樣本標準差（除以 n-1，貝塞爾校正）
+        const sampleVariance = data.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / (n - 1);
+        const sampleStdDev = Math.sqrt(sampleVariance);
+        
+        // 母體標準差（除以 n）
+        const populationVariance = data.reduce((acc, val) => acc + Math.pow(val - mean, 2), 0) / n;
+        const populationStdDev = Math.sqrt(populationVariance);
+        
+        const stdError = sampleStdDev / Math.sqrt(n);
+        
+        // 計算儀器不確定度（最小刻度的一半）
+        const instrumentUncertainty = minScale / 2;
+        
+        // A類不確定度（統計不確定度）
+        const typeAUncertainty = stdError;
+        
+        // B類不確定度（儀器不確定度）
+        const typeBUncertainty = instrumentUncertainty / Math.sqrt(3);
+        
+        // 總不確定度
+        const totalUncertainty = Math.sqrt(typeAUncertainty * typeAUncertainty + typeBUncertainty * typeBUncertainty);
+        
+        const output = `
+          <h4 style="margin-top: 0; color: #333;">基本統計量</h4>
+          <div class="result-item"><strong>數據個數 (n)：</strong>${n}</div>
+          <div class="result-item"><strong>總和：</strong>${sum.toFixed(decimalPlaces)}</div>
+          <div class="result-item"><strong>平均值 (x̄)：</strong>${mean.toFixed(decimalPlaces)}</div>
+          <div class="result-item"><strong>中位數：</strong>${median.toFixed(decimalPlaces)}</div>
+          <div class="result-item"><strong>最小值：</strong>${min.toFixed(decimalPlaces)}</div>
+          <div class="result-item"><strong>最大值：</strong>${max.toFixed(decimalPlaces)}</div>
+          <div class="result-item"><strong>全距：</strong>${range.toFixed(decimalPlaces)}</div>
+          <div class="result-item"><strong>樣本變異數 (s²)：</strong>${sampleVariance.toFixed(decimalPlaces)}</div>
+          <div class="result-item"><strong>樣本標準差 (s)：</strong>${sampleStdDev.toFixed(decimalPlaces)} <span style="color: #666; font-size: 12px;">(除以 n-1)</span></div>
+          <div class="result-item"><strong>母體標準差 (σ)：</strong>${populationStdDev.toFixed(decimalPlaces)} <span style="color: #666; font-size: 12px;">(除以 n)</span></div>
+          <div class="result-item"><strong>標準誤差 (SE)：</strong>${stdError.toFixed(decimalPlaces)}</div>
+          <div class="result-item" style="margin-top: 20px; padding-top: 15px; border-top: 2px solid #818181;"><h4 style="margin: 0 0 10px 0; color: #333;">不確定度分析</h4></div>
+          <div class="result-item"><strong>A類不確定度 (統計)：</strong>±${typeAUncertainty.toFixed(decimalPlaces)}</div>
+          <div class="result-item"><strong>B類不確定度 (儀器)：</strong>±${typeBUncertainty.toFixed(decimalPlaces)}</div>
+          <div class="result-item"><strong>　儀器最小刻度：</strong>${minScale}</div>
+          <div class="result-item"><strong>　儀器不確定度：</strong>±${instrumentUncertainty.toFixed(decimalPlaces)}</div>
+          <div class="result-item" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd;"><strong>總不確定度 (Δx)：</strong>±${totalUncertainty.toFixed(decimalPlaces)}</div>
+          <div class="result-item" style="font-size: 16px; color: #818181; font-weight: bold; margin-top: 10px; padding: 10px; background-color: #f0f0f0; border-radius: 5px;"><strong>結果表示：</strong>x = ${mean.toFixed(decimalPlaces)} ± ${totalUncertainty.toFixed(decimalPlaces)}</div>
+          <div class="result-item"><strong>相對不確定度：</strong>${((totalUncertainty/mean)*100).toFixed(2)}%</div>
+        `;
+        
+        document.getElementById('uncertaintyOutput').innerHTML = output;
+        document.getElementById('uncertaintyResult').style.display = 'block';
+      }
+      
+      // 線性回歸計算
+      let regressionChartInstance = null;
+      let currentRegressionData = null;
+      let dataRowCount = 0;
+      
+      // 初始化表格
+      document.addEventListener('DOMContentLoaded', function() {
+        // 添加初始數據行
+        for (let i = 0; i < 5; i++) {
+          addDataRow();
+        }
+      });
+      
+      // 新增數據行
+      function addDataRow(xValue = '', yValue = '') {
+        dataRowCount++;
+        const tbody = document.getElementById('dataTableBody');
+        const row = document.createElement('tr');
+        row.id = `dataRow${dataRowCount}`;
+        row.innerHTML = `
+          <td>${dataRowCount}</td>
+          <td><input type="number" step="any" value="${xValue}" oninput="onDataChange()" placeholder="輸入 X"></td>
+          <td><input type="number" step="any" value="${yValue}" oninput="onDataChange()" placeholder="輸入 Y"></td>
+          <td><button class="delete-row-btn" onclick="deleteDataRow('dataRow${dataRowCount}')">×</button></td>
+        `;
+        tbody.appendChild(row);
+      }
+      
+      // 刪除數據行
+      function deleteDataRow(rowId) {
+        const row = document.getElementById(rowId);
+        if (row) {
+          row.remove();
+          updateRowNumbers();
+          onDataChange();
+        }
+      }
+      
+      // 更新行號
+      function updateRowNumbers() {
+        const rows = document.querySelectorAll('#dataTableBody tr');
+        rows.forEach((row, index) => {
+          row.cells[0].textContent = index + 1;
+        });
+      }
+      
+      // 填入範例數據
+      function fillSampleData() {
+        clearAllData();
+        const sampleData = [
+          [1, 2.1],
+          [2, 4.2],
+          [3, 5.9],
+          [4, 8.1],
+          [5, 10.2]
+        ];
+        sampleData.forEach(([x, y]) => addDataRow(x, y));
+        onDataChange();
+      }
+      
+      // 快速輸入數據
+      function quickInput() {
+        const n = prompt('請輸入數據點數目：', '5');
+        if (!n || isNaN(n) || parseInt(n) < 1) {
+          if (n !== null) alert('請輸入有效的數據點數目！');
+          return;
+        }
+        
+        const count = parseInt(n);
+        if (count > REGRESSION_MAX_POINTS) {
+          alert(`數據點過多（${count}），為避免瀏覽器記憶體不足，請減少到 ${REGRESSION_MAX_POINTS} 以下。`);
+          return;
+        }
+        const data = [];
+        
+        for (let i = 1; i <= count; i++) {
+          const x = prompt(`請輸入 X${i}：`, '');
+          if (x === null) return; // 用戶取消
+          
+          const y = prompt(`請輸入 Y${i}：`, '');
+          if (y === null) return; // 用戶取消
+          
+          data.push({ x: x, y: y });
+        }
+        
+        // 清空現有數據
+        clearAllData();
+        
+        // 添加新數據
+        data.forEach(point => {
+          addDataRow(point.x, point.y);
+        });
+        
+        alert(`成功輸入 ${count} 個數據點！`);
+        
+        // 如果開啟自動更新，則自動計算
+        if (document.getElementById('autoUpdate').checked) {
+          calculateRegression();
+        }
+      }
+      
+      // 下載CSV檔案
+      function downloadCSV() {
+        const { xData, yData } = getTableData();
+        if (xData.length === 0) {
+          alert('請先輸入數據！');
+          return;
+        }
+        
+        // 建立CSV內容
+        let csvContent = 'X,Y\n';
+        for (let i = 0; i < xData.length; i++) {
+          csvContent += `${xData[i]},${yData[i]}\n`;
+        }
+        
+        // 建立下載連結
+        const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', `regression_data_${new Date().getTime()}.csv`);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+
+        // 釋放 ObjectURL，避免大量下載造成記憶體累積
+        setTimeout(() => URL.revokeObjectURL(url), 0);
+      }
+      
+      // 清除所有數據
+      function clearAllData() {
+        document.getElementById('dataTableBody').innerHTML = '';
+        dataRowCount = 0;
+        if (regressionChartInstance) {
+          regressionChartInstance.destroy();
+          regressionChartInstance = null;
+        }
+        document.getElementById('regressionChart').style.display = 'none';
+        document.getElementById('regressionResult').style.display = 'none';
+      }
+      
+      // 從表格獲取數據
+      function getTableData() {
+        const rows = document.querySelectorAll('#dataTableBody tr');
+        const xData = [];
+        const yData = [];
+        
+        rows.forEach(row => {
+          const xInput = row.cells[1].querySelector('input');
+          const yInput = row.cells[2].querySelector('input');
+          const x = parseFloat(xInput.value);
+          const y = parseFloat(yInput.value);
+          
+          if (!isNaN(x) && !isNaN(y)) {
+            xData.push(x);
+            yData.push(y);
+          }
+        });
+        
+        return { xData, yData };
+      }
+      
+      // 數據變更時的處理
+      function onDataChange() {
+        const autoUpdate = document.getElementById('autoUpdate').checked;
+        if (autoUpdate) {
+          scheduleRegressionCalculation();
+        }
+      }
+
+      // 防止輸入時每個字元都重繪圖表造成效能/記憶體壓力
+      const REGRESSION_DEBOUNCE_MS = 250;
+      const REGRESSION_MAX_POINTS = 5000;
+      let regressionUpdateTimer = null;
+
+      function scheduleRegressionCalculation() {
+        if (regressionUpdateTimer) {
+          clearTimeout(regressionUpdateTimer);
+        }
+        regressionUpdateTimer = setTimeout(() => {
+          calculateRegression({ silent: true });
+        }, REGRESSION_DEBOUNCE_MS);
+      }
+      
+      // 切換控制面板
+      function toggleSection(sectionId) {
+        const content = document.getElementById(sectionId);
+        const icon = document.getElementById(sectionId + 'Icon');
+        if (content.classList.contains('active')) {
+          content.classList.remove('active');
+          icon.textContent = '\u25bc';
+        } else {
+          content.classList.add('active');
+          icon.textContent = '\u25b2';
+        }
+      }
+      
+      function calculateRegression(options = {}) {
+        const silent = options && options.silent === true;
+        const { xData, yData } = getTableData();
+        
+        if (xData.length === 0 || yData.length === 0) {
+          if (!silent) alert('請至少輸入一組有效的 X 和 Y 數據！');
+          return;
+        }
+
+        if (xData.length < 2) {
+          if (!silent) alert('需要至少兩個數據點才能進行線性回歸！');
+          return;
+        }
+
+        if (xData.length > REGRESSION_MAX_POINTS) {
+          if (!silent) alert(`數據點過多（${xData.length}），為避免瀏覽器記憶體不足，請減少到 ${REGRESSION_MAX_POINTS} 以下再計算。`);
+          return;
+        }
+        
+        const n = xData.length;
+        const sumX = xData.reduce((sum, val) => sum + val, 0);
+        const sumY = yData.reduce((sum, val) => sum + val, 0);
+        const sumXY = xData.reduce((sum, val, i) => sum + val * yData[i], 0);
+        const sumX2 = xData.reduce((sum, val) => sum + val * val, 0);
+        const sumY2 = yData.reduce((sum, val) => sum + val * val, 0);
+        
+        // 計算平均值
+        const meanX = sumX / n;
+        const meanY = sumY / n;
+        
+        // 計算母體標準差
+        const varianceX = xData.reduce((sum, x) => sum + Math.pow(x - meanX, 2), 0) / n;
+        const varianceY = yData.reduce((sum, y) => sum + Math.pow(y - meanY, 2), 0) / n;
+        const stdDevX = Math.sqrt(varianceX);
+        const stdDevY = Math.sqrt(varianceY);
+        
+        // 計算斜率和截距
+        const delta = (n * sumX2 - sumX * sumX);
+        if (!isFinite(delta) || Math.abs(delta) < 1e-12) {
+          if (!silent) alert('無法進行線性回歸：所有 X 值太接近或相同，導致 Δ 接近 0。');
+          return;
+        }
+        const slope = (n * sumXY - sumX * sumY) / delta;
+        const intercept = (sumY * sumX2 - sumXY * sumX) / delta;
+        
+        // 計算殘差平方和
+        const yPred = xData.map(x => slope * x + intercept);
+        const residuals = yData.map((y, i) => y - yPred[i]);
+        const ssr = residuals.reduce((sum, r) => sum + r * r, 0);
+        
+        // 計算斜率和截距的不確定度
+        const sigma2 = ssr / (n - 2);
+        const sigmaSlope = Math.sqrt((n * sigma2) / delta);
+        const sigmaIntercept = Math.sqrt((sigma2 * sumX2) / delta);
+        
+        // 計算相關係數
+        const sst = yData.reduce((sum, y) => sum + Math.pow(y - meanY, 2), 0);
+        let r2;
+        if (!isFinite(sst) || Math.abs(sst) < 1e-12) {
+          // y 全部相同時 sst = 0，避免 NaN
+          r2 = (Math.abs(ssr) < 1e-12) ? 1 : 0;
+        } else {
+          r2 = 1 - (ssr / sst);
+        }
+        r2 = Math.max(0, Math.min(1, r2));
+        const r = Math.sqrt(r2) * (slope > 0 ? 1 : -1);
+        
+        // 保存當前數據供更新圖表使用
+        currentRegressionData = {
+          xData, yData, slope, intercept, r, r2, n
+        };
+        
+        // 取得小數點位數設定
+        const decimalPlaces = parseInt(document.getElementById('regressionDecimalPlaces').value) || 6;
+        
+        const output = `
+          <div class="result-item"><strong>數據點數 (n)：</strong>${n}</div>
+          <div class="result-item" style="font-size: 16px; color: #818181; font-weight: bold; margin-top: 10px; padding: 10px; background-color: #f0f0f0; border-radius: 5px;"><strong>回歸方程式：</strong>y = (${slope.toFixed(decimalPlaces)} ± ${sigmaSlope.toFixed(decimalPlaces)})x + (${intercept.toFixed(decimalPlaces)} ± ${sigmaIntercept.toFixed(decimalPlaces)})</div>
+          <div class="result-item"><strong>斜率 (b)：</strong>${slope.toFixed(decimalPlaces)} ± ${sigmaSlope.toFixed(decimalPlaces)}</div>
+          <div class="result-item"><strong>截距 (a)：</strong>${intercept.toFixed(decimalPlaces)} ± ${sigmaIntercept.toFixed(decimalPlaces)}</div>
+          <div class="result-item"><strong>相關係數 (r)：</strong>${r.toFixed(decimalPlaces)}</div>
+          <div class="result-item"><strong>決定係數 (R²)：</strong>${r2.toFixed(decimalPlaces)}</div>
+          <div class="result-item" style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd;"><strong>x總和 (Σx)：</strong>${sumX.toFixed(decimalPlaces)}</div>
+          <div class="result-item"><strong>y總和 (Σy)：</strong>${sumY.toFixed(decimalPlaces)}</div>
+          <div class="result-item"><strong>x平方總和 (Σx²)：</strong>${sumX2.toFixed(decimalPlaces)}</div>
+          <div class="result-item"><strong>y平方總和 (Σy²)：</strong>${sumY2.toFixed(decimalPlaces)}</div>
+          <div class="result-item"><strong>xy總和 (Σxy)：</strong>${sumXY.toFixed(decimalPlaces)}</div>
+          <div class="result-item"><strong>x母體標準差 (σx)：</strong>${stdDevX.toFixed(decimalPlaces)}</div>
+          <div class="result-item"><strong>y母體標準差 (σy)：</strong>${stdDevY.toFixed(decimalPlaces)}</div>
+        `;
+        
+        document.getElementById('regressionOutput').innerHTML = output;
+        document.getElementById('regressionResult').style.display = 'block';
+        
+        // 顯示圖表
+        document.getElementById('regressionChart').style.display = 'block';
+        drawRegressionChart();
+      }
+      
+      function drawRegressionChart() {
+        if (!currentRegressionData) return;
+        
+        const { xData, yData, slope, intercept } = currentRegressionData;
+        
+        // 生成回歸直線的點
+        // 避免大量資料時使用展開運算子造成記憶體/呼叫堆疊壓力
+        const minX = xData.reduce((min, v) => (v < min ? v : min), xData[0]);
+        const maxX = xData.reduce((max, v) => (v > max ? v : max), xData[0]);
+        const lineX = [minX, maxX];
+        const lineY = lineX.map(x => slope * x + intercept);
+        
+        const ctx = document.getElementById('regressionCanvas');
+
+        function buildRegressionChartConfig() {
+          // 獲取控制值
+          const chartTitle = document.getElementById('chartTitle').value;
+          const xAxisLabel = document.getElementById('xAxisLabel').value;
+          const yAxisLabel = document.getElementById('yAxisLabel').value;
+
+          const titleFontSize = parseInt(document.getElementById('titleFontSize').value) || 18;
+          const titleFontWeight = document.getElementById('titleFontWeight').value;
+          const axisLabelFontSize = parseInt(document.getElementById('axisLabelFontSize').value) || 14;
+          const axisTickFontSize = parseInt(document.getElementById('axisTickFontSize').value) || 12;
+
+          const showXGrid = document.getElementById('showXGrid').checked;
+          const showYGrid = document.getElementById('showYGrid').checked;
+          const showXMinorGrid = document.getElementById('showXMinorGrid').checked;
+          const showYMinorGrid = document.getElementById('showYMinorGrid').checked;
+
+          const xAxisStep = parseFloat(document.getElementById('xAxisStep').value) || undefined;
+          const yAxisStep = parseFloat(document.getElementById('yAxisStep').value) || undefined;
+          const xMinorTicks = parseInt(document.getElementById('xMinorTicks').value) || 5;
+          const yMinorTicks = parseInt(document.getElementById('yMinorTicks').value) || 5;
+
+          const pointRadius = parseInt(document.getElementById('pointRadius').value) || 6;
+          const pointStyle = document.getElementById('pointStyle').value;
+          const pointColor = document.getElementById('pointColor').value;
+          const pointBorderWidth = parseInt(document.getElementById('pointBorderWidth').value) || 2;
+
+          const showRegressionLine = document.getElementById('showRegressionLine').checked;
+          const lineWidth = parseInt(document.getElementById('lineWidth').value) || 2;
+          const lineStyle = document.getElementById('lineStyle').value;
+          const lineColor = document.getElementById('lineColor').value;
+
+          // 設定線條樣式
+          let borderDash = [];
+          if (lineStyle === 'dashed') {
+            borderDash = [10, 5];
+          } else if (lineStyle === 'dotted') {
+            borderDash = [2, 3];
+          }
+
+          // 準備數據集
+          const datasets = [
+            {
+              label: '實驗數據',
+              data: xData.map((x, i) => ({ x: x, y: yData[i] })),
+              backgroundColor: pointColor,
+              borderColor: pointColor,
+              pointRadius: pointRadius,
+              pointHoverRadius: pointRadius + 2,
+              pointStyle: pointStyle,
+              borderWidth: pointBorderWidth
+            }
+          ];
+
+          if (showRegressionLine) {
+            datasets.push({
+              label: `回歸直線: y = ${slope.toFixed(4)}x ${intercept >= 0 ? '+' : ''} ${intercept.toFixed(4)}`,
+              data: lineX.map((x, i) => ({ x: x, y: lineY[i] })),
+              type: 'line',
+              borderColor: lineColor,
+              backgroundColor: lineColor + '20',
+              borderWidth: lineWidth,
+              borderDash: borderDash,
+              pointRadius: 0,
+              fill: false
+            });
+          }
+
+          const options = {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: false,
+            parsing: false,
+            normalized: true,
+            plugins: {
+              title: {
+                display: true,
+                text: chartTitle,
+                font: {
+                  size: titleFontSize,
+                  weight: titleFontWeight
+                }
+              },
+              legend: {
+                display: true,
+                position: 'top'
+              },
+              tooltip: {
+                callbacks: {
+                  label: function(context) {
+                    return `(${context.parsed.x.toFixed(2)}, ${context.parsed.y.toFixed(2)})`;
+                  }
+                }
+              }
+            },
+            scales: {
+              x: {
+                title: {
+                  display: true,
+                  text: xAxisLabel,
+                  font: {
+                    size: axisLabelFontSize,
+                    weight: 'bold'
+                  }
+                },
+                ticks: {
+                  font: {
+                    size: axisTickFontSize
+                  },
+                  stepSize: xAxisStep,
+                  autoSkip: false,
+                  callback: function(value, index, ticks) {
+                    const tick = ticks && ticks[index];
+                    if (tick && tick.major === false) return '';
+                    return Number(value).toFixed(2);
+                  }
+                },
+                afterBuildTicks: function(axis) {
+                  if (!(showXMinorGrid && xMinorTicks > 0)) return;
+
+                  const min = axis.min;
+                  const max = axis.max;
+                  if (!isFinite(min) || !isFinite(max) || max <= min) return;
+
+                  const majorStep = xAxisStep || (max - min) / 5;
+                  if (!isFinite(majorStep) || majorStep <= 0) return;
+
+                  const minorStep = majorStep / (xMinorTicks + 1);
+                  if (!isFinite(minorStep) || minorStep <= 0) return;
+
+                  const maxTicks = 2000;
+                  const ticks = [];
+                  let current = Math.floor(min / minorStep) * minorStep;
+                  let safety = 0;
+                  const end = max + minorStep / 2;
+
+                  while (current <= end && safety < maxTicks) {
+                    const normalized = Math.abs((current - min) % majorStep);
+                    const isMajor = normalized < 1e-8 || normalized > majorStep - 1e-8;
+                    ticks.push({ value: current, major: isMajor });
+                    current += minorStep;
+                    safety++;
+                  }
+
+                  if (safety < maxTicks) {
+                    axis.ticks = ticks;
+                  }
+                },
+                grid: {
+                  display: true,
+                  drawTicks: true,
+                  color: function(context) {
+                    if (!context.tick) return 'rgba(0, 0, 0, 0.1)';
+                    if (showXMinorGrid && context.tick.major === false) {
+                      return 'rgba(0, 0, 0, 0.05)';
+                    }
+                    if (showXGrid && context.tick.major !== false) {
+                      return 'rgba(0, 0, 0, 0.1)';
+                    }
+                    return 'transparent';
+                  },
+                  lineWidth: function(context) {
+                    if (!context.tick) return 1;
+                    if (showXMinorGrid && context.tick.major === false) {
+                      return 0.5;
+                    }
+                    return 1;
+                  }
+                }
+              },
+              y: {
+                title: {
+                  display: true,
+                  text: yAxisLabel,
+                  font: {
+                    size: axisLabelFontSize,
+                    weight: 'bold'
+                  }
+                },
+                ticks: {
+                  font: {
+                    size: axisTickFontSize
+                  },
+                  stepSize: yAxisStep,
+                  autoSkip: false,
+                  callback: function(value, index, ticks) {
+                    const tick = ticks && ticks[index];
+                    if (tick && tick.major === false) return '';
+                    return Number(value).toFixed(2);
+                  }
+                },
+                afterBuildTicks: function(axis) {
+                  if (!(showYMinorGrid && yMinorTicks > 0)) return;
+
+                  const min = axis.min;
+                  const max = axis.max;
+                  if (!isFinite(min) || !isFinite(max) || max <= min) return;
+
+                  const majorStep = yAxisStep || (max - min) / 5;
+                  if (!isFinite(majorStep) || majorStep <= 0) return;
+
+                  const minorStep = majorStep / (yMinorTicks + 1);
+                  if (!isFinite(minorStep) || minorStep <= 0) return;
+
+                  const maxTicks = 2000;
+                  const ticks = [];
+                  let current = Math.floor(min / minorStep) * minorStep;
+                  let safety = 0;
+                  const end = max + minorStep / 2;
+
+                  while (current <= end && safety < maxTicks) {
+                    const normalized = Math.abs((current - min) % majorStep);
+                    const isMajor = normalized < 1e-8 || normalized > majorStep - 1e-8;
+                    ticks.push({ value: current, major: isMajor });
+                    current += minorStep;
+                    safety++;
+                  }
+
+                  if (safety < maxTicks) {
+                    axis.ticks = ticks;
+                  }
+                },
+                grid: {
+                  display: true,
+                  drawTicks: true,
+                  color: function(context) {
+                    if (!context.tick) return 'rgba(0, 0, 0, 0.1)';
+                    if (showYMinorGrid && context.tick.major === false) {
+                      return 'rgba(0, 0, 0, 0.05)';
+                    }
+                    if (showYGrid && context.tick.major !== false) {
+                      return 'rgba(0, 0, 0, 0.1)';
+                    }
+                    return 'transparent';
+                  },
+                  lineWidth: function(context) {
+                    if (!context.tick) return 1;
+                    if (showYMinorGrid && context.tick.major === false) {
+                      return 0.5;
+                    }
+                    return 1;
+                  }
+                }
+              }
+            }
+          };
+
+          return {
+            type: 'scatter',
+            data: { datasets: datasets },
+            options: options
+          };
+        }
+
+        const config = buildRegressionChartConfig();
+        if (!regressionChartInstance) {
+          regressionChartInstance = new Chart(ctx, config);
+        } else {
+          regressionChartInstance.data = config.data;
+          regressionChartInstance.options = config.options;
+          regressionChartInstance.update();
+        }
+      }
+      
+      // 控制面板連續調整時避免高頻重繪
+      const CHART_DEBOUNCE_MS = 100;
+      let chartUpdateTimer = null;
+
+      function updateChart() {
+        if (!currentRegressionData) return;
+        if (chartUpdateTimer) {
+          clearTimeout(chartUpdateTimer);
+        }
+        chartUpdateTimer = setTimeout(() => {
+          drawRegressionChart();
+        }, CHART_DEBOUNCE_MS);
+      }
+      
+      // 下載圖表
+      function downloadChart() {
+        if (!regressionChartInstance) {
+          alert('請先繪製圖表！');
+          return;
+        }
+        
+        const canvas = document.getElementById('regressionCanvas');
+        const backgroundType = document.getElementById('downloadBackground').value;
+        
+        if (backgroundType === 'white') {
+          // 創建一個新的 canvas 並填充白色背景
+          const tempCanvas = document.createElement('canvas');
+          tempCanvas.width = canvas.width;
+          tempCanvas.height = canvas.height;
+          const tempCtx = tempCanvas.getContext('2d');
+          
+          // 填充白色背景
+          tempCtx.fillStyle = 'white';
+          tempCtx.fillRect(0, 0, tempCanvas.width, tempCanvas.height);
+          
+          // 將原始 canvas 繪製到新 canvas 上
+          tempCtx.drawImage(canvas, 0, 0);
+          
+          const url = tempCanvas.toDataURL('image/png');
+          const link = document.createElement('a');
+          link.download = '線性回歸分析圖_白底.png';
+          link.href = url;
+          link.click();
+        } else {
+          // 透明背景
+          const url = canvas.toDataURL('image/png');
+          const link = document.createElement('a');
+          link.download = '線性回歸分析圖_透明.png';
+          link.href = url;
+          link.click();
+        }
+      }
+      
+      // 更新不確定度傳遞輸入欄位
+      function updatePropagationInputs() {
+        const type = document.getElementById('propagationType').value;
+        let html = '';
+        
+        if (type === 'power') {
+          html = `
+            <div class="input-group">
+              <label>A 值：</label>
+              <input type="number" id="propA" step="any">
+            </div>
+            <div class="input-group">
+              <label>A 的不確定度 (ΔA)：</label>
+              <input type="number" id="propDeltaA" step="any">
+            </div>
+            <div class="input-group">
+              <label>冪次 (n)：</label>
+              <input type="number" id="propN" step="any">
+            </div>
+          `;
+        } else if (type !== 'custom') {
+          html = `
+            <div class="input-group">
+              <label>A 值：</label>
+              <input type="number" id="propA" step="any">
+            </div>
+            <div class="input-group">
+              <label>A 的不確定度 (ΔA)：</label>
+              <input type="number" id="propDeltaA" step="any">
+            </div>
+            <div class="input-group">
+              <label>B 值：</label>
+              <input type="number" id="propB" step="any">
+            </div>
+            <div class="input-group">
+              <label>B 的不確定度 (ΔB)：</label>
+              <input type="number" id="propDeltaB" step="any">
+            </div>
+          `;
+        } else {
+          html = `
+            <p class="hint-text">自訂公式功能開發中...</p>
+          `;
+        }
+        
+        document.getElementById('propagationInputs').innerHTML = html;
+      }
+      
+      // 不確定度傳遞計算
+      function calculatePropagation() {
+        const type = document.getElementById('propagationType').value;
+        let output = '';
+        
+        try {
+          const A = parseFloat(document.getElementById('propA').value);
+          const deltaA = parseFloat(document.getElementById('propDeltaA').value);
+          
+          if (type === 'add') {
+            const B = parseFloat(document.getElementById('propB').value);
+            const deltaB = parseFloat(document.getElementById('propDeltaB').value);
+            const result = A + B;
+            const deltaResult = Math.sqrt(deltaA * deltaA + deltaB * deltaB);
+            
+            output = `
+              <div class="result-item"><strong>運算類型：</strong>加法/減法</div>
+              <div class="result-item"><strong>結果值：</strong>${result.toFixed(4)}</div>
+              <div class="result-item"><strong>不確定度：</strong>±${deltaResult.toFixed(4)}</div>
+              <div class="result-item"><strong>公式：</strong>Δf = √(ΔA² + ΔB²)</div>
+              <div class="result-item"><strong>完整結果：</strong>f = ${result.toFixed(4)} ± ${deltaResult.toFixed(4)}</div>
+            `;
+          } else if (type === 'multiply') {
+            const B = parseFloat(document.getElementById('propB').value);
+            const deltaB = parseFloat(document.getElementById('propDeltaB').value);
+            const result = A * B;
+            const relativeUncertainty = Math.sqrt(
+              Math.pow(deltaA/A, 2) + Math.pow(deltaB/B, 2)
+            );
+            const deltaResult = Math.abs(result) * relativeUncertainty;
+            
+            output = `
+              <div class="result-item"><strong>運算類型：</strong>乘法/除法</div>
+              <div class="result-item"><strong>結果值：</strong>${result.toFixed(4)}</div>
+              <div class="result-item"><strong>不確定度：</strong>±${deltaResult.toFixed(4)}</div>
+              <div class="result-item"><strong>相對不確定度：</strong>${(relativeUncertainty*100).toFixed(2)}%</div>
+              <div class="result-item"><strong>公式：</strong>Δf/f = √((ΔA/A)² + (ΔB/B)²)</div>
+              <div class="result-item"><strong>完整結果：</strong>f = ${result.toFixed(4)} ± ${deltaResult.toFixed(4)}</div>
+            `;
+          } else if (type === 'power') {
+            const n = parseFloat(document.getElementById('propN').value);
+            const result = Math.pow(A, n);
+            const deltaResult = Math.abs(n * Math.pow(A, n-1) * deltaA);
+            
+            output = `
+              <div class="result-item"><strong>運算類型：</strong>冪次運算</div>
+              <div class="result-item"><strong>結果值：</strong>${result.toFixed(4)}</div>
+              <div class="result-item"><strong>不確定度：</strong>±${deltaResult.toFixed(4)}</div>
+              <div class="result-item"><strong>公式：</strong>Δf = |n × A^(n-1) × ΔA|</div>
+              <div class="result-item"><strong>完整結果：</strong>f = ${result.toFixed(4)} ± ${deltaResult.toFixed(4)}</div>
+            `;
+          }
+          
+          document.getElementById('propagationOutput').innerHTML = output;
+          document.getElementById('propagationResult').style.display = 'block';
+        } catch (error) {
+          alert('請填寫所有必要欄位！');
+        }
+      }
+      
+      // 二元一次方程式求解
+      function solveEquations() {
+        try {
+          const a1 = parseFloat(document.getElementById('eqA1').value);
+          const b1 = parseFloat(document.getElementById('eqB1').value);
+          const c1 = parseFloat(document.getElementById('eqC1').value);
+          const a2 = parseFloat(document.getElementById('eqA2').value);
+          const b2 = parseFloat(document.getElementById('eqB2').value);
+          const c2 = parseFloat(document.getElementById('eqC2').value);
+          
+          // 使用 Cramer's Rule
+          const determinant = a1 * b2 - a2 * b1;
+          
+          if (Math.abs(determinant) < 1e-10) {
+            alert('此方程組無唯一解（行列式為零）！');
+            return;
+          }
+          
+          const x = (c1 * b2 - c2 * b1) / determinant;
+          const y = (a1 * c2 - a2 * c1) / determinant;
+          
+          // 驗證
+          const check1 = a1 * x + b1 * y;
+          const check2 = a2 * x + b2 * y;
+          
+          const output = `
+            <div class="result-item"><strong>方程組：</strong></div>
+            <div class="result-item">  ${a1}x + ${b1}y = ${c1}</div>
+            <div class="result-item">  ${a2}x + ${b2}y = ${c2}</div>
+            <div class="result-item" style="margin-top: 15px;"><strong>解：</strong></div>
+            <div class="result-item"><strong>x = </strong>${x.toFixed(6)}</div>
+            <div class="result-item"><strong>y = </strong>${y.toFixed(6)}</div>
+            <div class="result-item" style="margin-top: 15px;"><strong>驗證：</strong></div>
+            <div class="result-item">代入第一式：${check1.toFixed(6)} ≈ ${c1}</div>
+            <div class="result-item">代入第二式：${check2.toFixed(6)} ≈ ${c2}</div>
+          `;
+          
+          document.getElementById('equationOutput').innerHTML = output;
+          document.getElementById('equationResult').style.display = 'block';
+        } catch (error) {
+          alert('請填寫所有欄位！');
+        }
+      }
+
+    </script>
+  </body>
+</html>
