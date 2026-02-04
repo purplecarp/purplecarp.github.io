@@ -122,6 +122,7 @@ body {
     background: #1a1a1a;
     border-radius: 8px;
     padding: 20px;
+    overflow-x: auto; /* 允許橫向滾動以顯示完整畫布 */
 }
 
 #intensityCanvas {
@@ -148,6 +149,9 @@ body {
     background: #000;
     cursor: crosshair;
     display: block;
+    width: 1200px !important;
+    height: 900px !important;
+    max-width: none !important;
 }
 
 /* 控制面板 */
@@ -470,10 +474,16 @@ body {
     }
     
     #waveCanvas,
-    #intensityCanvas,
-    #simulationCanvas {
+    #intensityCanvas {
         max-width: 100%;
         height: auto;
+    }
+    
+    #simulationCanvas {
+        /* 保持固定尺寸不隨螢幕改變 */
+        width: 1200px !important;
+        height: 900px !important;
+        max-width: none !important;
     }
     
     .control-row {
