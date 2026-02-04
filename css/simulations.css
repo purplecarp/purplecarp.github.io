@@ -480,10 +480,11 @@ body {
     }
     
     #simulationCanvas {
-        /* 保持固定尺寸不隨螢幕改變 */
-        width: 1200px !important;
-        height: 900px !important;
-        max-width: none !important;
+        /* 手機版：保持比例縮放，與螢幕寬度一致 */
+        width: 100% !important;
+        height: auto !important;
+        max-width: 100% !important;
+        aspect-ratio: 4/3; /* 保持 1200:900 的比例 */
     }
     
     .control-row {
