@@ -87,8 +87,9 @@
         .control-row {
             display: flex;
             align-items: center;
-            margin: 15px 0;
+            margin: 20px 0;
             gap: 15px;
+            padding: 5px 0;
         }
         
         .control-row label {
@@ -99,32 +100,34 @@
         
         .control-row input[type="range"] {
             flex: 1;
-            height: 8px;
-            border-radius: 5px;
+            height: 12px;
+            border-radius: 6px;
             background: #ddd;
             outline: none;
             -webkit-appearance: none;
+            cursor: pointer;
         }
         
         .control-row input[type="range"]::-webkit-slider-thumb {
             -webkit-appearance: none;
             appearance: none;
-            width: 20px;
-            height: 20px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             background: #667eea;
             cursor: pointer;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+            border: 3px solid white;
         }
         
         .control-row input[type="range"]::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
+            width: 32px;
+            height: 32px;
             border-radius: 50%;
             background: #667eea;
             cursor: pointer;
-            border: none;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            border: 3px solid white;
+            box-shadow: 0 3px 8px rgba(0,0,0,0.3);
         }
         
         .value-display {
@@ -144,14 +147,15 @@
         }
         
         .btn {
-            padding: 12px 30px;
+            padding: 15px 35px;
             border: none;
-            border-radius: 8px;
-            font-size: 16px;
+            border-radius: 10px;
+            font-size: 18px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            min-height: 50px;
         }
         
         .btn:hover {
@@ -190,15 +194,16 @@
         }
         
         .btn-preset {
-            padding: 10px 20px;
+            padding: 12px 25px;
             border: 2px solid #667eea;
-            border-radius: 8px;
+            border-radius: 10px;
             background: white;
             color: #667eea;
-            font-size: 14px;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
+            min-height: 48px;
         }
         
         .btn-preset:hover {
@@ -264,6 +269,99 @@
             font-size: 18px;
             font-weight: bold;
             color: #667eea;
+        }
+        
+        /* 手機響應式設計 */
+        @media (max-width: 768px) {
+            body {
+                padding: 10px;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 24px;
+            }
+            
+            .subtitle {
+                font-size: 12px;
+            }
+            
+            #waveCanvas {
+                max-width: 100%;
+                height: auto;
+            }
+            
+            .control-row {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 10px;
+                margin: 25px 0;
+            }
+            
+            .control-row label {
+                min-width: auto;
+                font-size: 16px;
+            }
+            
+            .value-display {
+                text-align: center;
+                font-size: 18px;
+                padding: 8px;
+                background: rgba(102, 126, 234, 0.1);
+                border-radius: 5px;
+            }
+            
+            .button-group {
+                gap: 10px;
+            }
+            
+            .btn {
+                width: 100%;
+                max-width: 150px;
+            }
+            
+            .wave-info {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .wave-info-item {
+                padding: 10px;
+                background: white;
+                border-radius: 8px;
+            }
+            
+            .info-box {
+                padding: 15px;
+            }
+            
+            .info-box h4 {
+                font-size: 16px;
+            }
+            
+            .info-box p {
+                font-size: 14px;
+            }
+            
+            .formula {
+                font-size: 12px;
+                padding: 8px;
+                overflow-x: auto;
+            }
+        }
+        
+        /* 增加觸控反饋 */
+        .control-row input[type="range"]:active::-webkit-slider-thumb {
+            transform: scale(1.2);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
+        }
+        
+        .control-row input[type="range"]:active::-moz-range-thumb {
+            transform: scale(1.2);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
         }
     </style>
 </head>
