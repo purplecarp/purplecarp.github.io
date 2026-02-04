@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8">
+    <title>水波干涉模擬 - 物理模擬</title>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <link href="../../images/fish.png" rel="shortcut icon">
+    
+    <link href="../../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../../css/normalize.css" rel="stylesheet">
+    <link href="../../css/style.css" rel="stylesheet">
+    <link href="../../css/responsive.css" rel="stylesheet">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            padding: 30px;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 10px;
+            font-size: 32px;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 25px;
+            font-size: 14px;
+        }
+        
+        .canvas-wrapper {
+            display: flex;
+            justify-content: center;
+            margin: 25px 0;
+            background: #000;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+        }
+        
+        #waveCanvas {
+            border: 3px solid #667eea;
+            border-radius: 5px;
+            display: block;
+        }
+        
+        .controls {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+        
+        .control-section {
+            margin-bottom: 25px;
+        }
+        
+        .control-section h3 {
+            color: #667eea;
+            margin-bottom: 15px;
+            font-size: 18px;
+            border-bottom: 2px solid #667eea;
+            padding-bottom: 8px;
+        }
+        
+        .control-row {
+            display: flex;
+            align-items: center;
+            margin: 15px 0;
+            gap: 15px;
+        }
+        
+        .control-row label {
+            min-width: 150px;
+            font-weight: 600;
+            color: #555;
+        }
+        
+        .control-row input[type="range"] {
+            flex: 1;
+            height: 8px;
+            border-radius: 5px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .control-row input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .control-row input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        }
+        
+        .value-display {
+            min-width: 100px;
+            text-align: right;
+            font-weight: bold;
+            color: #667eea;
+            font-size: 16px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 25px 0;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        .btn-start {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .btn-pause {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+        }
+        
+        .btn-reset {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            color: white;
+        }
+        
+        .btn-back {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .preset-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .btn-preset {
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            border-radius: 8px;
+            background: white;
+            color: #667eea;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-preset:hover {
+            background: #667eea;
+            color: white;
+            transform: scale(1.05);
+        }
+        
+        .btn-preset.active {
+            background: #667eea;
+            color: white;
+        }
+        
+        .info-box {
+            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 5px solid #667eea;
+        }
+        
+        .info-box h4 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .info-box p {
+            color: #555;
+            margin: 8px 0;
+            line-height: 1.6;
+        }
+        
+        .info-box .formula {
+            background: white;
+            padding: 12px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+            color: #333;
+            font-weight: 600;
+        }
+        
+        .wave-info {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+            padding: 15px;
+            background: rgba(255,255,255,0.5);
+            border-radius: 8px;
+        }
+        
+        .wave-info-item {
+            text-align: center;
+        }
+        
+        .wave-info-label {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 5px;
+        }
+        
+        .wave-info-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #667eea;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌊 水波干涉模擬</h1>
+        <p class="subtitle">使用解析式波動方程模擬波的疊加與干涉現象</p>
+        
+        <div class="info-box">
+            <h4>📚 物理原理</h4>
+            <p><strong>波動方程（每個波源）：</strong></p>
+            <div class="formula">h(x,y,t) = A · sin(2π/λ · r - 2π·f·t + φ)</div>
+            <p><strong>總振幅（多波源疊加）：</strong></p>
+            <div class="formula">H(x,y,t) = Σ h<sub>i</sub>(x,y,t)</div>
+            <p>
+                • <strong>建設性干涉：</strong>兩波同相位疊加，振幅增強（明亮區域）<br>
+                • <strong>破壞性干涉：</strong>兩波反相位疊加，振幅相消（暗淡區域）<br>
+                • <strong>干涉條紋：</strong>由路徑差產生的穩定亮暗條紋圖案<br>
+                • <strong>波速關係：</strong>v = f·λ（波速 = 頻率 × 波長）
+            </p>
+        </div>
+        
+        <div class="canvas-wrapper">
+            <canvas id="waveCanvas" width="900" height="600"></canvas>
+        </div>
+        
+        <div class="button-group">
+            <button class="btn btn-start" id="startBtn">▶ 開始</button>
+            <button class="btn btn-pause" id="pauseBtn">⏸ 暫停</button>
+            <button class="btn btn-reset" id="resetBtn">🔄 重置</button>
+            <button class="btn btn-back" onclick="window.location.href='../../physics-simulations.html'">← 返回</button>
+        </div>
+        
+        <div class="controls">
+            <div class="control-section">
+                <h3>🎯 波源配置</h3>
+                
+                <div class="control-row">
+                    <label>波源間距 (d)</label>
+                    <input type="range" id="spacingSlider" min="20" max="600" step="10" value="150">
+                    <span class="value-display" id="spacingValue">150 px</span>
+                </div>
+                <div class="wave-info">
+                    <div class="wave-info-item">
+                        <div class="wave-info-label">波源 1 位置</div>
+                        <div class="wave-info-value" id="source1Pos">-</div>
+                    </div>
+                    <div class="wave-info-item">
+                        <div class="wave-info-label">波源 2 位置</div>
+                        <div class="wave-info-value" id="source2Pos">-</div>
+                    </div>
+                    <div class="wave-info-item">
+                        <div class="wave-info-label">波源間距</div>
+                        <div class="wave-info-value" id="sourceDist">-</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="control-section">
+                <h3>⚙️ 波動參數</h3>
+                
+                <div class="control-row">
+                    <label>波長 (λ)</label>
+                    <input type="range" id="wavelengthSlider" min="10" max="100" step="5" value="30">
+                    <span class="value-display" id="wavelengthValue">30 px</span>
+                </div>
+                
+                <div class="control-row">
+                    <label>動畫速度</label>
+                    <input type="range" id="speedSlider" min="0.2" max="3" step="0.2" value="1">
+                    <span class="value-display" id="speedValue">1.0x</span>
+                </div>
+                
+                <div class="wave-info" style="margin-top: 20px;">
+                    <div class="wave-info-item">
+                        <div class="wave-info-label">波長 (λ)</div>
+                        <div class="wave-info-value" id="currentWavelength">30 px</div>
+                    </div>
+                    <div class="wave-info-item">
+                        <div class="wave-info-label">波源間距 (d)</div>
+                        <div class="wave-info-value" id="currentSpacing">150 px</div>
+                    </div>
+                    <div class="wave-info-item">
+                        <div class="wave-info-label">d/λ 比值</div>
+                        <div class="wave-info-value" id="spacingRatio">5.0</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="info-box" style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);">
+            <h4>💡 使用說明</h4>
+            <p>
+                • <strong>波源位置：</strong>兩個波源位於畫布底部，向上傳播產生干涉圖案<br>
+                • <strong>調整波長：</strong>波長越長，干涉條紋越寬，波的傳播距離越遠<br>
+                • <strong>調整間距：</strong>間距越大，干涉條紋越密集；d/λ 比值決定條紋數量<br>
+                • <strong>觀察干涉：</strong>明亮區域表示建設性干涉，暗淡區域表示破壞性干涉<br>
+                • <strong>顏色含義：</strong>
+                <span style="color: #ff4444; font-weight: bold;">紅黃色</span> = 正振幅（波峰），
+                <span style="color: #4444ff; font-weight: bold;">藍色</span> = 負振幅（波谷），
+                <span style="color: #000; font-weight: bold;">黑色</span> = 零振幅
+            </p>
+        </div>
+    </div>
+    
+    <script>
+        class WaveInterferenceSimulation {
+            constructor() {
+                this.canvas = document.getElementById('waveCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.width = this.canvas.width;
+                this.height = this.canvas.height;
+                
+                // 物理參數
+                this.wavelength = 30;    // 波長（像素）
+                this.frequency = 1.5;    // 頻率（Hz）- 固定值
+                this.amplitude = 50;     // 振幅 - 固定值
+                this.speed = 1.0;        // 動畫速度倍率
+                this.spacingDistance = 150; // 波源間距（像素）
+                
+                // 波源配置
+                this.sources = [];
+                
+                // 時間
+                this.time = 0;
+                this.isRunning = false;
+                this.animationId = null;
+                
+                // 像素緩衝
+                this.imageData = this.ctx.createImageData(this.width, this.height);
+                
+                // 波前追蹤（用於顯示波的擴散範圍）
+                this.showWavefront = true;
+                
+                this.init();
+            }
+            
+            init() {
+                this.setupSources();
+                this.setupControls();
+                this.updateInfo();
+                this.drawStatic();
+            }
+            
+            setupSources() {
+                const centerX = this.width / 2;
+                const bottomY = this.height - 50;  // 距離底部 50 像素
+                const halfDist = this.spacingDistance / 2;
+                
+                this.sources = [
+                    { x: centerX - halfDist, y: bottomY, phase: 0 },
+                    { x: centerX + halfDist, y: bottomY, phase: 0 }
+                ];
+                
+                this.updateSourceInfo();
+            }
+            
+            setupControls() {
+                // 波源間距滑桿
+                document.getElementById('spacingSlider').addEventListener('input', (e) => {
+                    this.spacingDistance = parseFloat(e.target.value);
+                    document.getElementById('spacingValue').textContent = this.spacingDistance + ' px';
+                    this.setupSources();
+                    this.updateInfo();
+                    if (!this.isRunning) {
+                        this.drawStatic();
+                    }
+                });
+                
+                // 波長控制
+                document.getElementById('wavelengthSlider').addEventListener('input', (e) => {
+                    this.wavelength = parseFloat(e.target.value);
+                    document.getElementById('wavelengthValue').textContent = this.wavelength + ' px';
+                    this.updateInfo();
+                });
+                
+                // 速度控制
+                document.getElementById('speedSlider').addEventListener('input', (e) => {
+                    this.speed = parseFloat(e.target.value);
+                    document.getElementById('speedValue').textContent = this.speed.toFixed(1) + 'x';
+                });
+                
+                // 按鈕控制
+                document.getElementById('startBtn').addEventListener('click', () => this.start());
+                document.getElementById('pauseBtn').addEventListener('click', () => this.pause());
+                document.getElementById('resetBtn').addEventListener('click', () => this.reset());
+            }
+            
+            updateSourceInfo() {
+                const s1 = this.sources[0];
+                const s2 = this.sources[1];
+                const dist = Math.sqrt((s2.x - s1.x) ** 2 + (s2.y - s1.y) ** 2);
+                
+                document.getElementById('source1Pos').textContent = `(${s1.x}, ${s1.y})`;
+                document.getElementById('source2Pos').textContent = `(${s2.x}, ${s2.y})`;
+                document.getElementById('sourceDist').textContent = dist.toFixed(0) + ' px';
+            }
+            
+            updateInfo() {
+                document.getElementById('currentWavelength').textContent = this.wavelength.toFixed(0) + ' px';
+                document.getElementById('currentSpacing').textContent = this.spacingDistance.toFixed(0) + ' px';
+                
+                const ratio = this.spacingDistance / this.wavelength;
+                document.getElementById('spacingRatio').textContent = ratio.toFixed(1);
+            }
+            
+            start() {
+                this.isRunning = true;
+                this.animate();
+            }
+            
+            pause() {
+                this.isRunning = false;
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                    this.animationId = null;
+                }
+            }
+            
+            reset() {
+                this.pause();
+                this.time = 0;
+                this.drawStatic();
+            }
+            
+            animate() {
+                if (!this.isRunning) return;
+                
+                // 更新時間（考慮速度倍率）
+                this.time += 0.016 * this.speed;  // 假設 60 FPS
+                
+                this.render();
+                this.animationId = requestAnimationFrame(() => this.animate());
+            }
+            
+            calculateWaveHeight(x, y) {
+                let totalHeight = 0;
+                const omega = 2 * Math.PI * this.frequency;
+                const k = 2 * Math.PI / this.wavelength;
+                
+                // 計算波速（v = f·λ）
+                const waveSpeed = this.frequency * this.wavelength;
+                
+                // 疊加所有波源的貢獻
+                for (const source of this.sources) {
+                    const dx = x - source.x;
+                    const dy = y - source.y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    
+                    // 波前擴散檢查（波只在已到達的區域顯示）
+                    const wavefrontDistance = waveSpeed * this.time;
+                    if (this.showWavefront && distance > wavefrontDistance) {
+                        continue;  // 波尚未到達此位置
+                    }
+                    
+                    // 波動方程：h = A · sin(k·r - ω·t + φ)
+                    // k = 2π/λ, ω = 2πf
+                    const phase = k * distance - omega * this.time + source.phase;
+                    const height = this.amplitude * Math.sin(phase);
+                    
+                    // 考慮距離衰減（可選，讓遠處的波變弱）
+                    const attenuation = 1.0 / (1.0 + distance / 1000);
+                    
+                    totalHeight += height * attenuation;
+                }
+                
+                return totalHeight;
+            }
+            
+            render() {
+                const data = this.imageData.data;
+                const maxDisplay = this.amplitude * this.sources.length * 0.8;
+                
+                // 計算每個像素的波高
+                for (let y = 0; y < this.height; y++) {
+                    for (let x = 0; x < this.width; x++) {
+                        const height = this.calculateWaveHeight(x, y);
+                        const normalized = Math.max(-1, Math.min(1, height / maxDisplay));
+                        
+                        const idx = (y * this.width + x) * 4;
+                        
+                        // 改進的顏色映射
+                        let r, g, b;
+                        
+                        if (normalized > 0) {
+                            // 正振幅：黑 -> 紅 -> 黃 -> 白
+                            const intensity = normalized;
+                            if (intensity < 0.5) {
+                                // 黑 -> 紅
+                                r = Math.floor(255 * intensity * 2);
+                                g = 0;
+                                b = 0;
+                            } else {
+                                // 紅 -> 黃
+                                r = 255;
+                                g = Math.floor(255 * (intensity - 0.5) * 2);
+                                b = 0;
+                            }
+                        } else {
+                            // 負振幅：黑 -> 藍 -> 青
+                            const intensity = -normalized;
+                            if (intensity < 0.5) {
+                                // 黑 -> 藍
+                                r = 0;
+                                g = 0;
+                                b = Math.floor(255 * intensity * 2);
+                            } else {
+                                // 藍 -> 青
+                                r = 0;
+                                g = Math.floor(255 * (intensity - 0.5) * 2);
+                                b = 255;
+                            }
+                        }
+                        
+                        data[idx] = r;
+                        data[idx + 1] = g;
+                        data[idx + 2] = b;
+                        data[idx + 3] = 255;
+                    }
+                }
+                
+                this.ctx.putImageData(this.imageData, 0, 0);
+                this.drawSources();
+            }
+            
+            drawStatic() {
+                // 繪製靜態背景（時間 = 0）
+                const savedTime = this.time;
+                this.time = 0;
+                this.render();
+                this.time = savedTime;
+            }
+            
+            drawSources() {
+                // 繪製波源標記
+                this.sources.forEach((source, index) => {
+                    // 外圈脈衝效果
+                    if (this.isRunning) {
+                        const pulseRadius = 5 + (this.time * this.frequency * 20) % 15;
+                        const pulseAlpha = 1 - (pulseRadius - 5) / 15;
+                        
+                        this.ctx.beginPath();
+                        this.ctx.arc(source.x, source.y, pulseRadius, 0, Math.PI * 2);
+                        this.ctx.strokeStyle = `rgba(255, 255, 100, ${pulseAlpha * 0.6})`;
+                        this.ctx.lineWidth = 2;
+                        this.ctx.stroke();
+                    }
+                    
+                    // 光暈
+                    const gradient = this.ctx.createRadialGradient(
+                        source.x, source.y, 0,
+                        source.x, source.y, 15
+                    );
+                    gradient.addColorStop(0, 'rgba(0, 255, 0, 0.8)');
+                    gradient.addColorStop(1, 'rgba(0, 255, 0, 0)');
+                    this.ctx.fillStyle = gradient;
+                    this.ctx.beginPath();
+                    this.ctx.arc(source.x, source.y, 15, 0, Math.PI * 2);
+                    this.ctx.fill();
+                    
+                    // 主體
+                    this.ctx.beginPath();
+                    this.ctx.arc(source.x, source.y, 8, 0, Math.PI * 2);
+                    this.ctx.fillStyle = '#ffffff';
+                    this.ctx.fill();
+                    this.ctx.strokeStyle = '#00ff00';
+                    this.ctx.lineWidth = 3;
+                    this.ctx.stroke();
+                    
+                    // 內核
+                    this.ctx.beginPath();
+                    this.ctx.arc(source.x, source.y, 4, 0, Math.PI * 2);
+                    this.ctx.fillStyle = '#00ff00';
+                    this.ctx.fill();
+                    
+                    // 編號
+                    this.ctx.fillStyle = '#ffffff';
+                    this.ctx.font = 'bold 16px Arial';
+                    this.ctx.textAlign = 'center';
+                    this.ctx.textBaseline = 'top';
+                    this.ctx.shadowColor = '#000';
+                    this.ctx.shadowBlur = 4;
+                    this.ctx.fillText((index + 1).toString(), source.x, source.y + 12);
+                    this.ctx.shadowBlur = 0;
+                });
+            }
+        }
+        
+        // 初始化
+        let simulation;
+        window.addEventListener('DOMContentLoaded', () => {
+            simulation = new WaveInterferenceSimulation();
+        });
+    </script>
+</body>
+</html>

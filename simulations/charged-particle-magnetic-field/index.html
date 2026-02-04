@@ -1,0 +1,684 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8">
+    <title>帶電粒子在磁場中的運動 - 物理模擬</title>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <link href="../../images/fish.png" rel="shortcut icon">
+    
+    <link href="../../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../../css/normalize.css" rel="stylesheet">
+    <link href="../../css/style.css" rel="stylesheet">
+    <link href="../../css/responsive.css" rel="stylesheet">
+    
+    <style>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: #f5f5f5;
+        }
+        
+        .simulation-container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .simulation-title {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #818181;
+        }
+        
+        .canvas-container {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+            background: #000;
+            border-radius: 5px;
+            padding: 10px;
+        }
+        
+        #simulationCanvas {
+            border: 2px solid #818181;
+            background: #000;
+            cursor: crosshair;
+        }
+        
+        .controls-panel {
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+        
+        .control-group {
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .control-group label {
+            min-width: 180px;
+            font-weight: 500;
+            color: #555;
+        }
+        
+        .control-group input[type="range"] {
+            flex: 1;
+            max-width: 300px;
+        }
+        
+        .control-group input[type="number"] {
+            width: 100px;
+            padding: 5px 10px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+        
+        .control-group .value-display {
+            min-width: 80px;
+            text-align: right;
+            font-weight: bold;
+            color: #818181;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        
+        .btn-sim {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 5px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-start {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .btn-start:hover {
+            background: #45a049;
+        }
+        
+        .btn-pause {
+            background: #ff9800;
+            color: white;
+        }
+        
+        .btn-pause:hover {
+            background: #e68900;
+        }
+        
+        .btn-reset {
+            background: #f44336;
+            color: white;
+        }
+        
+        .btn-reset:hover {
+            background: #da190b;
+        }
+        
+        .btn-back {
+            background: #818181;
+            color: white;
+        }
+        
+        .btn-back:hover {
+            background: #2f2f2f;
+        }
+        
+        .info-panel {
+            background: #e3f2fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+            border-left: 4px solid #2196F3;
+        }
+        
+        .info-panel h4 {
+            margin-top: 0;
+            color: #1976D2;
+        }
+        
+        .info-panel p {
+            margin: 5px 0;
+            color: #555;
+        }
+        
+        .formula {
+            background: #fff;
+            padding: 10px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="simulation-container">
+        <h1 class="simulation-title">帶電粒子在磁場中的運動模擬</h1>
+        
+        <div class="info-panel">
+            <h4>📚 物理原理</h4>
+            <p><strong>勞倫茲力：</strong>當帶電粒子以速度 v 進入磁場 B 時，會受到垂直於速度和磁場的勞倫茲力。</p>
+            <div class="formula">F = q(v × B) = qvB sin(θ)</div>
+            <p><strong>圓周運動：</strong>當 v ⊥ B 時，粒子做等速率圓周運動，半徑 r = mv/(qB)</p>
+            <p><strong>螺旋運動：</strong>當 v 與 B 有夾角時，粒子做螺旋運動</p>
+        </div>
+        
+        <div class="canvas-container">
+            <canvas id="simulationCanvas" width="2400" height="1800" style="width: 1200px; height: 900px;"></canvas>
+        </div>
+        
+        <div class="button-group">
+            <button class="btn-sim btn-start" id="startBtn">▶ 開始</button>
+            <button class="btn-sim btn-pause" id="pauseBtn">⏸ 暫停</button>
+            <button class="btn-sim btn-reset" id="resetBtn">🔄 重置</button>
+            <button class="btn-sim btn-back" onclick="window.location.href='../../physics-simulations.html'">← 返回</button>
+        </div>
+        
+        <div class="controls-panel">
+            <h3 style="margin-top: 0; color: #333;">參數控制</h3>
+            
+            <div class="control-group">
+                <label>磁場強度 B (T):</label>
+                <input type="range" id="magneticField" min="0.1" max="5" step="0.1" value="1">
+                <span class="value-display" id="bValue">1.0 T</span>
+            </div>
+            
+            <div class="control-group">
+                <label>磁場方向:</label>
+                <select id="magneticDirection" style="padding: 5px 10px; border: 1px solid #ddd; border-radius: 3px;">
+                    <option value="out">⊙ 指向螢幕外</option>
+                    <option value="in">⊗ 指向螢幕內</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label>粒子電荷 q (×10⁻¹⁹ C):</label>
+                <input type="range" id="charge" min="-5" max="5" step="0.5" value="1.6">
+                <span class="value-display" id="qValue">1.6</span>
+            </div>
+            
+            <div class="control-group">
+                <label>粒子質量 m (×10⁻²⁷ kg):</label>
+                <input type="range" id="mass" min="0.5" max="10" step="0.5" value="1.67">
+                <span class="value-display" id="mValue">1.67</span>
+            </div>
+            
+            <div class="control-group">
+                <label>初速度 v (×10⁶ m/s):</label>
+                <input type="range" id="velocity" min="0.5" max="10" step="0.5" value="5">
+                <span class="value-display" id="vValue">5.0</span>
+            </div>
+            
+            <div class="control-group">
+                <label>速度方向角度 (度):</label>
+                <input type="range" id="angle" min="0" max="180" step="5" value="90">
+                <span class="value-display" id="angleValue">90°</span>
+            </div>
+            
+            <div class="control-group">
+                <label>初始位置:</label>
+                <select id="initialPosition" style="padding: 5px 10px; border: 1px solid #ddd; border-radius: 3px;">
+                    <option value="right">右側</option>
+                    <option value="left">左側</option>
+                    <option value="top">上方</option>
+                    <option value="bottom">下方</option>
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label>播放速度:</label>
+                <input type="range" id="playbackSpeed" min="0.1" max="5" step="0.1" value="1">
+                <span class="value-display" id="speedValue">1.0x</span>
+            </div>
+            
+            <div class="control-group">
+                <label>顯示軌跡:</label>
+                <input type="checkbox" id="showTrail" checked>
+            </div>
+        </div>
+        
+        <div class="controls-panel" style="background: #e8f5e9; border-left: 4px solid #4caf50;">
+            <h4 style="margin-top: 0; color: #2e7d32;">📊 即時數據</h4>
+            <div class="control-group">
+                <label>當前速度:</label>
+                <span class="value-display" id="currentSpeed" style="color: #2e7d32; font-size: 16px;">0.000 × 10⁶ m/s</span>
+            </div>
+            <div class="control-group">
+                <label>理論半徑 r = mv/(qB):</label>
+                <span class="value-display" id="currentRadius" style="color: #2e7d32; font-size: 16px;">0.000 m</span>
+            </div>
+            <div class="control-group">
+                <label>粒子電荷:</label>
+                <span class="value-display" id="currentCharge" style="color: #2e7d32; font-size: 16px;">+1.6 × 10⁻¹⁹ C</span>
+            </div>
+            <div class="control-group">
+                <label>向量圖例:</label>
+                <span style="color: #ffd700; font-weight: bold;">━━► 速度 v</span>
+                <span style="color: #fff; background: #333; padding: 2px 8px; margin-left: 15px; border-radius: 3px; font-weight: bold;">━━► 向心力 F = q(v × B)</span>
+            </div>
+        </div>
+        
+        <div class="info-panel" style="background: #fff3cd; border-left-color: #ffc107;">
+            <h4>🎯 使用說明</h4>
+            <p>• 調整參數後按「開始」觀察粒子運動軌跡</p>
+            <p>• 正電荷（紅色）和負電荷（藍色）會以相反方向偏轉</p>
+            <p>• 速度方向角度 90° 為垂直磁場，會做圓周運動</p>
+        </div>
+    </div>
+    
+    <script>
+        // 物理模擬類別
+        class MagneticFieldSimulation {
+            constructor(canvasId) {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext('2d');
+                this.animationId = null;
+                this.isRunning = false;
+                
+                // 物理參數
+                this.params = {
+                    B: 1.0,                    // 磁場強度 (T)
+                    magneticDirection: 'out',  // 'out' 或 'in'
+                    q: 1.6,                    // 電荷 (×10^-19 C)
+                    m: 1.67,                   // 質量 (×10^-27 kg)
+                    v: 5.0,                    // 初速度 (×10^6 m/s)
+                    angle: 90,                 // 速度角度 (度)
+                    initialPosition: 'right',
+                    playbackSpeed: 1.0,
+                    showTrail: true
+                };
+                
+                // 粒子狀態
+                this.particle = {
+                    x: 2100,
+                    y: 900,
+                    vx: 0,
+                    vy: 0,
+                    trail: []
+                };
+                
+                this.scale = 50; // 縮放因子
+                this.dt = 0.01;  // 時間步長
+                
+                this.init();
+            }
+            
+            init() {
+                this.setupEventListeners();
+                this.reset();
+            }
+            
+            setupEventListeners() {
+                // 參數控制
+                document.getElementById('magneticField').addEventListener('input', (e) => {
+                    this.params.B = parseFloat(e.target.value);
+                    document.getElementById('bValue').textContent = this.params.B.toFixed(1) + ' T';
+                    if (!this.isRunning) this.drawStatic();
+                });
+                
+                document.getElementById('magneticDirection').addEventListener('change', (e) => {
+                    this.params.magneticDirection = e.target.value;
+                    if (!this.isRunning) this.drawStatic();
+                });
+                
+                document.getElementById('charge').addEventListener('input', (e) => {
+                    this.params.q = parseFloat(e.target.value);
+                    document.getElementById('qValue').textContent = this.params.q.toFixed(1);
+                    if (!this.isRunning) this.drawStatic();
+                });
+                
+                document.getElementById('mass').addEventListener('input', (e) => {
+                    this.params.m = parseFloat(e.target.value);
+                    document.getElementById('mValue').textContent = this.params.m.toFixed(2);
+                });
+                
+                document.getElementById('velocity').addEventListener('input', (e) => {
+                    this.params.v = parseFloat(e.target.value);
+                    document.getElementById('vValue').textContent = this.params.v.toFixed(1);
+                    if (!this.isRunning) {
+                        this.updateParticleVelocity();
+                        this.drawStatic();
+                    }
+                });
+                
+                document.getElementById('angle').addEventListener('input', (e) => {
+                    this.params.angle = parseFloat(e.target.value);
+                    document.getElementById('angleValue').textContent = this.params.angle.toFixed(0) + '°';
+                    if (!this.isRunning) {
+                        this.updateParticleVelocity();
+                        this.drawStatic();
+                    }
+                });
+                
+                document.getElementById('initialPosition').addEventListener('change', (e) => {
+                    this.params.initialPosition = e.target.value;
+                    if (!this.isRunning) this.reset();
+                });
+                
+                document.getElementById('playbackSpeed').addEventListener('input', (e) => {
+                    this.params.playbackSpeed = parseFloat(e.target.value);
+                    document.getElementById('speedValue').textContent = this.params.playbackSpeed.toFixed(1) + 'x';
+                });
+                
+                document.getElementById('showTrail').addEventListener('change', (e) => {
+                    this.params.showTrail = e.target.checked;
+                });
+                
+                // 按鈕控制
+                document.getElementById('startBtn').addEventListener('click', () => this.start());
+                document.getElementById('pauseBtn').addEventListener('click', () => this.pause());
+                document.getElementById('resetBtn').addEventListener('click', () => this.reset());
+            }
+            
+            getInitialPosition() {
+                const positions = {
+                    'left': { x: 300, y: 900 },
+                    'top': { x: 1200, y: 300 },
+                    'right': { x: 2100, y: 900 },
+                    'bottom': { x: 1200, y: 1500 }
+                };
+                return positions[this.params.initialPosition] || positions['right'];
+            }
+            
+            updateParticleVelocity() {
+                const angleRad = (this.params.angle * Math.PI) / 180;
+                this.particle.vx = this.params.v * Math.cos(angleRad);
+                this.particle.vy = -this.params.v * Math.sin(angleRad);
+            }
+            
+            reset() {
+                this.pause();
+                
+                const pos = this.getInitialPosition();
+                this.particle.x = pos.x;
+                this.particle.y = pos.y;
+                this.particle.trail = [];
+                
+                this.updateParticleVelocity();
+                this.drawStatic();
+            }
+            
+            start() {
+                if (this.isRunning) return;
+                this.isRunning = true;
+                this.updateParticleVelocity();
+                this.animate();
+            }
+            
+            pause() {
+                this.isRunning = false;
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                    this.animationId = null;
+                }
+            }
+            
+            animate() {
+                if (!this.isRunning) return;
+                
+                this.updatePhysics();
+                this.draw();
+                
+                this.animationId = requestAnimationFrame(() => this.animate());
+            }
+            
+            updatePhysics() {
+                const dt = this.dt * this.params.playbackSpeed;
+                
+                // 磁場向量 B = (0, 0, Bz)
+                const Bz = this.params.magneticDirection === 'out' ? this.params.B : -this.params.B;
+                
+                // 勞倫茲力：F = q(v × B)
+                // v × B = (vy*Bz, -vx*Bz, 0)
+                const crossX = this.particle.vy * Bz;
+                const crossY = -this.particle.vx * Bz;
+                
+                // 加速度：a = F/m = q(v × B)/m
+                const ax = (this.params.q * crossX) / this.params.m;
+                const ay = (this.params.q * crossY) / this.params.m;
+                
+                // 記錄當前速率（用於能量守恆修正）
+                const currentSpeed = Math.sqrt(
+                    this.particle.vx * this.particle.vx + 
+                    this.particle.vy * this.particle.vy
+                );
+                
+                // 更新速度
+                this.particle.vx += ax * dt;
+                this.particle.vy += ay * dt;
+                
+                // 能量守恆修正（磁力不做功，速率應保持恆定）
+                const newSpeed = Math.sqrt(
+                    this.particle.vx * this.particle.vx + 
+                    this.particle.vy * this.particle.vy
+                );
+                if (newSpeed > 0) {
+                    const speedRatio = currentSpeed / newSpeed;
+                    this.particle.vx *= speedRatio;
+                    this.particle.vy *= speedRatio;
+                }
+                
+                // 更新位置
+                this.particle.x += this.particle.vx * this.scale * dt;
+                this.particle.y += this.particle.vy * this.scale * dt;
+                
+                // 邊界處理（環繞）
+                if (this.particle.x < 0) this.particle.x = this.canvas.width;
+                if (this.particle.x > this.canvas.width) this.particle.x = 0;
+                if (this.particle.y < 0) this.particle.y = this.canvas.height;
+                if (this.particle.y > this.canvas.height) this.particle.y = 0;
+                
+                // 記錄軌跡
+                if (this.params.showTrail) {
+                    this.particle.trail.push({ 
+                        x: this.particle.x, 
+                        y: this.particle.y 
+                    });
+                    if (this.particle.trail.length > 500) {
+                        this.particle.trail.shift();
+                    }
+                } else {
+                    this.particle.trail = [];
+                }
+            }
+            
+            draw() {
+                this.clearCanvas();
+                this.drawGrid();
+                this.drawTrail();
+                this.drawParticle();
+                this.drawVectors();
+                this.updateInfoDisplay();
+            }
+            
+            drawStatic() {
+                this.clearCanvas();
+                this.drawGrid();
+                this.drawParticle();
+                this.drawVectors();
+                this.updateInfoDisplay();
+            }
+            
+            clearCanvas() {
+                this.ctx.fillStyle = '#000';
+                this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
+            }
+            
+            drawGrid() {
+                // 繪製網格
+                this.ctx.strokeStyle = '#222';
+                this.ctx.lineWidth = 2;
+                
+                for (let x = 0; x < this.canvas.width; x += 150) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(x, 0);
+                    this.ctx.lineTo(x, this.canvas.height);
+                    this.ctx.stroke();
+                }
+                
+                for (let y = 0; y < this.canvas.height; y += 150) {
+                    this.ctx.beginPath();
+                    this.ctx.moveTo(0, y);
+                    this.ctx.lineTo(this.canvas.width, y);
+                    this.ctx.stroke();
+                }
+                
+                // 繪製磁場符號
+                this.ctx.fillStyle = '#444';
+                this.ctx.font = '60px Arial';
+                const symbol = this.params.magneticDirection === 'out' ? '⊙' : '⊗';
+                
+                for (let x = 150; x < this.canvas.width; x += 300) {
+                    for (let y = 150; y < this.canvas.height; y += 300) {
+                        this.ctx.fillText(symbol, x - 24, y + 24);
+                    }
+                }
+            }
+            
+            drawTrail() {
+                if (this.particle.trail.length === 0) return;
+                
+                const baseColor = this.params.q > 0 ? '255, 100, 100' : '100, 150, 255';
+                
+                this.particle.trail.forEach((point, i) => {
+                    const alpha = 0.4 * (i / this.particle.trail.length);
+                    this.ctx.fillStyle = `rgba(${baseColor}, ${alpha})`;
+                    
+                    // 多層繪製產生光暈效果
+                    for (let r = 12; r > 0; r -= 2) {
+                        this.ctx.globalAlpha = 0.6 / r;
+                        this.ctx.beginPath();
+                        this.ctx.arc(point.x, point.y, r, 0, Math.PI * 2);
+                        this.ctx.fill();
+                    }
+                });
+                
+                this.ctx.globalAlpha = 1.0;
+            }
+            
+            drawParticle() {
+                // 繪製粒子
+                this.ctx.fillStyle = this.params.q > 0 ? '#ff3333' : '#3399ff';
+                this.ctx.beginPath();
+                this.ctx.arc(this.particle.x, this.particle.y, 16, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // 繪製電荷符號
+                this.ctx.fillStyle = '#fff';
+                this.ctx.font = 'bold 20px Arial';
+                this.ctx.textAlign = 'center';
+                this.ctx.textBaseline = 'middle';
+                const chargeSymbol = this.params.q > 0 ? '+' : '−';
+                this.ctx.fillText(chargeSymbol, this.particle.x, this.particle.y);
+            }
+            
+            drawVectors() {
+                const vMag = Math.sqrt(
+                    this.particle.vx * this.particle.vx + 
+                    this.particle.vy * this.particle.vy
+                );
+                
+                if (vMag === 0) return;
+                
+                // 繪製速度向量（黃色）
+                const vArrowLength = 30 + vMag * 15;
+                const vxNorm = (this.particle.vx / vMag) * vArrowLength;
+                const vyNorm = (this.particle.vy / vMag) * vArrowLength;
+                
+                this.drawArrow(
+                    this.particle.x, this.particle.y,
+                    this.particle.x + vxNorm, this.particle.y + vyNorm,
+                    '#ffff00', 8, 24
+                );
+                
+                // 繪製力向量（白色）
+                const Bz = this.params.magneticDirection === 'out' ? 
+                    this.params.B : -this.params.B;
+                const crossX = this.particle.vy * Bz;
+                const crossY = -this.particle.vx * Bz;
+                const Fx = this.params.q * crossX;
+                const Fy = this.params.q * crossY;
+                
+                const fMag = Math.sqrt(Fx * Fx + Fy * Fy);
+                if (fMag > 0) {
+                    const fArrowLength = 25 + fMag * 10;
+                    const fxNorm = (Fx / fMag) * fArrowLength;
+                    const fyNorm = (Fy / fMag) * fArrowLength;
+                    
+                    this.drawArrow(
+                        this.particle.x, this.particle.y,
+                        this.particle.x + fxNorm, this.particle.y + fyNorm,
+                        '#ffffff', 6, 20
+                    );
+                }
+            }
+            
+            drawArrow(x1, y1, x2, y2, color, lineWidth, headSize) {
+                this.ctx.strokeStyle = color;
+                this.ctx.lineWidth = lineWidth;
+                
+                // 繪製箭身
+                this.ctx.beginPath();
+                this.ctx.moveTo(x1, y1);
+                this.ctx.lineTo(x2, y2);
+                this.ctx.stroke();
+                
+                // 繪製箭頭
+                const angle = Math.atan2(y2 - y1, x2 - x1);
+                this.ctx.beginPath();
+                this.ctx.moveTo(x2, y2);
+                this.ctx.lineTo(
+                    x2 - headSize * Math.cos(angle - Math.PI / 6),
+                    y2 - headSize * Math.sin(angle - Math.PI / 6)
+                );
+                this.ctx.moveTo(x2, y2);
+                this.ctx.lineTo(
+                    x2 - headSize * Math.cos(angle + Math.PI / 6),
+                    y2 - headSize * Math.sin(angle + Math.PI / 6)
+                );
+                this.ctx.stroke();
+            }
+            
+            updateInfoDisplay() {
+                const speed = Math.sqrt(
+                    this.particle.vx * this.particle.vx + 
+                    this.particle.vy * this.particle.vy
+                );
+                const radius = (this.params.m * speed) / 
+                    (Math.abs(this.params.q) * this.params.B);
+                
+                document.getElementById('currentSpeed').textContent = 
+                    speed.toFixed(3) + ' × 10⁶ m/s';
+                document.getElementById('currentRadius').textContent = 
+                    radius.toFixed(3) + ' m';
+                document.getElementById('currentCharge').textContent = 
+                    (this.params.q > 0 ? '+' : '') + this.params.q.toFixed(1) + ' × 10⁻¹⁹ C';
+            }
+        }
+        
+        // 初始化模擬
+        let simulation;
+        document.addEventListener('DOMContentLoaded', () => {
+            simulation = new MagneticFieldSimulation('simulationCanvas');
+        });
+    </script>
+</body>
+</html>
