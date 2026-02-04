@@ -11,393 +11,108 @@
     <link href="../../css/normalize.css" rel="stylesheet">
     <link href="../../css/style.css" rel="stylesheet">
     <link href="../../css/responsive.css" rel="stylesheet">
+    <link href="../../css/simulations.css" rel="stylesheet">
     
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
-            padding: 20px;
-        }
-        
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-            padding: 30px;
-        }
-        
-        h1 {
-            text-align: center;
-            color: #333;
-            margin-bottom: 10px;
-            font-size: 32px;
-        }
-        
-        .subtitle {
-            text-align: center;
-            color: #666;
-            margin-bottom: 25px;
-            font-size: 14px;
-        }
-        
-        .canvas-wrapper {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            margin: 25px 0;
-            background: #000;
-            border-radius: 10px;
-            padding: 15px;
-            box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
-        }
-        
-        #intensityCanvas {
-            border: 2px solid #ff6b6b;
-            border-radius: 5px;
-            background: #1a1a1a;
-            margin-bottom: 15px;
-            display: block;
-        }
-        
-        #waveCanvas {
-            border: 3px solid #667eea;
-            border-radius: 5px;
-            display: block;
-        }
-        
-        .controls {
-            background: #f8f9fa;
-            border-radius: 10px;
-            padding: 25px;
-            margin: 20px 0;
-        }
-        
-        .control-section {
-            margin-bottom: 25px;
-        }
-        
-        .control-section h3 {
-            color: #667eea;
-            margin-bottom: 15px;
-            font-size: 18px;
-            border-bottom: 2px solid #667eea;
-            padding-bottom: 8px;
-        }
-        
-        .control-row {
-            display: flex;
-            align-items: center;
-            margin: 20px 0;
-            gap: 15px;
-            padding: 5px 0;
-        }
-        
-        .control-row label {
-            min-width: 150px;
-            font-weight: 600;
-            color: #555;
-        }
-        
-        .control-row input[type="range"] {
-            flex: 1;
-            height: 12px;
-            border-radius: 6px;
-            background: #ddd;
-            outline: none;
-            -webkit-appearance: none;
-            cursor: pointer;
-        }
-        
-        .control-row input[type="range"]::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: #667eea;
-            cursor: pointer;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.3);
-            border: 3px solid white;
-        }
-        
-        .control-row input[type="range"]::-moz-range-thumb {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: #667eea;
-            cursor: pointer;
-            border: 3px solid white;
-            box-shadow: 0 3px 8px rgba(0,0,0,0.3);
-        }
-        
-        .value-display {
-            min-width: 100px;
-            text-align: right;
-            font-weight: bold;
-            color: #667eea;
-            font-size: 16px;
-        }
-        
-        .button-group {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-            flex-wrap: wrap;
-            margin: 25px 0;
-        }
-        
-        .btn {
-            padding: 15px 35px;
-            border: none;
-            border-radius: 10px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-            min-height: 50px;
-        }
-        
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 15px rgba(0,0,0,0.3);
-        }
-        
-        .btn:active {
-            transform: translateY(0);
-        }
-        
-        .btn-start {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-        }
-        
-        .btn-pause {
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-        }
-        
-        .btn-reset {
-            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            color: white;
-        }
-        
-        .btn-back {
-            background: #6c757d;
-            color: white;
-        }
-        
-        .preset-group {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-        
-        .btn-preset {
-            padding: 12px 25px;
-            border: 2px solid #667eea;
-            border-radius: 10px;
-            background: white;
-            color: #667eea;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            min-height: 48px;
-        }
-        
-        .btn-preset:hover {
-            background: #667eea;
-            color: white;
-            transform: scale(1.05);
-        }
-        
-        .btn-preset.active {
-            background: #667eea;
-            color: white;
-        }
-        
-        .info-box {
-            background: linear-gradient(135deg, #e0c3fc 0%, #8ec5fc 100%);
-            border-radius: 10px;
-            padding: 20px;
-            margin: 20px 0;
-            border-left: 5px solid #667eea;
-        }
-        
-        .info-box h4 {
-            color: #333;
-            margin-bottom: 10px;
-        }
-        
-        .info-box p {
-            color: #555;
-            margin: 8px 0;
-            line-height: 1.6;
-        }
-        
-        .info-box .formula {
-            background: white;
-            padding: 12px;
-            border-radius: 5px;
-            font-family: 'Courier New', monospace;
-            margin: 10px 0;
-            color: #333;
-            font-weight: 600;
-        }
-        
-        .wave-info {
-            display: flex;
-            justify-content: space-around;
-            margin-top: 15px;
-            padding: 15px;
-            background: rgba(255,255,255,0.5);
-            border-radius: 8px;
-        }
-        
-        .wave-info-item {
-            text-align: center;
-        }
-        
-        .wave-info-label {
-            font-size: 12px;
-            color: #666;
-            margin-bottom: 5px;
-        }
-        
-        .wave-info-value {
-            font-size: 18px;
-            font-weight: bold;
-            color: #667eea;
-        }
-        
-        /* 手機響應式設計 */
-        @media (max-width: 768px) {
-            body {
-                padding: 10px;
-            }
-            
-            .container {
-                padding: 15px;
-            }
-            
-            h1 {
-                font-size: 24px;
-            }
-            
-            .subtitle {
-                font-size: 12px;
-            }
-            
-            #waveCanvas {
-                max-width: 100%;
-                height: auto;
-            }
-            
-            .control-row {
-                flex-direction: column;
-                align-items: stretch;
-                gap: 10px;
-                margin: 25px 0;
-            }
-            
-            .control-row label {
-                min-width: auto;
-                font-size: 16px;
-            }
-            
-            .value-display {
-                text-align: center;
-                font-size: 18px;
-                padding: 8px;
-                background: rgba(102, 126, 234, 0.1);
-                border-radius: 5px;
-            }
-            
-            .button-group {
-                gap: 10px;
-            }
-            
-            .btn {
-                width: 100%;
-                max-width: 150px;
-            }
-            
-            .wave-info {
-                flex-direction: column;
-                gap: 15px;
-            }
-            
-            .wave-info-item {
-                padding: 10px;
-                background: white;
-                border-radius: 8px;
-            }
-            
-            .info-box {
-                padding: 15px;
-            }
-            
-            .info-box h4 {
-                font-size: 16px;
-            }
-            
-            .info-box p {
-                font-size: 14px;
-            }
-            
-            .formula {
-                font-size: 12px;
-                padding: 8px;
-                overflow-x: auto;
-            }
-        }
-        
-        /* 增加觸控反饋 */
-        .control-row input[type="range"]:active::-webkit-slider-thumb {
-            transform: scale(1.2);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
-        }
-        
-        .control-row input[type="range"]:active::-moz-range-thumb {
-            transform: scale(1.2);
-            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.5);
-        }
-    </style>
+    <link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Roboto:400,300,500,700' rel='stylesheet' type='text/css'>
 </head>
 <body>
-    <div class="container">
-        <h1>🌊 水波干涉模擬</h1>
-        <p class="subtitle">使用解析式波動方程模擬波的疊加與干涉現象</p>
+    <!--HEADER -->
+    <div class="header">
+      <div class="for-sticky">
+        <!--LOGO-->
+        <div class="col-md-2 col-xs-6 logo">
+          <a href="../../index.html"><img alt="logo" class="logo-nav" src="../../images/fish.png"></a>
+        </div>
+        <!--/.LOGO END-->
+      </div>
+      <div class="menu-wrap">
+        <nav class="menu">
+          <div class="menu-list">
+            <a href="../../index.html#home">
+              <span>首頁</span>
+            </a>
+            <a href="../../index.html#about">
+              <span>關於我</span>
+            </a>
+            <a href="../../index.html#experience">
+              <span>教學經驗</span>
+            </a>
+            <a href="../../teaching-gallery.html">
+              <span>查看教學剪影</span>
+            </a>
+            <a href="../../physics-simulations.html" class="active">
+              <span>高中物理內容</span>
+            </a>
+            <a href="../../index.html#skills">
+              <span>專業技能</span>
+            </a>
+            <a href="../../index.html#achievements">
+              <span>成果展示</span>
+            </a>
+            <a href="../../index.html#philosophy">
+              <span>教育理念</span>
+            </a>
+            <a href="../../index.html#contact">
+              <span>聯絡方式</span>
+            </a>
+          </div>
+        </nav>
+        <button class="close-button" id="close-button">Close Menu</button>
+      </div>
+      <button class="menu-button" id="open-button">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button><!--/.for-sticky-->
+    </div>
+    <!--/.HEADER END-->
+    
+    <!-- 頂部導航欄 -->
+    <div class="top-nav">
+        <div class="container">
+            <a href="../../index.html" class="nav-brand">
+                <img src="../../images/fish.png" alt="Logo">
+                <h2>物鯉魚教學模擬</h2>
+            </a>
+            <a href="../../physics-simulations.html" class="btn-back">← 返回列表</a>
+        </div>
+    </div>
+    
+    <!-- 主容器 -->
+    <div class="main-container">
+        <!-- 頁面標題 -->
+        <div class="page-header">
+            <h1>🌊 水波干涉模擬</h1>
+            <p class="subtitle">雙點波源的疊加與干涉現象 | 選修物理 III - 波動</p>
+        </div>
         
+        <!-- 物理原理說明 -->
         <div class="info-box">
-            <h4>📚 物理原理</h4>
-                • <strong>建設性干涉：</strong>兩波同相位疊加，振幅增強<br>
-                • <strong>破壞性干涉：</strong>兩波反相位疊加，振幅相消<br>
-                • <strong>干涉條紋：</strong>觀察強度分布，特定位置的合成波振福始終為0，該處即為節點(位於節線)<br>
-                • <strong>腹線與節線數目關係：</strong>波長與點波源間距均會影響腹線與節線數目
+            <h4>📚 物理原理與公式</h4>
+            <p>
+                • <strong>建設性干涉：</strong>兩波同相位疊加時，振幅增強，形成明亮區域（腹線）<br>
+                • <strong>破壞性干涉：</strong>兩波反相位疊加時，振幅相消，形成暗淡區域（節線）<br>
+                • <strong>干涉條紋：</strong>觀察強度分布，特定位置的合成波振幅始終為零，該處即為節點（位於節線上）<br>
+                • <strong>腹線與節線數目：</strong>波長與點波源間距（d/λ 比值）共同決定腹線與節線數目
             </p>
         </div>
         
-        <div class="canvas-wrapper">
-            <canvas id="intensityCanvas" width="900" height="150"></canvas>
-            <canvas id="waveCanvas" width="900" height="600"></canvas>
+        <!-- 模擬區域 -->
+        <div class="simulation-section">
+        <!-- 模擬區域 -->
+        <div class="simulation-section">
+            <div class="canvas-wrapper">
+                <canvas id="intensityCanvas" width="900" height="150"></canvas>
+                <canvas id="waveCanvas" width="900" height="600"></canvas>
+            </div>
         </div>
         
+        <!-- 控制按鈕 -->
         <div class="button-group">
-            <button class="btn btn-start" id="startBtn">▶ 開始</button>
+            <button class="btn btn-start" id="startBtn">▶ 開始模擬</button>
             <button class="btn btn-pause" id="pauseBtn">⏸ 暫停</button>
             <button class="btn btn-reset" id="resetBtn">🔄 重置</button>
-            <button class="btn btn-back" onclick="window.location.href='../../physics-simulations.html'">← 返回</button>
         </div>
         
         <div class="controls">
@@ -467,18 +182,20 @@
             </div>
         </div>
         
-        <div class="info-box" style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);">
-            <h4>💡 使用說明</h4>
+        <!-- 教學指引 -->
+        <div class="info-box teaching-note">
+            <h4>💡 教學使用指引</h4>
             <p>
-                • <strong>波源位置：</strong>兩個波源位於水波槽底部，向上傳播產生干涉圖案<br>
-                • <strong>調整切面：</strong>移動紅色虛線位置，觀察不同位置的波強度分布<br>
-                • <strong>強度圖表：</strong>上方綠色折線顯示切面上每個點的絕對振幅強度<br>
-                • <strong>調整間距：</strong>間距越大，干涉條紋越密集；d/λ 比值決定條紋數量<br>
-                • <strong>觀察干涉：</strong>明亮區域表示建設性干涉，暗淡區域表示破壞性干涉<br>
-                • <strong>顏色含義：</strong>
-                <span style="color: #ff4444; font-weight: bold;">紅黃色</span> = 正振幅（波峰），
-                <span style="color: #4444ff; font-weight: bold;">藍色</span> = 負振幅（波谷），
-                <span style="color: #000; font-weight: bold;">黑色</span> = 零振幅
+                • <strong>波源位置：</strong>兩個波源位於模擬區底部，向上傳播產生干涉圖案<br>
+                • <strong>調整波長：</strong>波長越短，干涉條紋越密集；可觀察波長對圖案的影響<br>
+                • <strong>調整間距：</strong>改變兩波源間距離，觀察干涉條紋數量與分布的變化<br>
+                • <strong>切面分析：</strong>紅色虛線代表觀察切面，可上下移動查看不同位置的波強度<br>
+                • <strong>強度圖表：</strong>上方綠色曲線顯示切面上的絕對振幅強度分布<br>
+                • <strong>d/λ 比值：</strong>此比值越大，干涉條紋數量越多<br>
+                • <strong>顏色編碼：</strong>
+                <span style="color: #e74c3c; font-weight: bold;">紅黃</span> = 波峰（正振幅），
+                <span style="color: #3498db; font-weight: bold;">藍</span> = 波谷（負振幅），
+                <span style="color: #2c3e50; font-weight: bold;">黑</span> = 零振幅（節線）
             </p>
         </div>
     </div>
@@ -875,5 +592,9 @@
             simulation = new WaveInterferenceSimulation();
         });
     </script>
+    
+    <script src="../../js/jquery-1.9.1.min.js" type="text/javascript"></script>
+    <script src="../../js/classie.js" type="text/javascript"></script>
+    <script src="../../js/main.js" type="text/javascript"></script>
 </body>
 </html>

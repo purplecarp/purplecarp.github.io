@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8">
+    <title>[模擬名稱] - 物理模擬</title>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <link href="../../images/fish.png" rel="shortcut icon">
+    
+    <link href="../../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../../css/normalize.css" rel="stylesheet">
+    <link href="../../css/style.css" rel="stylesheet">
+    <link href="../../css/responsive.css" rel="stylesheet">
+    <link href="../../css/simulations.css" rel="stylesheet">
+    
+    <link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Roboto:400,300,500,700' rel='stylesheet' type='text/css'>
+</head>
+<body>
+    <!--HEADER - 側邊導覽欄 -->
+    <div class="header">
+      <div class="for-sticky">
+        <!--LOGO-->
+        <div class="col-md-2 col-xs-6 logo">
+          <a href="../../index.html"><img alt="logo" class="logo-nav" src="../../images/fish.png"></a>
+        </div>
+        <!--/.LOGO END-->
+      </div>
+      <div class="menu-wrap">
+        <nav class="menu">
+          <div class="menu-list">
+            <a href="../../index.html#home">
+              <span>首頁</span>
+            </a>
+            <a href="../../index.html#about">
+              <span>關於我</span>
+            </a>
+            <a href="../../index.html#experience">
+              <span>教學經驗</span>
+            </a>
+            <a href="../../teaching-gallery.html">
+              <span>查看教學剪影</span>
+            </a>
+            <a href="../../physics-simulations.html" class="active">
+              <span>高中物理內容</span>
+            </a>
+            <a href="../../index.html#skills">
+              <span>專業技能</span>
+            </a>
+            <a href="../../index.html#achievements">
+              <span>成果展示</span>
+            </a>
+            <a href="../../index.html#philosophy">
+              <span>教育理念</span>
+            </a>
+            <a href="../../index.html#contact">
+              <span>聯絡方式</span>
+            </a>
+          </div>
+        </nav>
+        <button class="close-button" id="close-button">Close Menu</button>
+      </div>
+      <button class="menu-button" id="open-button">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button><!--/.for-sticky-->
+    </div>
+    <!--/.HEADER END-->
+    
+    <!-- 頂部導航欄 -->
+    <div class="top-nav">
+        <div class="container">
+            <a href="../../index.html" class="nav-brand">
+                <img src="../../images/fish.png" alt="Logo">
+                <h2>物鯉魚教學模擬</h2>
+            </a>
+            <a href="../../physics-simulations.html" class="btn-back">← 返回列表</a>
+        </div>
+    </div>
+    
+    <!-- 主容器 -->
+    <div class="main-container">
+        <!-- 頁面標題 -->
+        <div class="page-header">
+            <h1>🔬 [模擬標題]</h1>
+            <p class="subtitle">[模擬副標題] | [適用課程章節]</p>
+        </div>
+        
+        <!-- 物理原理說明 -->
+        <div class="info-box">
+            <h4>📚 物理原理與公式</h4>
+            <p>
+                • <strong>原理要點 1：</strong>在此說明第一個重要的物理概念<br>
+                • <strong>原理要點 2：</strong>在此說明第二個重要的物理概念<br>
+                • <strong>原理要點 3：</strong>在此說明第三個重要的物理概念<br>
+                • <strong>相關公式：</strong>在此列出相關的物理公式與說明
+            </p>
+        </div>
+        
+        <!-- 模擬區域 -->
+        <div class="simulation-section">
+            <div class="canvas-wrapper">
+                <!-- 根據需要調整畫布數量和尺寸 -->
+                <canvas id="simulationCanvas" width="900" height="600"></canvas>
+            </div>
+        </div>
+        
+        <!-- 控制按鈕 -->
+        <div class="button-group">
+            <button class="btn btn-start" id="startBtn">▶ 開始模擬</button>
+            <button class="btn btn-pause" id="pauseBtn">⏸ 暫停</button>
+            <button class="btn btn-reset" id="resetBtn">🔄 重置</button>
+        </div>
+        
+        <!-- 控制面板 -->
+        <div class="controls">
+            <div class="control-section">
+                <h3>⚙️ 參數控制</h3>
+                
+                <!-- 參數控制範例 -->
+                <div class="control-row">
+                    <label>參數 1</label>
+                    <input type="range" id="param1Slider" min="0" max="100" step="1" value="50">
+                    <span class="value-display" id="param1Value">50</span>
+                </div>
+                
+                <div class="control-row">
+                    <label>參數 2</label>
+                    <input type="range" id="param2Slider" min="0" max="100" step="1" value="50">
+                    <span class="value-display" id="param2Value">50</span>
+                </div>
+                
+                <div class="control-row">
+                    <label>參數 3</label>
+                    <input type="range" id="param3Slider" min="0" max="100" step="1" value="50">
+                    <span class="value-display" id="param3Value">50</span>
+                </div>
+                
+                <!-- 即時數據顯示 -->
+                <div class="wave-info" style="margin-top: 20px;">
+                    <div class="wave-info-item">
+                        <div class="wave-info-label">數據 1</div>
+                        <div class="wave-info-value" id="data1">-</div>
+                    </div>
+                    <div class="wave-info-item">
+                        <div class="wave-info-label">數據 2</div>
+                        <div class="wave-info-value" id="data2">-</div>
+                    </div>
+                    <div class="wave-info-item">
+                        <div class="wave-info-label">數據 3</div>
+                        <div class="wave-info-value" id="data3">-</div>
+                    </div>
+                    <div class="wave-info-item">
+                        <div class="wave-info-label">數據 4</div>
+                        <div class="wave-info-value" id="data4">-</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 教學指引 -->
+        <div class="info-box teaching-note">
+            <h4>💡 教學使用指引</h4>
+            <p>
+                • <strong>觀察重點 1：</strong>說明學生應該觀察的現象<br>
+                • <strong>觀察重點 2：</strong>說明參數對模擬結果的影響<br>
+                • <strong>操作建議：</strong>提供操作步驟與教學建議<br>
+                • <strong>思考問題：</strong>提出引導學生思考的問題<br>
+                • <strong>延伸應用：</strong>說明此原理在實際生活中的應用
+            </p>
+        </div>
+    </div>
+
+    <!-- JavaScript 模擬程式碼 -->
+    <script>
+        // ==========================================
+        // 模擬類別定義
+        // ==========================================
+        class Simulation {
+            constructor(canvasId) {
+                this.canvas = document.getElementById(canvasId);
+                this.ctx = this.canvas.getContext('2d');
+                this.width = this.canvas.width;
+                this.height = this.canvas.height;
+                
+                // 參數初始化
+                this.params = {
+                    param1: 50,
+                    param2: 50,
+                    param3: 50
+                };
+                
+                // 狀態變數
+                this.isRunning = false;
+                this.time = 0;
+                this.animationSpeed = 1.0;
+                
+                // 綁定控制項
+                this.bindControls();
+                
+                // 初始繪製
+                this.draw();
+            }
+            
+            // ==========================================
+            // 控制項綁定
+            // ==========================================
+            bindControls() {
+                // 參數滑桿
+                const param1Slider = document.getElementById('param1Slider');
+                const param1Value = document.getElementById('param1Value');
+                param1Slider.addEventListener('input', (e) => {
+                    this.params.param1 = parseFloat(e.target.value);
+                    param1Value.textContent = e.target.value;
+                    if (!this.isRunning) this.draw();
+                });
+                
+                const param2Slider = document.getElementById('param2Slider');
+                const param2Value = document.getElementById('param2Value');
+                param2Slider.addEventListener('input', (e) => {
+                    this.params.param2 = parseFloat(e.target.value);
+                    param2Value.textContent = e.target.value;
+                    if (!this.isRunning) this.draw();
+                });
+                
+                const param3Slider = document.getElementById('param3Slider');
+                const param3Value = document.getElementById('param3Value');
+                param3Slider.addEventListener('input', (e) => {
+                    this.params.param3 = parseFloat(e.target.value);
+                    param3Value.textContent = e.target.value;
+                    if (!this.isRunning) this.draw();
+                });
+                
+                // 控制按鈕
+                document.getElementById('startBtn').addEventListener('click', () => this.start());
+                document.getElementById('pauseBtn').addEventListener('click', () => this.pause());
+                document.getElementById('resetBtn').addEventListener('click', () => this.reset());
+            }
+            
+            // ==========================================
+            // 模擬控制方法
+            // ==========================================
+            start() {
+                if (this.isRunning) return;
+                this.isRunning = true;
+                document.getElementById('startBtn').disabled = true;
+                document.getElementById('pauseBtn').disabled = false;
+                this.animate();
+            }
+            
+            pause() {
+                this.isRunning = false;
+                document.getElementById('startBtn').disabled = false;
+                document.getElementById('pauseBtn').disabled = true;
+            }
+            
+            reset() {
+                this.pause();
+                this.time = 0;
+                
+                // 重置參數
+                this.params.param1 = 50;
+                this.params.param2 = 50;
+                this.params.param3 = 50;
+                
+                // 重置控制項
+                document.getElementById('param1Slider').value = 50;
+                document.getElementById('param1Value').textContent = '50';
+                document.getElementById('param2Slider').value = 50;
+                document.getElementById('param2Value').textContent = '50';
+                document.getElementById('param3Slider').value = 50;
+                document.getElementById('param3Value').textContent = '50';
+                
+                // 重繪
+                this.draw();
+            }
+            
+            // ==========================================
+            // 動畫循環
+            // ==========================================
+            animate() {
+                if (!this.isRunning) return;
+                
+                // 更新時間
+                this.time += 0.05 * this.animationSpeed;
+                
+                // 更新物理狀態
+                this.update();
+                
+                // 繪製畫面
+                this.draw();
+                
+                // 更新數據顯示
+                this.updateData();
+                
+                // 下一幀
+                requestAnimationFrame(() => this.animate());
+            }
+            
+            // ==========================================
+            // 物理更新（需要自行實現）
+            // ==========================================
+            update() {
+                // 在此實現物理計算和狀態更新
+                // 例如：位置更新、速度計算、力的計算等
+            }
+            
+            // ==========================================
+            // 繪製方法（需要自行實現）
+            // ==========================================
+            draw() {
+                // 清空畫布
+                this.ctx.clearRect(0, 0, this.width, this.height);
+                
+                // 繪製背景
+                this.ctx.fillStyle = '#1a1a2e';
+                this.ctx.fillRect(0, 0, this.width, this.height);
+                
+                // 在此實現具體的繪製邏輯
+                // 例如：繪製粒子、波形、場線、網格等
+                
+                // 範例：繪製中心參考點
+                this.ctx.fillStyle = '#3498db';
+                this.ctx.beginPath();
+                this.ctx.arc(this.width / 2, this.height / 2, 5, 0, Math.PI * 2);
+                this.ctx.fill();
+                
+                // 範例：繪製參考文字
+                this.ctx.fillStyle = '#ecf0f1';
+                this.ctx.font = '16px Roboto';
+                this.ctx.textAlign = 'center';
+                this.ctx.fillText('[在此繪製模擬內容]', this.width / 2, this.height / 2 + 30);
+            }
+            
+            // ==========================================
+            // 更新數據顯示
+            // ==========================================
+            updateData() {
+                // 更新即時數據顯示
+                document.getElementById('data1').textContent = this.params.param1.toFixed(1);
+                document.getElementById('data2').textContent = this.params.param2.toFixed(1);
+                document.getElementById('data3').textContent = this.params.param3.toFixed(1);
+                document.getElementById('data4').textContent = this.time.toFixed(2);
+            }
+        }
+        
+        // ==========================================
+        // 初始化模擬
+        // ==========================================
+        let simulation;
+        document.addEventListener('DOMContentLoaded', () => {
+            simulation = new Simulation('simulationCanvas');
+        });
+    </script>
+    
+    <!-- Navigation Scripts -->
+    <script src="../../js/jquery-1.9.1.min.js"></script>
+    <script src="../../js/classie.js"></script>
+    <script src="../../js/main.js"></script>
+</body>
+</html>

@@ -2,36 +2,208 @@
 <html lang="zh-Hant">
   <head>
     <meta charset="utf-8">
-    <title>高中物理內容</title>
+    <title>高中物理內容 - 李宜閎</title>
     <meta content="IE=edge" http-equiv="X-UA-Compatible">
     <meta content="width=device-width, initial-scale=1" name="viewport">
-
+    <meta content="高中物理教學內容整理" name="description">
+    <meta content="李宜閎" name="author">
+    
+    <!--Fav-->
     <link href="images/fish.png" rel="shortcut icon">
-
+    
+    <!--styles-->
     <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/owl.carousel.css" rel="stylesheet">
+    <link href="css/owl.theme.css" rel="stylesheet">
+    <link href="css/magnific-popup.css" rel="stylesheet">
     <link href="css/normalize.css" rel="stylesheet">
     <link href="css/style.css" rel="stylesheet">
     <link href="css/responsive.css" rel="stylesheet">
-
+    
+    <style>
+      .simulation-link {
+        margin-left: 10px;
+        color: #27ae60;
+        text-decoration: none;
+        font-weight: 500;
+        transition: color 0.3s ease;
+      }
+      
+      .simulation-link:hover {
+        color: #1e8449;
+        text-decoration: none;
+      }
+      
+      .physics-section {
+        background: #fff;
+        border: 1px solid #eee;
+        padding: 25px;
+        margin-bottom: 20px;
+        border-radius: 5px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+      
+      .physics-section:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      }
+      
+      .physics-section h4 {
+        margin-top: 0;
+        color: #2c3e50;
+        font-family: 'Roboto Slab', serif;
+        font-weight: 700;
+        border-bottom: 3px solid #3498db;
+        padding-bottom: 10px;
+        margin-bottom: 15px;
+      }
+      
+      .physics-section ul {
+        margin: 0;
+        color: #555;
+        padding-left: 20px;
+        line-height: 1.8;
+      }
+      
+      .physics-section ul li {
+        margin-bottom: 8px;
+      }
+      
+      .page-title {
+        color: #2c3e50;
+        font-family: 'Roboto Slab', serif;
+        font-weight: 700;
+        margin-bottom: 15px;
+      }
+      
+      .page-description {
+        color: #7f8c8d;
+        font-size: 16px;
+        margin-bottom: 40px;
+      }
+      
+      /* 頁面標題區域 */
+      .page-header-section {
+        text-align: center;
+        margin-bottom: 40px;
+        padding: 40px 30px;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+      }
+      
+      .page-header-section h2 {
+        color: #2c3e50;
+        margin: 0 0 15px 0;
+        font-size: 42px;
+        font-family: 'Roboto Slab', serif;
+        font-weight: 700;
+      }
+      
+      .page-header-section .subtitle {
+        color: #7f8c8d;
+        font-size: 18px;
+        line-height: 1.6;
+        margin: 0;
+      }
+      
+      /* 內容區域 */
+      .content-section {
+        margin-top: 0;
+      }
+    </style>
+    
+    <!--fonts google-->
     <link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700' rel='stylesheet' type='text/css'>
     <link href='https://fonts.googleapis.com/css?family=Roboto:400,300,500,700' rel='stylesheet' type='text/css'>
+    
+    <!--[if lt IE 9]>
+       <script type="text/javascript" src="js/html5shiv.min.js"></script>
+    <![endif]-->
   </head>
   <body>
+    <!--PRELOADER-->
+    <div id="preloader">
+      <div id="status">
+        <img alt="logo" src="images/fish.png">
+      </div>
+    </div>
+    <!--/.PRELOADER END-->
+
+    <!--HEADER -->
+    <div class="header">
+      <div class="for-sticky">
+        <!--LOGO-->
+        <div class="col-md-2 col-xs-6 logo">
+          <a href="index.html"><img alt="logo" class="logo-nav" src="images/fish.png"></a>
+        </div>
+        <!--/.LOGO END-->
+      </div>
+      <div class="menu-wrap">
+        <nav class="menu">
+          <div class="menu-list">
+            <a data-scroll="" href="index.html#home">
+              <span>首頁</span>
+            </a>
+            <a data-scroll="" href="index.html#about">
+              <span>關於我</span>
+            </a>
+            <a data-scroll="" href="index.html#experience">
+              <span>教學經驗</span>
+            </a>
+            <a href="teaching-gallery.html">
+              <span>查看教學剪影</span>
+            </a>
+            <a href="physics-simulations.html" class="active">
+              <span>高中物理內容</span>
+            </a>
+            <a data-scroll="" href="index.html#skills">
+              <span>專業技能</span>
+            </a>
+            <a data-scroll="" href="index.html#achievements">
+              <span>成果展示</span>
+            </a>
+            <a data-scroll="" href="index.html#philosophy">
+              <span>教育理念</span>
+            </a>
+            <a data-scroll="" href="index.html#contact">
+              <span>聯絡方式</span>
+            </a>
+          </div>
+        </nav>
+        <button class="close-button" id="close-button">Close Menu</button>
+      </div>
+      <button class="menu-button" id="open-button">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button><!--/.for-sticky-->
+    </div>
+    <!--/.HEADER END-->
+    
+    <!--CONTENT WRAP-->
     <div class="content-wrap">
+      <!--CONTENT-->
       <div class="content">
-        <section class="grey-bg" style="min-height: 100vh; padding: 80px 0;">
+        <!--PHYSICS SIMULATIONS-->
+        <section class="grey-bg" id="physics-content" style="min-height: 100vh; padding: 100px 0 80px;">
           <div class="container">
             <div class="row">
               <div class="col-md-10 col-md-offset-1">
-                <h2 style="margin-top: 0;">高中物理內容</h2>
-                <p style="color: #666;">依「選修物理 I～V」整理高中物理主題索引（不含任何模擬程式）。</p>
+                <!-- 頁面標題區域 -->
+                <div class="page-header-section">
+                  <h2>高中物理內容</h2>
+                  <p class="subtitle">依「選修物理 I～V」整理高中物理主題索引，包含教學模擬程式</p>
+                </div>
 
-                <div style="margin-top: 25px;">
-                  <div class="row" style="margin-bottom: 20px;">
+                <!-- 內容區域 -->
+                <div class="content-section">
+                  <div class="row">
                     <div class="col-md-12">
-                      <div style="background: #fff; border: 1px solid #eee; padding: 18px;">
-                        <h4 style="margin-top: 0;">選修物理 1</h4>
-                        <ul style="margin: 0; color: #666; padding-left: 18px;">
+                      <div class="physics-section">
+                        <h4>選修物理 1</h4>
+                        <ul>
                           <li>運動學（直線、平面、相對運動）</li>
                           <li>牛頓運動定律與受力分析</li>
                           <li>功與能、動能定理、位能</li>
@@ -44,28 +216,29 @@
                     </div>
                   </div>
 
-                  <div class="row" style="margin-bottom: 20px;">
+                  <div class="row">
                     <div class="col-md-12">
-                      <div style="background: #fff; border: 1px solid #eee; padding: 18px;">
-                        <h4 style="margin-top: 0;">選修物理 2</h4>
-                        <ul style="margin: 0; color: #666; padding-left: 18px;">
+                      <div class="physics-section">
+                        <h4>選修物理 2</h4>
+                        <ul>
                           <li>熱與溫度、熱容量、熱傳遞</li>
                           <li>理想氣體與氣體動力論</li>
                         </ul>
                       </div>
                     </div>
                   </div>
-                  <div class="row" style="margin-bottom: 20px;">
+
+                  <div class="row">
                     <div class="col-md-12">
-                      <div style="background: #fff; border: 1px solid #eee; padding: 18px;">
-                        <h4 style="margin-top: 0;">選修物理 3</h4>
-                        <ul style="margin: 0; color: #666; padding-left: 18px;">
+                      <div class="physics-section">
+                        <h4>選修物理 3</h4>
+                        <ul>
                           <li>幾何光學（成像、透鏡、反射折射）</li>
                           <li>波動光學（干涉、繞射、偏振）</li>
                           <li>
                             波動（波速、疊加、駐波、干涉）
-                            <a href="simulations/water-wave-interference/" style="margin-left: 10px; color: #4CAF50; text-decoration: none; font-weight: 500;">
-                              [水波干涉模擬]
+                            <a href="simulations/water-wave-interference/" class="simulation-link">
+                              💧 水波干涉模擬
                             </a>
                           </li>
                           <li>聲波（共鳴、拍頻、都卜勒效應）</li>
@@ -74,19 +247,19 @@
                     </div>
                   </div>
 
-                  <div class="row" style="margin-bottom: 20px;">
+                  <div class="row">
                     <div class="col-md-12">
-                      <div style="background: #fff; border: 1px solid #eee; padding: 18px;">
-                        <h4 style="margin-top: 0;">選修物理 4</h4>
-                        <ul style="margin: 0; color: #666; padding-left: 18px;">
+                      <div class="physics-section">
+                        <h4>選修物理 4</h4>
+                        <ul>
                           <li>電荷與電場、庫侖定律</li>
                           <li>電勢能與電位、等位面</li>
                           <li>電容與介電質</li>
                           <li>直流電路（歐姆定律、串並聯、功率）</li>
                           <li>
                             磁場與帶電粒子運動
-                            <a href="simulations/charged-particle-magnetic-field/" style="margin-left: 10px; color: #4CAF50; text-decoration: none; font-weight: 500;">
-                              [程式模擬]
+                            <a href="simulations/charged-particle-magnetic-field/" class="simulation-link">
+                              ⚡ 帶電粒子模擬
                             </a>
                           </li>
                           <li>電磁感應（法拉第定律、楞次定律）</li>
@@ -97,11 +270,11 @@
                     </div>
                   </div>
 
-                  <div class="row" style="margin-bottom: 10px;">
+                  <div class="row">
                     <div class="col-md-12">
-                      <div style="background: #fff; border: 1px solid #eee; padding: 18px;">
-                        <h4 style="margin-top: 0;">選修物理 5</h4>
-                        <ul style="margin: 0; color: #666; padding-left: 18px;">
+                      <div class="physics-section">
+                        <h4>選修物理 5</h4>
+                        <ul>
                           <li>量子概念（光電效應、德布羅意：概念）</li>
                           <li>原子結構與能階（光譜）</li>
                           <li>核物理（放射性、半衰期：概念）</li>
@@ -111,17 +284,48 @@
                     </div>
                   </div>
                 </div>
-                <div style="margin-top: 20px;">
-                  <a href="index.html" class="btn" style="background-color: #818181; color: #fff;">返回首頁</a>
-                </div>
+                <!-- /.content-section -->
               </div>
             </div>
           </div>
         </section>
-      </div>
-    </div>
+        <!--/.PHYSICS SIMULATIONS END-->
+        
+        <!--FOOTER-->
+        <footer>
+          <div class="footer-top">
+            <ul class="socials">
+              <li class="facebook">
+                <a href="https://www.facebook.com/profile.php?id=100000406892032" data-hover="Facebook">Facebook</a>
+              </li>
+              <li class="instagram">
+                <a href="https://www.instagram.com/physic.carp/" data-hover="Instagram">Instagram</a>
+              </li>
+              <li class="physictool">
+                <a href="physics-tools.html" data-hover="普物實驗小工具(網頁版)">普物實驗小工具(網頁版)</a>
+              </li>
+              <li class="physictool">
+                <a href="physics-simulations.html" data-hover="高中物理內容">高中物理內容</a>
+              </li>
+              <li class="physictool">
+                <a href="https://drive.google.com/file/d/11-np-5bq9sse7b9Eb7KIk0qJ6ilK6iNH/view?usp=drive_link" data-hover="普物實驗小工具(電腦版)">普物實驗小工具(電腦版)</a>
+              </li>
+            </ul>
+          </div>
+        </footer>
+        <!--/.FOOTER-END-->
 
+      <!--/.CONTENT END-->
+      </div>
+    <!--/.CONTENT-WRAP END-->
+    </div>
+    
     <script src="js/jquery-1.9.1.min.js" type="text/javascript"></script>
+    <script src="js/jquery.appear.js" type="text/javascript"></script>
     <script src="js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="js/classie.js" type="text/javascript"></script>
+    <script src="js/owl.carousel.min.js" type="text/javascript"></script>
+    <script src="js/smooth-scroll.min.js" type="text/javascript"></script>
+    <script src="js/main.js" type="text/javascript"></script>
   </body>
 </html>

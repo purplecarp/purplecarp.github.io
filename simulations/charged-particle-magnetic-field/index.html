@@ -11,169 +11,83 @@
     <link href="../../css/normalize.css" rel="stylesheet">
     <link href="../../css/style.css" rel="stylesheet">
     <link href="../../css/responsive.css" rel="stylesheet">
+    <link href="../../css/simulations.css" rel="stylesheet">
     
-    <style>
-        body {
-            font-family: 'Roboto', sans-serif;
-            background: #f5f5f5;
-        }
-        
-        .simulation-container {
-            max-width: 1200px;
-            margin: 40px auto;
-            padding: 20px;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        .simulation-title {
-            text-align: center;
-            color: #333;
-            margin-bottom: 30px;
-            padding-bottom: 15px;
-            border-bottom: 2px solid #818181;
-        }
-        
-        .canvas-container {
-            display: flex;
-            justify-content: center;
-            margin: 20px 0;
-            background: #000;
-            border-radius: 5px;
-            padding: 10px;
-        }
-        
-        #simulationCanvas {
-            border: 2px solid #818181;
-            background: #000;
-            cursor: crosshair;
-        }
-        
-        .controls-panel {
-            background: #f9f9f9;
-            padding: 20px;
-            border-radius: 5px;
-            margin: 20px 0;
-        }
-        
-        .control-group {
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .control-group label {
-            min-width: 180px;
-            font-weight: 500;
-            color: #555;
-        }
-        
-        .control-group input[type="range"] {
-            flex: 1;
-            max-width: 300px;
-        }
-        
-        .control-group input[type="number"] {
-            width: 100px;
-            padding: 5px 10px;
-            border: 1px solid #ddd;
-            border-radius: 3px;
-        }
-        
-        .control-group .value-display {
-            min-width: 80px;
-            text-align: right;
-            font-weight: bold;
-            color: #818181;
-        }
-        
-        .button-group {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            margin: 20px 0;
-        }
-        
-        .btn-sim {
-            padding: 10px 25px;
-            border: none;
-            border-radius: 5px;
-            font-size: 14px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-start {
-            background: #4CAF50;
-            color: white;
-        }
-        
-        .btn-start:hover {
-            background: #45a049;
-        }
-        
-        .btn-pause {
-            background: #ff9800;
-            color: white;
-        }
-        
-        .btn-pause:hover {
-            background: #e68900;
-        }
-        
-        .btn-reset {
-            background: #f44336;
-            color: white;
-        }
-        
-        .btn-reset:hover {
-            background: #da190b;
-        }
-        
-        .btn-back {
-            background: #818181;
-            color: white;
-        }
-        
-        .btn-back:hover {
-            background: #2f2f2f;
-        }
-        
-        .info-panel {
-            background: #e3f2fd;
-            padding: 15px;
-            border-radius: 5px;
-            margin: 20px 0;
-            border-left: 4px solid #2196F3;
-        }
-        
-        .info-panel h4 {
-            margin-top: 0;
-            color: #1976D2;
-        }
-        
-        .info-panel p {
-            margin: 5px 0;
-            color: #555;
-        }
-        
-        .formula {
-            background: #fff;
-            padding: 10px;
-            border-radius: 3px;
-            font-family: 'Courier New', monospace;
-            margin: 10px 0;
-        }
-    </style>
+    <link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Roboto:400,300,500,700' rel='stylesheet' type='text/css'>
 </head>
 <body>
-    <div class="simulation-container">
-        <h1 class="simulation-title">帶電粒子在磁場中的運動模擬</h1>
+    <!--HEADER -->
+    <div class="header">
+      <div class="for-sticky">
+        <!--LOGO-->
+        <div class="col-md-2 col-xs-6 logo">
+          <a href="../../index.html"><img alt="logo" class="logo-nav" src="../../images/fish.png"></a>
+        </div>
+        <!--/.LOGO END-->
+      </div>
+      <div class="menu-wrap">
+        <nav class="menu">
+          <div class="menu-list">
+            <a href="../../index.html#home">
+              <span>首頁</span>
+            </a>
+            <a href="../../index.html#about">
+              <span>關於我</span>
+            </a>
+            <a href="../../index.html#experience">
+              <span>教學經驗</span>
+            </a>
+            <a href="../../teaching-gallery.html">
+              <span>查看教學剪影</span>
+            </a>
+            <a href="../../physics-simulations.html" class="active">
+              <span>高中物理內容</span>
+            </a>
+            <a href="../../index.html#skills">
+              <span>專業技能</span>
+            </a>
+            <a href="../../index.html#achievements">
+              <span>成果展示</span>
+            </a>
+            <a href="../../index.html#philosophy">
+              <span>教育理念</span>
+            </a>
+            <a href="../../index.html#contact">
+              <span>聯絡方式</span>
+            </a>
+          </div>
+        </nav>
+        <button class="close-button" id="close-button">Close Menu</button>
+      </div>
+      <button class="menu-button" id="open-button">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button><!--/.for-sticky-->
+    </div>
+    <!--/.HEADER END-->
+    
+    <!-- 頂部導航欄 -->
+    <div class="top-nav">
+        <div class="container">
+            <a href="../../index.html" class="nav-brand">
+                <img src="../../images/fish.png" alt="Logo">
+                <h2>物理魚教學模擬</h2>
+            </a>
+            <a href="../../physics-simulations.html" class="btn-back">← 返回目錄</a>
+        </div>
+    </div>
+    
+    <!-- 主容器 -->
+    <div class="main-container">
+        <!-- 頁面標題 -->
+        <div class="page-header">
+            <h1>帶電粒子在磁場中的運動模擬</h1>
+            <p class="subtitle">探索帶電粒子在均勻磁場中的運動軌跡與物理特性</p>
+        </div>
         
-        <div class="info-panel">
+        <div class="info-box physics-principle">
             <h4>📚 物理原理</h4>
             <p><strong>勞倫茲力：</strong>當帶電粒子以速度 v 進入磁場 B 時，會受到垂直於速度和磁場的勞倫茲力。</p>
             <div class="formula">F = q(v × B) = qvB sin(θ)</div>
@@ -181,27 +95,32 @@
             <p><strong>螺旋運動：</strong>當 v 與 B 有夾角時，粒子做螺旋運動</p>
         </div>
         
-        <div class="canvas-container">
-            <canvas id="simulationCanvas" width="2400" height="1800" style="width: 1200px; height: 900px;"></canvas>
+        <!-- 模擬區域 -->
+        <div class="simulation-section">
+            <div class="canvas-wrapper">
+                <canvas id="simulationCanvas" width="2400" height="1800" style="width: 1200px; height: 900px;"></canvas>
+            </div>
         </div>
         
+        <!-- 按鈕控制 -->
         <div class="button-group">
-            <button class="btn-sim btn-start" id="startBtn">▶ 開始</button>
-            <button class="btn-sim btn-pause" id="pauseBtn">⏸ 暫停</button>
-            <button class="btn-sim btn-reset" id="resetBtn">🔄 重置</button>
-            <button class="btn-sim btn-back" onclick="window.location.href='../../physics-simulations.html'">← 返回</button>
+            <button class="btn btn-start" id="startBtn">▶ 開始</button>
+            <button class="btn btn-pause" id="pauseBtn">⏸ 暫停</button>
+            <button class="btn btn-reset" id="resetBtn">🔄 重置</button>
         </div>
         
-        <div class="controls-panel">
-            <h3 style="margin-top: 0; color: #333;">參數控制</h3>
+        <!-- 控制面板 -->
+        <div class="controls">
+            <div class="control-section">
+                <h3>參數控制</h3>
             
-            <div class="control-group">
+            <div class="control-row">
                 <label>磁場強度 B (T):</label>
                 <input type="range" id="magneticField" min="0.1" max="5" step="0.1" value="1">
                 <span class="value-display" id="bValue">1.0 T</span>
             </div>
             
-            <div class="control-group">
+            <div class="control-row">
                 <label>磁場方向:</label>
                 <select id="magneticDirection" style="padding: 5px 10px; border: 1px solid #ddd; border-radius: 3px;">
                     <option value="out">⊙ 指向螢幕外</option>
@@ -209,31 +128,31 @@
                 </select>
             </div>
             
-            <div class="control-group">
+            <div class="control-row">
                 <label>粒子電荷 q (×10⁻¹⁹ C):</label>
                 <input type="range" id="charge" min="-5" max="5" step="0.5" value="1.6">
                 <span class="value-display" id="qValue">1.6</span>
             </div>
             
-            <div class="control-group">
+            <div class="control-row">
                 <label>粒子質量 m (×10⁻²⁷ kg):</label>
                 <input type="range" id="mass" min="0.5" max="10" step="0.5" value="1.67">
                 <span class="value-display" id="mValue">1.67</span>
             </div>
             
-            <div class="control-group">
+            <div class="control-row">
                 <label>初速度 v (×10⁶ m/s):</label>
                 <input type="range" id="velocity" min="0.5" max="10" step="0.5" value="5">
                 <span class="value-display" id="vValue">5.0</span>
             </div>
             
-            <div class="control-group">
+            <div class="control-row">
                 <label>速度方向角度 (度):</label>
                 <input type="range" id="angle" min="0" max="180" step="5" value="90">
                 <span class="value-display" id="angleValue">90°</span>
             </div>
             
-            <div class="control-group">
+            <div class="control-row">
                 <label>初始位置:</label>
                 <select id="initialPosition" style="padding: 5px 10px; border: 1px solid #ddd; border-radius: 3px;">
                     <option value="right">右側</option>
@@ -243,44 +162,52 @@
                 </select>
             </div>
             
-            <div class="control-group">
+            <div class="control-row">
                 <label>播放速度:</label>
                 <input type="range" id="playbackSpeed" min="0.1" max="5" step="0.1" value="1">
                 <span class="value-display" id="speedValue">1.0x</span>
             </div>
             
-            <div class="control-group">
+            <div class="control-row">
                 <label>顯示軌跡:</label>
                 <input type="checkbox" id="showTrail" checked>
             </div>
+            </div>
         </div>
         
-        <div class="controls-panel" style="background: #e8f5e9; border-left: 4px solid #4caf50;">
-            <h4 style="margin-top: 0; color: #2e7d32;">📊 即時數據</h4>
-            <div class="control-group">
+        <!-- 即時數據顯示 -->
+        <div class="info-box real-time-data">
+            <h4>📊 即時數據</h4>
+            <div class="control-row">
                 <label>當前速度:</label>
-                <span class="value-display" id="currentSpeed" style="color: #2e7d32; font-size: 16px;">0.000 × 10⁶ m/s</span>
+                <span class="value-display" id="currentSpeed">0.000 × 10⁶ m/s</span>
             </div>
-            <div class="control-group">
+            <div class="control-row">
                 <label>理論半徑 r = mv/(qB):</label>
-                <span class="value-display" id="currentRadius" style="color: #2e7d32; font-size: 16px;">0.000 m</span>
+                <span class="value-display" id="currentRadius">0.000 m</span>
             </div>
-            <div class="control-group">
+            <div class="control-row">
                 <label>粒子電荷:</label>
-                <span class="value-display" id="currentCharge" style="color: #2e7d32; font-size: 16px;">+1.6 × 10⁻¹⁹ C</span>
+                <span class="value-display" id="currentCharge">+1.6 × 10⁻¹⁹ C</span>
             </div>
-            <div class="control-group">
+            <div class="control-row">
                 <label>向量圖例:</label>
                 <span style="color: #ffd700; font-weight: bold;">━━► 速度 v</span>
                 <span style="color: #fff; background: #333; padding: 2px 8px; margin-left: 15px; border-radius: 3px; font-weight: bold;">━━► 向心力 F = q(v × B)</span>
             </div>
         </div>
         
-        <div class="info-panel" style="background: #fff3cd; border-left-color: #ffc107;">
+        <!-- 使用說明 -->
+        <div class="info-box teaching-note">
             <h4>🎯 使用說明</h4>
-            <p>• 調整參數後按「開始」觀察粒子運動軌跡</p>
-            <p>• 正電荷（紅色）和負電荷（藍色）會以相反方向偏轉</p>
-            <p>• 速度方向角度 90° 為垂直磁場，會做圓周運動</p>
+            <p>
+                • <strong>開始模擬：</strong>調整參數後按「開始」觀察粒子運動軌跡<br>
+                • <strong>電荷符號：</strong>正電荷（紅色 +）和負電荷（藍色 −）會以相反方向偏轉<br>
+                • <strong>圓周運動：</strong>速度方向角度 90° 為垂直磁場，粒子做等速率圓周運動<br>
+                • <strong>向量意義：</strong><span style="color: #ffd700; font-weight: bold;">黃色箭頭</span> 為速度向量 v，<span style="color: #fff; background: #555; padding: 2px 6px; border-radius: 3px;">白色箭頭</span> 為向心力 F = q(v × B)<br>
+                • <strong>參數調整：</strong>可即時調整磁場強度、粒子質量、電荷量等參數，觀察運動變化<br>
+                • <strong>軌跡顯示：</strong>勾選「顯示軌跡」可看見粒子的完整運動路徑
+            </p>
         </div>
     </div>
     
@@ -680,5 +607,10 @@
             simulation = new MagneticFieldSimulation('simulationCanvas');
         });
     </script>
+    
+    <!-- Navigation Scripts -->
+    <script src="../../js/jquery-1.9.1.min.js"></script>
+    <script src="../../js/classie.js"></script>
+    <script src="../../js/main.js"></script>
 </body>
 </html>
