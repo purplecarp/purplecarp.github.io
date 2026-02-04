@@ -51,12 +51,21 @@
         
         .canvas-wrapper {
             display: flex;
-            justify-content: center;
+            flex-direction: column;
+            align-items: center;
             margin: 25px 0;
             background: #000;
             border-radius: 10px;
             padding: 15px;
             box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+        }
+        
+        #intensityCanvas {
+            border: 2px solid #ff6b6b;
+            border-radius: 5px;
+            background: #1a1a1a;
+            margin-bottom: 15px;
+            display: block;
         }
         
         #waveCanvas {
@@ -372,19 +381,15 @@
         
         <div class="info-box">
             <h4>📚 物理原理</h4>
-            <p><strong>波動方程（每個波源）：</strong></p>
-            <div class="formula">h(x,y,t) = A · sin(2π/λ · r - 2π·f·t + φ)</div>
-            <p><strong>總振幅（多波源疊加）：</strong></p>
-            <div class="formula">H(x,y,t) = Σ h<sub>i</sub>(x,y,t)</div>
-            <p>
-                • <strong>建設性干涉：</strong>兩波同相位疊加，振幅增強（明亮區域）<br>
-                • <strong>破壞性干涉：</strong>兩波反相位疊加，振幅相消（暗淡區域）<br>
-                • <strong>干涉條紋：</strong>由路徑差產生的穩定亮暗條紋圖案<br>
-                • <strong>波速關係：</strong>v = f·λ（波速 = 頻率 × 波長）
+                • <strong>建設性干涉：</strong>兩波同相位疊加，振幅增強<br>
+                • <strong>破壞性干涉：</strong>兩波反相位疊加，振幅相消<br>
+                • <strong>干涉條紋：</strong>觀察強度分布，特定位置的合成波振福始終為0，該處即為節點(位於節線)<br>
+                • <strong>腹線與節線數目關係：</strong>波長與點波源間距均會影響腹線與節線數目
             </p>
         </div>
         
         <div class="canvas-wrapper">
+            <canvas id="intensityCanvas" width="900" height="150"></canvas>
             <canvas id="waveCanvas" width="900" height="600"></canvas>
         </div>
         
@@ -430,6 +435,12 @@
                 </div>
                 
                 <div class="control-row">
+                    <label>切面位置 (y)</label>
+                    <input type="range" id="slicePositionSlider" min="50" max="550" step="10" value="300">
+                    <span class="value-display" id="slicePositionValue">300 px</span>
+                </div>
+                
+                <div class="control-row">
                     <label>動畫速度</label>
                     <input type="range" id="speedSlider" min="0.2" max="3" step="0.2" value="1">
                     <span class="value-display" id="speedValue">1.0x</span>
@@ -441,8 +452,12 @@
                         <div class="wave-info-value" id="currentWavelength">30 px</div>
                     </div>
                     <div class="wave-info-item">
-                        <div class="wave-info-label">波源間距 (d)</div>
-                        <div class="wave-info-value" id="currentSpacing">150 px</div>
+                        <div class="wave-info-label">切面位置</div>
+                        <div class="wave-info-value" id="currentSlicePosition">300 px</div>
+                    </div>
+                    <div class="wave-info-item">
+                        <div class="wave-info-label">距離波源</div>
+                        <div class="wave-info-value" id="distanceToSource">250 px</div>
                     </div>
                     <div class="wave-info-item">
                         <div class="wave-info-label">d/λ 比值</div>
@@ -455,8 +470,9 @@
         <div class="info-box" style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);">
             <h4>💡 使用說明</h4>
             <p>
-                • <strong>波源位置：</strong>兩個波源位於畫布底部，向上傳播產生干涉圖案<br>
-                • <strong>調整波長：</strong>波長越長，干涉條紋越寬，波的傳播距離越遠<br>
+                • <strong>波源位置：</strong>兩個波源位於水波槽底部，向上傳播產生干涉圖案<br>
+                • <strong>調整切面：</strong>移動紅色虛線位置，觀察不同位置的波強度分布<br>
+                • <strong>強度圖表：</strong>上方綠色折線顯示切面上每個點的絕對振幅強度<br>
                 • <strong>調整間距：</strong>間距越大，干涉條紋越密集；d/λ 比值決定條紋數量<br>
                 • <strong>觀察干涉：</strong>明亮區域表示建設性干涉，暗淡區域表示破壞性干涉<br>
                 • <strong>顏色含義：</strong>
@@ -475,12 +491,19 @@
                 this.width = this.canvas.width;
                 this.height = this.canvas.height;
                 
+                // 強度圖canvas
+                this.intensityCanvas = document.getElementById('intensityCanvas');
+                this.intensityCtx = this.intensityCanvas.getContext('2d');
+                this.intensityWidth = this.intensityCanvas.width;
+                this.intensityHeight = this.intensityCanvas.height;
+                
                 // 物理參數
                 this.wavelength = 30;    // 波長（像素）
                 this.frequency = 1.5;    // 頻率（Hz）- 固定值
                 this.amplitude = 50;     // 振幅 - 固定值
                 this.speed = 1.0;        // 動畫速度倍率
                 this.spacingDistance = 150; // 波源間距（像素）
+                this.slicePosition = 300;   // 切面位置（y座標）
                 
                 // 波源配置
                 this.sources = [];
@@ -538,6 +561,13 @@
                     this.updateInfo();
                 });
                 
+                // 切面位置控制
+                document.getElementById('slicePositionSlider').addEventListener('input', (e) => {
+                    this.slicePosition = parseFloat(e.target.value);
+                    document.getElementById('slicePositionValue').textContent = this.slicePosition.toFixed(0) + ' px';
+                    this.updateInfo();
+                });
+                
                 // 速度控制
                 document.getElementById('speedSlider').addEventListener('input', (e) => {
                     this.speed = parseFloat(e.target.value);
@@ -562,7 +592,12 @@
             
             updateInfo() {
                 document.getElementById('currentWavelength').textContent = this.wavelength.toFixed(0) + ' px';
-                document.getElementById('currentSpacing').textContent = this.spacingDistance.toFixed(0) + ' px';
+                document.getElementById('currentSlicePosition').textContent = this.slicePosition.toFixed(0) + ' px';
+                
+                // 計算切面到波源的距離
+                const sourceY = this.sources[0].y;
+                const distanceToSource = Math.abs(sourceY - this.slicePosition);
+                document.getElementById('distanceToSource').textContent = distanceToSource.toFixed(0) + ' px';
                 
                 const ratio = this.spacingDistance / this.wavelength;
                 document.getElementById('spacingRatio').textContent = ratio.toFixed(1);
@@ -684,7 +719,9 @@
                 }
                 
                 this.ctx.putImageData(this.imageData, 0, 0);
+                this.drawSliceLine();
                 this.drawSources();
+                this.drawIntensityGraph();
             }
             
             drawStatic() {
@@ -693,6 +730,88 @@
                 this.time = 0;
                 this.render();
                 this.time = savedTime;
+            }
+            
+            drawSliceLine() {
+                // 繪製切面線
+                this.ctx.strokeStyle = '#ff6b6b';
+                this.ctx.lineWidth = 3;
+                this.ctx.setLineDash([10, 5]);
+                this.ctx.beginPath();
+                this.ctx.moveTo(0, this.slicePosition);
+                this.ctx.lineTo(this.width, this.slicePosition);
+                this.ctx.stroke();
+                this.ctx.setLineDash([]);
+                
+                // 標籤
+                this.ctx.fillStyle = '#ff6b6b';
+                this.ctx.font = 'bold 14px Arial';
+                this.ctx.textAlign = 'right';
+                this.ctx.shadowColor = '#000';
+                this.ctx.shadowBlur = 3;
+                this.ctx.fillText(`切面 y=${this.slicePosition.toFixed(0)}`, this.width - 10, this.slicePosition - 10);
+                this.ctx.shadowBlur = 0;
+            }
+            
+            drawIntensityGraph() {
+                // 清除強度圖canvas
+                this.intensityCtx.fillStyle = '#1a1a1a';
+                this.intensityCtx.fillRect(0, 0, this.intensityWidth, this.intensityHeight);
+                
+                // 繪製網格
+                this.intensityCtx.strokeStyle = '#333';
+                this.intensityCtx.lineWidth = 1;
+                for (let i = 0; i <= 5; i++) {
+                    const y = (this.intensityHeight / 5) * i;
+                    this.intensityCtx.beginPath();
+                    this.intensityCtx.moveTo(0, y);
+                    this.intensityCtx.lineTo(this.intensityWidth, y);
+                    this.intensityCtx.stroke();
+                }
+                
+                // 計算切面上每個點的強度
+                const intensities = [];
+                let maxIntensity = 0;
+                
+                for (let x = 0; x < this.width; x++) {
+                    const height = this.calculateWaveHeight(x, this.slicePosition);
+                    const intensity = Math.abs(height);
+                    intensities.push(intensity);
+                    maxIntensity = Math.max(maxIntensity, intensity);
+                }
+                
+                // 歸一化並繪製折線圖
+                this.intensityCtx.beginPath();
+                this.intensityCtx.strokeStyle = '#00ff88';
+                this.intensityCtx.lineWidth = 2;
+                
+                for (let x = 0; x < this.width; x++) {
+                    const normalizedIntensity = maxIntensity > 0 ? intensities[x] / maxIntensity : 0;
+                    const graphX = (x / this.width) * this.intensityWidth;
+                    const graphY = this.intensityHeight - (normalizedIntensity * this.intensityHeight * 0.9);
+                    
+                    if (x === 0) {
+                        this.intensityCtx.moveTo(graphX, graphY);
+                    } else {
+                        this.intensityCtx.lineTo(graphX, graphY);
+                    }
+                }
+                this.intensityCtx.stroke();
+                
+                // 填充區域
+                this.intensityCtx.lineTo(this.intensityWidth, this.intensityHeight);
+                this.intensityCtx.lineTo(0, this.intensityHeight);
+                this.intensityCtx.closePath();
+                this.intensityCtx.fillStyle = 'rgba(0, 255, 136, 0.2)';
+                this.intensityCtx.fill();
+                
+                // 繪製標籤
+                this.intensityCtx.fillStyle = '#fff';
+                this.intensityCtx.font = 'bold 12px Arial';
+                this.intensityCtx.textAlign = 'left';
+                this.intensityCtx.fillText('強度分布', 10, 20);
+                this.intensityCtx.textAlign = 'right';
+                this.intensityCtx.fillText(`Max: ${maxIntensity.toFixed(1)}`, this.intensityWidth - 10, 20);
             }
             
             drawSources() {
