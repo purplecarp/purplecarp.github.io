@@ -190,7 +190,7 @@
                 • <strong>調整波長：</strong>波長越短，干涉條紋越密集；可觀察波長對圖案的影響<br>
                 • <strong>調整間距：</strong>改變兩波源間距離，觀察干涉條紋數量與分布的變化<br>
                 • <strong>切面分析：</strong>紅色虛線代表觀察切面，可上下移動查看不同位置的波強度<br>
-                • <strong>強度圖表：</strong>上方綠色曲線顯示切面上的絕對振幅強度分布<br>
+                • <strong>強度圖表：</strong>上方綠色曲線顯示切面上的時間累計平均功率分布（∝ ⟨A²⟩）<br>
                 • <strong>d/λ 比值：</strong>此比值越大，干涉條紋數量越多<br>
                 • <strong>顏色編碼：</strong>
                 <span style="color: #e74c3c; font-weight: bold;">紅黃</span> = 波峰（正振幅），
@@ -236,6 +236,10 @@
                 // 波前追蹤（用於顯示波的擴散範圍）
                 this.showWavefront = true;
                 
+                // 時間累計平均功率
+                this.powerAccumulator = new Float64Array(this.width);
+                this.powerFrameCount = 0;
+                
                 this.init();
             }
             
@@ -266,6 +270,8 @@
                     document.getElementById('spacingValue').textContent = this.spacingDistance + ' px';
                     this.setupSources();
                     this.updateInfo();
+                    this.powerAccumulator.fill(0);
+                    this.powerFrameCount = 0;
                     if (!this.isRunning) {
                         this.drawStatic();
                     }
@@ -275,6 +281,8 @@
                 document.getElementById('wavelengthSlider').addEventListener('input', (e) => {
                     this.wavelength = parseFloat(e.target.value);
                     document.getElementById('wavelengthValue').textContent = this.wavelength + ' px';
+                    this.powerAccumulator.fill(0);
+                    this.powerFrameCount = 0;
                     this.updateInfo();
                 });
                 
@@ -282,6 +290,8 @@
                 document.getElementById('slicePositionSlider').addEventListener('input', (e) => {
                     this.slicePosition = parseFloat(e.target.value);
                     document.getElementById('slicePositionValue').textContent = this.slicePosition.toFixed(0) + ' px';
+                    this.powerAccumulator.fill(0);
+                    this.powerFrameCount = 0;
                     this.updateInfo();
                 });
                 
@@ -336,6 +346,8 @@
             reset() {
                 this.pause();
                 this.time = 0;
+                this.powerAccumulator.fill(0);
+                this.powerFrameCount = 0;
                 this.drawStatic();
             }
             
@@ -438,6 +450,7 @@
                 this.ctx.putImageData(this.imageData, 0, 0);
                 this.drawSliceLine();
                 this.drawSources();
+                this.accumulatePower();
                 this.drawIntensityGraph();
             }
             
@@ -470,6 +483,14 @@
                 this.ctx.shadowBlur = 0;
             }
             
+            accumulatePower() {
+                for (let x = 0; x < this.width; x++) {
+                    const height = this.calculateWaveHeight(x, this.slicePosition);
+                    this.powerAccumulator[x] += height * height;
+                }
+                this.powerFrameCount++;
+            }
+            
             drawIntensityGraph() {
                 // 清除強度圖canvas
                 this.intensityCtx.fillStyle = '#1a1a1a';
@@ -486,15 +507,14 @@
                     this.intensityCtx.stroke();
                 }
                 
-                // 計算切面上每個點的強度
-                const intensities = [];
-                let maxIntensity = 0;
+                // 計算時間累計平均功率
+                const avgPowers = [];
+                let maxPower = 0;
                 
                 for (let x = 0; x < this.width; x++) {
-                    const height = this.calculateWaveHeight(x, this.slicePosition);
-                    const intensity = Math.abs(height);
-                    intensities.push(intensity);
-                    maxIntensity = Math.max(maxIntensity, intensity);
+                    const avgP = this.powerFrameCount > 0 ? this.powerAccumulator[x] / this.powerFrameCount : 0;
+                    avgPowers.push(avgP);
+                    maxPower = Math.max(maxPower, avgP);
                 }
                 
                 // 歸一化並繪製折線圖
@@ -503,9 +523,9 @@
                 this.intensityCtx.lineWidth = 2;
                 
                 for (let x = 0; x < this.width; x++) {
-                    const normalizedIntensity = maxIntensity > 0 ? intensities[x] / maxIntensity : 0;
+                    const normalizedPower = maxPower > 0 ? avgPowers[x] / maxPower : 0;
                     const graphX = (x / this.width) * this.intensityWidth;
-                    const graphY = this.intensityHeight - (normalizedIntensity * this.intensityHeight * 0.9);
+                    const graphY = this.intensityHeight - (normalizedPower * this.intensityHeight * 0.9);
                     
                     if (x === 0) {
                         this.intensityCtx.moveTo(graphX, graphY);
@@ -526,9 +546,9 @@
                 this.intensityCtx.fillStyle = '#fff';
                 this.intensityCtx.font = 'bold 12px Arial';
                 this.intensityCtx.textAlign = 'left';
-                this.intensityCtx.fillText('強度分布', 10, 20);
+                this.intensityCtx.fillText(`平均功率分布（累計 ${this.powerFrameCount} 幀）`, 10, 20);
                 this.intensityCtx.textAlign = 'right';
-                this.intensityCtx.fillText(`Max: ${maxIntensity.toFixed(1)}`, this.intensityWidth - 10, 20);
+                this.intensityCtx.fillText(`Max: ${maxPower.toFixed(1)}`, this.intensityWidth - 10, 20);
             }
             
             drawSources() {

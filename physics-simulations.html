@@ -21,96 +21,198 @@
     <link href="css/responsive.css" rel="stylesheet">
     
     <style>
+      /* 模擬連結按鈕 */
       .simulation-link {
-        margin-left: 10px;
-        color: #27ae60;
-        text-decoration: none;
+        display: inline-block;
+        margin-left: 8px;
+        padding: 3px 12px;
+        background: #27ae60;
+        color: #fff !important;
+        text-decoration: none !important;
+        border-radius: 15px;
+        font-size: 12px;
         font-weight: 500;
-        transition: color 0.3s ease;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+        vertical-align: middle;
       }
-      
       .simulation-link:hover {
-        color: #1e8449;
-        text-decoration: none;
+        background: #1e8449;
+        transform: translateY(-1px);
+        box-shadow: 0 3px 8px rgba(39, 174, 96, 0.3);
       }
-      
+
+      /* 物理主題卡片 */
       .physics-section {
         background: #fff;
         border: 1px solid #eee;
-        padding: 25px;
+        padding: 30px;
         margin-bottom: 20px;
-        border-radius: 5px;
+        border-radius: 8px;
         box-shadow: 0 2px 5px rgba(0,0,0,0.05);
         transition: transform 0.2s ease, box-shadow 0.2s ease;
+        position: relative;
+        overflow: hidden;
       }
-      
+      .physics-section::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 4px;
+        height: 100%;
+        border-radius: 8px 0 0 8px;
+      }
+      .physics-section:nth-child(1) .physics-section::before,
+      .row:nth-child(1) .physics-section::before { background: #3498db; }
+      .row:nth-child(2) .physics-section::before { background: #e67e22; }
+      .row:nth-child(3) .physics-section::before { background: #9b59b6; }
+      .row:nth-child(4) .physics-section::before { background: #e74c3c; }
+      .row:nth-child(5) .physics-section::before { background: #1abc9c; }
+
       .physics-section:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        transform: translateY(-3px);
+        box-shadow: 0 6px 18px rgba(0,0,0,0.1);
       }
-      
       .physics-section h4 {
         margin-top: 0;
         color: #2c3e50;
         font-family: 'Roboto Slab', serif;
         font-weight: 700;
-        border-bottom: 3px solid #3498db;
-        padding-bottom: 10px;
-        margin-bottom: 15px;
+        padding-bottom: 12px;
+        margin-bottom: 18px;
+        border-bottom: none;
+        display: flex;
+        align-items: center;
+        gap: 12px;
       }
-      
+      .physics-section h4 .section-badge {
+        display: inline-block;
+        padding: 4px 12px;
+        border-radius: 15px;
+        font-size: 11px;
+        font-weight: 600;
+        color: #fff;
+        letter-spacing: 0.5px;
+        flex-shrink: 0;
+      }
+      .badge-1 { background: #3498db; }
+      .badge-2 { background: #e67e22; }
+      .badge-3 { background: #9b59b6; }
+      .badge-4 { background: #e74c3c; }
+      .badge-5 { background: #1abc9c; }
+
       .physics-section ul {
         margin: 0;
         color: #555;
-        padding-left: 20px;
-        line-height: 1.8;
+        padding-left: 22px;
+        line-height: 2;
       }
-      
       .physics-section ul li {
-        margin-bottom: 8px;
+        margin-bottom: 6px;
+        font-size: 15px;
       }
-      
-      .page-title {
-        color: #2c3e50;
-        font-family: 'Roboto Slab', serif;
-        font-weight: 700;
-        margin-bottom: 15px;
-      }
-      
-      .page-description {
-        color: #7f8c8d;
-        font-size: 16px;
-        margin-bottom: 40px;
-      }
-      
+
       /* 頁面標題區域 */
       .page-header-section {
         text-align: center;
         margin-bottom: 40px;
-        padding: 40px 30px;
-        background: #fff;
-        border-radius: 8px;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        padding: 50px 30px 40px;
+        background: linear-gradient(135deg, #fff 0%, #f8f9fa 100%);
+        border-radius: 12px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.06);
+        border: 1px solid #eee;
       }
-      
       .page-header-section h2 {
         color: #2c3e50;
         margin: 0 0 15px 0;
-        font-size: 42px;
+        font-size: 38px;
         font-family: 'Roboto Slab', serif;
         font-weight: 700;
       }
-      
       .page-header-section .subtitle {
         color: #7f8c8d;
-        font-size: 18px;
+        font-size: 16px;
         line-height: 1.6;
-        margin: 0;
+        margin: 0 0 20px;
       }
-      
+      .page-header-section .legend {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-top: 10px;
+      }
+      .page-header-section .legend span {
+        font-size: 12px;
+        padding: 4px 14px;
+        border-radius: 15px;
+        color: #fff;
+        font-weight: 500;
+      }
+
+      /* 模擬互動區塊 */
+      .simulations-highlight {
+        background: linear-gradient(135deg, #f0faf4 0%, #e8f8f0 100%);
+        border: 1px solid #c3e6cb;
+        border-radius: 10px;
+        padding: 25px 30px;
+        margin-bottom: 30px;
+        text-align: center;
+      }
+      .simulations-highlight h3 {
+        font-size: 18px;
+        color: #27ae60;
+        margin: 0 0 10px;
+        font-family: 'Roboto Slab', serif;
+      }
+      .simulations-highlight p {
+        font-size: 14px;
+        color: #666;
+        margin: 0 0 18px;
+        line-height: 1.6;
+      }
+      .simulations-highlight .sim-cards {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        flex-wrap: wrap;
+      }
+      .sim-card {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 22px;
+        background: #fff;
+        border: 1px solid #c3e6cb;
+        border-radius: 8px;
+        color: #2c3e50;
+        text-decoration: none !important;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+      }
+      .sim-card:hover {
+        background: #27ae60;
+        color: #fff !important;
+        border-color: #27ae60;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(39,174,96,0.25);
+      }
+      .sim-card .sim-icon {
+        font-size: 20px;
+      }
+
       /* 內容區域 */
-      .content-section {
-        margin-top: 0;
+      .content-section { margin-top: 0; }
+
+      @media (max-width: 768px) {
+        .page-header-section { padding: 30px 20px 25px; }
+        .page-header-section h2 { font-size: 28px; }
+        .physics-section { padding: 22px 18px; }
+        .physics-section h4 { flex-wrap: wrap; font-size: 16px; }
+        .simulations-highlight .sim-cards { flex-direction: column; align-items: center; }
+        .sim-card { width: 100%; max-width: 280px; justify-content: center; }
       }
     </style>
     
@@ -150,22 +252,19 @@
               <span>關於我</span>
             </a>
             <a data-scroll="" href="index.html#experience">
-              <span>教學經驗</span>
-            </a>
-            <a href="teaching-gallery.html">
-              <span>查看教學剪影</span>
+              <span>教學經歷</span>
             </a>
             <a href="physics-simulations.html" class="active">
               <span>高中物理內容</span>
+            </a>
+            <a href="teaching-gallery.html">
+              <span>教學剪影</span>
             </a>
             <a data-scroll="" href="index.html#skills">
               <span>專業技能</span>
             </a>
             <a data-scroll="" href="index.html#achievements">
               <span>成果展示</span>
-            </a>
-            <a data-scroll="" href="index.html#philosophy">
-              <span>教育理念</span>
             </a>
             <a data-scroll="" href="index.html#contact">
               <span>聯絡方式</span>
@@ -193,8 +292,15 @@
               <div class="col-md-10 col-md-offset-1">
                 <!-- 頁面標題區域 -->
                 <div class="page-header-section">
-                  <h2>高中物理內容</h2>
-                  <p class="subtitle">依「選修物理 I～V」整理高中物理主題索引，包含教學模擬程式</p>
+                  <h2>📖 高中物理內容</h2>
+                  <p class="subtitle">依「選修物理 I～V」整理高中物理主題索引，點擊模擬連結可進行互動式學習</p>
+                  <div class="legend">
+                    <span class="badge-1">選修物理 1 ─ 力學</span>
+                    <span class="badge-2">選修物理 2 ─ 熱學</span>
+                    <span class="badge-3">選修物理 3 ─ 波動與光學</span>
+                    <span class="badge-4">選修物理 4 ─ 電磁學</span>
+                    <span class="badge-5">選修物理 5 ─ 近代物理</span>
+                  </div>
                 </div>
 
                 <!-- 內容區域 -->
@@ -202,7 +308,10 @@
                   <div class="row">
                     <div class="col-md-12">
                       <div class="physics-section">
-                        <h4>選修物理 1</h4>
+                        <h4>
+                          <span class="section-badge badge-1">選修 I</span>
+                          力學
+                        </h4>
                         <ul>
                           <li>運動學（直線、平面、相對運動）</li>
                           <li>牛頓運動定律與受力分析</li>
@@ -210,7 +319,7 @@
                           <li>動量、碰撞、質心</li>
                           <li>圓周運動與萬有引力</li>
                           <li>剛體轉動（轉動動力學、轉動能）</li>
-                          <li>簡諧運動（彈簧/單擺）</li>
+                          <li>簡諧運動（彈簧／單擺）</li>
                         </ul>
                       </div>
                     </div>
@@ -219,7 +328,10 @@
                   <div class="row">
                     <div class="col-md-12">
                       <div class="physics-section">
-                        <h4>選修物理 2</h4>
+                        <h4>
+                          <span class="section-badge badge-2">選修 II</span>
+                          熱學
+                        </h4>
                         <ul>
                           <li>熱與溫度、熱容量、熱傳遞</li>
                           <li>理想氣體與氣體動力論</li>
@@ -231,13 +343,16 @@
                   <div class="row">
                     <div class="col-md-12">
                       <div class="physics-section">
-                        <h4>選修物理 3</h4>
+                        <h4>
+                          <span class="section-badge badge-3">選修 III</span>
+                          波動與光學
+                        </h4>
                         <ul>
                           <li>幾何光學（成像、透鏡、反射折射）</li>
                           <li>波動光學（干涉、繞射、偏振）</li>
                           <li>
                             波動（波速、疊加、駐波、干涉）
-                            <a href="simulations/water-wave-interference/" class="simulation-link">
+                            <a href="simulations/water-wave-interference/index.html" class="simulation-link">
                               💧 水波干涉模擬
                             </a>
                           </li>
@@ -250,7 +365,10 @@
                   <div class="row">
                     <div class="col-md-12">
                       <div class="physics-section">
-                        <h4>選修物理 4</h4>
+                        <h4>
+                          <span class="section-badge badge-4">選修 IV</span>
+                          電磁學
+                        </h4>
                         <ul>
                           <li>電荷與電場、庫侖定律</li>
                           <li>電勢能與電位、等位面</li>
@@ -258,7 +376,7 @@
                           <li>直流電路（歐姆定律、串並聯、功率）</li>
                           <li>
                             磁場與帶電粒子運動
-                            <a href="simulations/charged-particle-magnetic-field/" class="simulation-link">
+                            <a href="simulations/charged-particle-magnetic-field/index.html" class="simulation-link">
                               ⚡ 帶電粒子模擬
                             </a>
                           </li>
@@ -273,12 +391,15 @@
                   <div class="row">
                     <div class="col-md-12">
                       <div class="physics-section">
-                        <h4>選修物理 5</h4>
+                        <h4>
+                          <span class="section-badge badge-5">選修 V</span>
+                          近代物理
+                        </h4>
                         <ul>
-                          <li>量子概念（光電效應、德布羅意：概念）</li>
+                          <li>量子概念（光電效應、德布羅意波）</li>
                           <li>原子結構與能階（光譜）</li>
-                          <li>核物理（放射性、半衰期：概念）</li>
-                          <li>半導體與現代科技應用（概念）</li>
+                          <li>核物理（放射性、半衰期）</li>
+                          <li>半導體與現代科技應用</li>
                         </ul>
                       </div>
                     </div>
@@ -295,22 +416,22 @@
         <footer>
           <div class="footer-top">
             <ul class="socials">
-              <li class="facebook">
+              <li class="facebook" style="width:25%;">
                 <a href="https://www.facebook.com/profile.php?id=100000406892032" data-hover="Facebook">Facebook</a>
               </li>
-              <li class="instagram">
+              <li class="instagram" style="width:25%;">
                 <a href="https://www.instagram.com/physic.carp/" data-hover="Instagram">Instagram</a>
               </li>
-              <li class="physictool">
-                <a href="physics-tools.html" data-hover="普物實驗小工具(網頁版)">普物實驗小工具(網頁版)</a>
-              </li>
-              <li class="physictool">
+              <li class="physictool" style="width:25%;">
                 <a href="physics-simulations.html" data-hover="高中物理內容">高中物理內容</a>
               </li>
-              <li class="physictool">
-                <a href="https://drive.google.com/file/d/11-np-5bq9sse7b9Eb7KIk0qJ6ilK6iNH/view?usp=drive_link" data-hover="普物實驗小工具(電腦版)">普物實驗小工具(電腦版)</a>
+              <li class="physictool" style="width:25%;">
+                <a href="physics-tools.html" data-hover="普物實驗小工具">普物實驗小工具</a>
               </li>
             </ul>
+          </div>
+          <div class="footer-bottom" style="padding:20px 0; text-align:center;">
+            <p style="font-size:12px; color:#636363; margin:0;">&copy; 2024 李宜閎 ─ 物理教師個人網站</p>
           </div>
         </footer>
         <!--/.FOOTER-END-->

@@ -1157,7 +1157,7 @@ ul.portfolio-image li .desc{
   list-style: outside none none;
   float: left;
   overflow: hidden;
-  width: 33.33333%;
+  width: 25%;
   font-size: 13px;
 }
 
@@ -1309,6 +1309,75 @@ ul.portfolio-image li .desc{
 }
 .skillst .count-bar .count { background-color: #818181;}
 .skillst .count-bar .count span:after { border-top: 4px solid #818181;}
+
+/* -----------------------------------------------------------
+  Teaching Resources Section
+-------------------------------------------------------------*/
+.resource-card {
+  background: #fff;
+  border: 1px solid rgba(129, 129, 129, 0.15);
+  border-radius: 10px;
+  padding: 35px 25px;
+  text-align: center;
+  margin-bottom: 30px;
+  transition: all 0.3s ease;
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.resource-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+  border-color: #818181;
+}
+.resource-icon {
+  font-size: 48px;
+  margin-bottom: 20px;
+  line-height: 1;
+}
+.resource-card h4 {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  color: #2f2f2f;
+  font-family: 'Roboto Slab', serif;
+}
+.resource-card p {
+  font-size: 14px;
+  line-height: 1.7;
+  color: #777;
+  font-weight: 300;
+  margin-bottom: 20px;
+  flex-grow: 1;
+}
+.resource-btn {
+  display: inline-block;
+  padding: 10px 28px;
+  background-color: #818181;
+  color: #fff !important;
+  text-decoration: none !important;
+  border-radius: 25px;
+  font-size: 13px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  transition: all 0.3s ease;
+}
+.resource-btn:hover {
+  background-color: #2f2f2f;
+  transform: translateY(-2px);
+  box-shadow: 0 5px 15px rgba(47, 47, 47, 0.3);
+  color: #fff !important;
+  text-decoration: none !important;
+}
+
+@media (max-width: 768px) {
+  .resource-card {
+    min-height: auto;
+    padding: 25px 20px;
+  }
+}
 
 /* -----------------------------------------------------------
   Teaching Gallery Page Styles
