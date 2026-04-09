@@ -1,0 +1,1008 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8">
+    <title>簡諧運動：彈簧與圓周運動的對應 - 物理模擬</title>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <link href="../../images/fish.png" rel="shortcut icon">
+    
+    <link href="../../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../../css/normalize.css" rel="stylesheet">
+    <link href="../../css/style.css" rel="stylesheet">
+    <link href="../../css/responsive.css" rel="stylesheet">
+    <link href="../../css/simulations.css" rel="stylesheet">
+    
+    <link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Roboto:400,300,500,700' rel='stylesheet' type='text/css'>
+
+    <style>
+        .graphs-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .graph-box {
+            background: #1a1a2e;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+        }
+        .graph-box h5 {
+            color: #ecf0f1;
+            margin: 0 0 6px 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .graph-box canvas {
+            width: 100%;
+            border-radius: 4px;
+            background: #0a0a1a;
+        }
+        #simCanvas {
+            width: 100%;
+            border-radius: 6px;
+            background: #0d1117;
+        }
+        @media (max-width: 768px) {
+            .graphs-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!--HEADER -->
+    <div class="header">
+      <div class="for-sticky">
+        <div class="col-md-2 col-xs-6 logo">
+          <a href="../../index.html"><img alt="logo" class="logo-nav" src="../../images/fish.png"></a>
+        </div>
+      </div>
+      <div class="menu-wrap">
+        <nav class="menu">
+          <div class="menu-list">
+            <a href="../../index.html#home"><span>首頁</span></a>
+            <a href="../../index.html#about"><span>關於我</span></a>
+            <a href="../../index.html#experience"><span>教學經驗</span></a>
+            <a href="../../teaching-gallery.html"><span>查看教學剪影</span></a>
+            <a href="../../physics-simulations.html" class="active"><span>高中物理內容</span></a>
+            <a href="../../index.html#skills"><span>專業技能</span></a>
+            <a href="../../index.html#achievements"><span>成果展示</span></a>
+            <a href="../../index.html#philosophy"><span>教育理念</span></a>
+            <a href="../../index.html#contact"><span>聯絡方式</span></a>
+          </div>
+        </nav>
+        <button class="close-button" id="close-button">Close Menu</button>
+      </div>
+      <button class="menu-button" id="open-button">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <!--/.HEADER END-->
+    
+    <!-- 頂部導航欄 -->
+    <div class="top-nav">
+        <div class="container">
+            <a href="../../index.html" class="nav-brand">
+                <img src="../../images/fish.png" alt="Logo">
+                <h2>物鯉魚教學模擬</h2>
+            </a>
+            <a href="../../physics-simulations.html" class="btn-back">← 返回列表</a>
+        </div>
+    </div>
+    
+    <!-- 主容器 -->
+    <div class="main-container">
+        <!-- 頁面標題 -->
+        <div class="page-header">
+            <h1>🔬 簡諧運動 — 彈簧與圓周運動的對應</h1>
+            <p class="subtitle">觀察水平彈簧的簡諧運動與等速圓周運動投影的對應關係 | 選修物理 I - 力學</p>
+        </div>
+        
+        <!-- 物理原理說明 -->
+        <div class="info-box physics-principle">
+            <h4>📚 物理原理與公式</h4>
+            <p>
+                • <strong>簡諧運動 (SHM)：</strong>物體在彈性恢復力 F = −kx 作用下的週期性運動<br>
+                • <strong>位移公式：</strong>x(t) = A cos(ωt)，其中 A 為振幅（釋放點），ω = √(k/m)<br>
+                • <strong>速度公式：</strong>v(t) = −Aω sin(ωt)<br>
+                • <strong>加速度公式：</strong>a(t) = −Aω² cos(ωt) = −(k/m)x<br>
+                • <strong>週期：</strong>T = 2π/ω = 2π√(m/k)<br>
+                • <strong>圓周運動對應：</strong>等速圓周運動在直徑方向的投影即為簡諧運動
+            </p>
+        </div>
+        
+        <!-- 模擬與控制面板並排 -->
+        <div class="sim-layout">
+            <!-- 右側控制面板 -->
+            <div class="sim-layout-left">
+                <div class="controls">
+                    <div class="control-section">
+                        <h3>⚙️ 參數控制</h3>
+                        
+                        <div class="control-row">
+                            <label>彈簧力常數 k (N/m)</label>
+                            <input type="range" id="kSlider" min="1" max="50" step="1" value="10">
+                            <span class="value-display" id="kValue">10</span>
+                        </div>
+                        
+                        <div class="control-row">
+                            <label>質量 m (kg)</label>
+                            <input type="range" id="mSlider" min="0.5" max="10" step="0.5" value="2">
+                            <span class="value-display" id="mValue">2.0</span>
+                        </div>
+
+                        <div class="control-row">
+                            <label>釋放點 A (m)</label>
+                            <input type="range" id="ampSlider" min="0.5" max="5" step="0.1" value="2">
+                            <span class="value-display" id="ampValue">2.0</span>
+                        </div>
+
+                        <div class="control-row">
+                            <label>播放速度</label>
+                            <input type="range" id="speedSlider" min="0.25" max="3" step="0.25" value="1">
+                            <span class="value-display" id="speedValue">1.0x</span>
+                        </div>
+
+                        <div class="control-row">
+                            <label>顯示運動軌跡</label>
+                            <input type="checkbox" id="trailToggle" checked>
+                        </div>
+                    </div>
+
+
+                </div>
+                
+                <!-- 控制按鈕 -->
+                <div class="button-group">
+                    <button class="btn btn-start" id="startBtn">▶ 開始模擬</button>
+                    <button class="btn btn-pause" id="pauseBtn">⏸ 暫停</button>
+                    <button class="btn btn-reset" id="resetBtn">🔄 重置</button>
+                </div>
+            </div>
+            
+            <!-- 左側模擬區域 + 圖表 -->
+            <div class="sim-layout-right">
+                <div class="simulation-section">
+                    <div class="canvas-wrapper">
+                        <canvas id="simCanvas" width="900" height="480"></canvas>
+                    </div>
+                    
+                    <!-- x-t, v-t, a-t 圖 -->
+                    <div class="graphs-container">
+                        <div class="graph-box">
+                            <h5>x-t 圖（位移-時間）</h5>
+                            <canvas id="xtCanvas" width="280" height="200"></canvas>
+                        </div>
+                        <div class="graph-box">
+                            <h5>v-t 圖（速度-時間）</h5>
+                            <canvas id="vtCanvas" width="280" height="200"></canvas>
+                        </div>
+                        <div class="graph-box">
+                            <h5>a-t 圖（加速度-時間）</h5>
+                            <canvas id="atCanvas" width="280" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 教學指引 -->
+        <div class="info-box teaching-note">
+            <h4>💡 教學使用指引</h4>
+            <p>
+                • <strong>觀察重點 1：</strong>圓周運動的質點在水平方向的投影與彈簧上的質量塊完全同步運動<br>
+                • <strong>觀察重點 2：</strong>調整彈簧力常數 k 或質量 m，觀察角頻率 ω 與週期 T 的變化<br>
+                • <strong>觀察重點 3：</strong>x-t 圖為餘弦函數、v-t 圖為負正弦函數、a-t 圖與 x-t 圖反相<br>
+                • <strong>思考問題：</strong>為什麼增大彈簧力常數會讓振動更快？質量如何影響週期？<br>
+                • <strong>延伸應用：</strong>單擺在小角度下的運動也近似簡諧運動，週期 T = 2π√(L/g)
+            </p>
+        </div>
+    </div>
+
+    <!-- JavaScript 模擬程式碼 -->
+    <script>
+    class SpringSHMSimulation {
+        constructor() {
+            // 主模擬畫布
+            this.simCanvas = document.getElementById('simCanvas');
+            this.simCtx = this.simCanvas.getContext('2d');
+            // 圖表畫布
+            this.xtCanvas = document.getElementById('xtCanvas');
+            this.xtCtx = this.xtCanvas.getContext('2d');
+            this.vtCanvas = document.getElementById('vtCanvas');
+            this.vtCtx = this.vtCanvas.getContext('2d');
+            this.atCanvas = document.getElementById('atCanvas');
+            this.atCtx = this.atCanvas.getContext('2d');
+
+            // 物理參數
+            this.k = 10;       // 彈簧力常數 N/m
+            this.m = 2.0;      // 質量 kg
+            this.A = 2.0;      // 振幅（釋放點）m
+            this.playbackSpeed = 1.0;
+
+            // 狀態
+            this.isRunning = false;
+            this.time = 0;
+            this.animationId = null;
+            this.lastTimestamp = null;
+            this.history = [];
+            this.trailPoints = []; // 固定間隔的軌跡點
+            this.trailInterval = 0.05; // 軌跡記錄間隔（秒）
+            this.lastTrailTime = -1;
+            this.showTrail = true;
+            this.maxGraphTime = 10; // 圖表顯示的最大時間範圍
+
+            this.init();
+        }
+
+        get omega() {
+            return Math.sqrt(this.k / this.m);
+        }
+
+        get period() {
+            return (2 * Math.PI) / this.omega;
+        }
+
+        getX(t) {
+            return this.A * Math.cos(this.omega * t);
+        }
+
+        getV(t) {
+            return -this.A * this.omega * Math.sin(this.omega * t);
+        }
+
+        getAcc(t) {
+            return -this.A * this.omega * this.omega * Math.cos(this.omega * t);
+        }
+
+        init() {
+            this.bindControls();
+            this.updateDataDisplay();
+            this.drawAll();
+        }
+
+        bindControls() {
+            const bind = (sliderId, prop, displayId, fmt) => {
+                document.getElementById(sliderId).addEventListener('input', (e) => {
+                    this[prop] = parseFloat(e.target.value);
+                    document.getElementById(displayId).textContent = fmt(this[prop]);
+                    this.reset();
+                });
+            };
+            bind('kSlider', 'k', 'kValue', v => v.toFixed(0));
+            bind('mSlider', 'm', 'mValue', v => v.toFixed(1));
+            bind('ampSlider', 'A', 'ampValue', v => v.toFixed(1));
+
+            document.getElementById('speedSlider').addEventListener('input', (e) => {
+                this.playbackSpeed = parseFloat(e.target.value);
+                document.getElementById('speedValue').textContent = this.playbackSpeed.toFixed(2) + 'x';
+            });
+
+            document.getElementById('trailToggle').addEventListener('change', (e) => {
+                this.showTrail = e.target.checked;
+                if (!this.isRunning) this.drawAll();
+            });
+
+            document.getElementById('startBtn').addEventListener('click', () => this.start());
+            document.getElementById('pauseBtn').addEventListener('click', () => this.pause());
+            document.getElementById('resetBtn').addEventListener('click', () => this.reset());
+        }
+
+        start() {
+            if (this.isRunning) return;
+            this.isRunning = true;
+            this.lastTimestamp = null;
+            this.animationId = requestAnimationFrame((ts) => this.animate(ts));
+        }
+
+        pause() {
+            this.isRunning = false;
+            if (this.animationId) {
+                cancelAnimationFrame(this.animationId);
+                this.animationId = null;
+            }
+        }
+
+        reset() {
+            this.pause();
+            this.time = 0;
+            this.history = [];
+            this.trailPoints = [];
+            this.lastTrailTime = -1;
+            this.updateDataDisplay();
+            this.drawAll();
+        }
+
+        animate(timestamp) {
+            if (!this.isRunning) return;
+            if (this.lastTimestamp === null) this.lastTimestamp = timestamp;
+
+            const elapsed = (timestamp - this.lastTimestamp) / 1000;
+            this.lastTimestamp = timestamp;
+            this.time += elapsed * this.playbackSpeed;
+
+            // 記錄歷史（圖表用）
+            const lastT = this.history.length > 0 ? this.history[this.history.length - 1].t : -1;
+            if (this.time - lastT >= 0.02) {
+                this.history.push({
+                    t: this.time,
+                    x: this.getX(this.time),
+                    v: this.getV(this.time),
+                    a: this.getAcc(this.time)
+                });
+            }
+
+            // 記錄軌跡點（固定時間間隔，穩定）
+            if (this.time - this.lastTrailTime >= this.trailInterval) {
+                this.trailPoints.push({
+                    t: this.time,
+                    x: this.getX(this.time),
+                    theta: this.omega * this.time
+                });
+                this.lastTrailTime = this.time;
+            }
+
+            // 動態調整圖表時間範圍
+            if (this.time > this.maxGraphTime - 1) {
+                this.maxGraphTime = this.time + 3;
+            }
+
+            this.updateDataDisplay();
+            this.drawAll();
+
+            this.animationId = requestAnimationFrame((ts) => this.animate(ts));
+        }
+
+        updateDataDisplay() {
+            // 數據直接繪製在模擬畫面上，不需額外 DOM 更新
+        }
+
+        drawAll() {
+            this.drawSimulation();
+            this.drawGraph(this.xtCtx, this.xtCanvas, 'x', '#3498db', 'x (m)');
+            this.drawGraph(this.vtCtx, this.vtCanvas, 'v', '#e74c3c', 'v (m/s)');
+            this.drawGraph(this.atCtx, this.atCanvas, 'a', '#f39c12', 'a (m/s²)');
+        }
+
+        // ===================== 主模擬畫面 =====================
+        drawSimulation() {
+            const canvas = this.simCanvas;
+            const ctx = this.simCtx;
+            const W = canvas.width, H = canvas.height;
+
+            ctx.clearRect(0, 0, W, H);
+            ctx.fillStyle = '#0d1117';
+            ctx.fillRect(0, 0, W, H);
+
+            // ---- 佈局計算 ----
+            // 上方：圓周運動（圓心在 eqX 正上方）
+            // 下方：水平彈簧 SHM
+            // 兩者共用相同的水平座標
+            const springY = H * 0.72;
+            const wallX = W * 0.08;
+            const eqX = W * 0.45; // 平衡位置
+            const scale = Math.min((eqX - wallX - 40) / 5, 50); // px per meter
+
+            const circR = Math.min(this.A * scale, H * 0.22, 100);
+            const circCenterX = eqX; // 圓心在平衡點正上方
+            const circCenterY = springY - 90 - circR; // 圓在彈簧上方
+
+            const curX = this.getX(this.time);
+            const curV = this.getV(this.time);
+            const curA = this.getAcc(this.time);
+
+            // 物體位置（像素）
+            const objPx = eqX + curX * scale;
+            const blockW = 36;
+            const blockH = 36;
+
+            // ---- 繪製平衡位置垂直參考線（貫穿圓與彈簧）----
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(eqX, circCenterY - circR - 15);
+            ctx.lineTo(eqX, springY + 40);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // ================================================================
+            // ---- 圓周運動（上方）----
+            // ================================================================
+
+            // 標題
+            ctx.fillStyle = '#ecf0f1';
+            ctx.font = 'bold 15px Roboto Slab, serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            ctx.fillText('等速圓周運動', circCenterX, circCenterY - circR - 22);
+
+            // 圓軌道
+            ctx.strokeStyle = '#444';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(circCenterX, circCenterY, circR, 0, Math.PI * 2);
+            ctx.stroke();
+
+            // 圓心十字
+            ctx.strokeStyle = '#555';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(circCenterX - 6, circCenterY);
+            ctx.lineTo(circCenterX + 6, circCenterY);
+            ctx.moveTo(circCenterX, circCenterY - 6);
+            ctx.lineTo(circCenterX, circCenterY + 6);
+            ctx.stroke();
+
+            // 圓周運動質點角度：θ = ωt
+            const theta = this.omega * this.time;
+            const circPx = circCenterX + circR * Math.cos(theta);
+            const circPy = circCenterY - circR * Math.sin(theta);
+
+            // 圓周軌跡點
+            if (this.showTrail && this.trailPoints.length > 0) {
+                const maxTrail = 120;
+                const start = Math.max(0, this.trailPoints.length - maxTrail);
+                const count = this.trailPoints.length - start;
+                for (let i = start; i < this.trailPoints.length; i++) {
+                    const tp = this.trailPoints[i];
+                    const cpx = circCenterX + circR * Math.cos(tp.theta);
+                    const cpy = circCenterY - circR * Math.sin(tp.theta);
+                    const age = (i - start) / count;
+                    const alpha = 0.05 + 0.7 * age;
+                    const r = 1.2 + 1.8 * age;
+                    ctx.fillStyle = `rgba(46, 204, 113, ${alpha.toFixed(2)})`;
+                    ctx.beginPath();
+                    ctx.arc(cpx, cpy, r, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            // 半徑線
+            ctx.strokeStyle = '#888';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([3, 3]);
+            ctx.beginPath();
+            ctx.moveTo(circCenterX, circCenterY);
+            ctx.lineTo(circPx, circPy);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // 圓上質點
+            ctx.fillStyle = '#2ecc71';
+            ctx.beginPath();
+            ctx.arc(circPx, circPy, 8, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#27ae60';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // ---- 圓周運動速度箭頭（切線方向）----
+            // 大小取 Aω * scale * 0.5，使水平分量 = 彈簧速度箭頭長度
+            const vMag = this.A * this.omega;
+            const vtx = -Math.sin(theta);  // 切線 x 分量
+            const vty = -Math.cos(theta);  // 切線 y 分量 (canvas y 反轉)
+            const vArrowScale = Math.min(vMag * scale * 0.5, 80);
+            if (vArrowScale > 2) {
+                const vex = circPx + vtx * vArrowScale;
+                const vey = circPy + vty * vArrowScale;
+                ctx.strokeStyle = '#e74c3c';
+                ctx.lineWidth = 2.5;
+                ctx.beginPath();
+                ctx.moveTo(circPx, circPy);
+                ctx.lineTo(vex, vey);
+                ctx.stroke();
+                const ahl = 7;
+                const vAngle = Math.atan2(vty, vtx);
+                ctx.fillStyle = '#e74c3c';
+                ctx.beginPath();
+                ctx.moveTo(vex, vey);
+                ctx.lineTo(vex - ahl * Math.cos(vAngle - 0.4), vey - ahl * Math.sin(vAngle - 0.4));
+                ctx.lineTo(vex - ahl * Math.cos(vAngle + 0.4), vey - ahl * Math.sin(vAngle + 0.4));
+                ctx.closePath();
+                ctx.fill();
+                ctx.font = 'bold 11px Roboto, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('v', vex + vtx * 10, vey + vty * 10);
+            }
+
+            // ---- 向心加速度箭頭（指向圓心）----
+            // 大小取 Aω² * scale * 0.15，使水平分量 = 彈簧加速度箭頭長度
+            const acMag = this.A * this.omega * this.omega;
+            const acx = circCenterX - circPx;
+            const acy = circCenterY - circPy;
+            const acLen = Math.sqrt(acx * acx + acy * acy);
+            const acArrowScale = Math.min(acMag * scale * 0.15, 60);
+            if (acArrowScale > 2 && acLen > 0) {
+                const acux = acx / acLen;
+                const acuy = acy / acLen;
+                const acex = circPx + acux * acArrowScale;
+                const acey = circPy + acuy * acArrowScale;
+                ctx.strokeStyle = '#f39c12';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([4, 3]);
+                ctx.beginPath();
+                ctx.moveTo(circPx, circPy);
+                ctx.lineTo(acex, acey);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                // 箭頭
+                const ahl = 6;
+                const acAngle = Math.atan2(acuy, acux);
+                ctx.fillStyle = '#f39c12';
+                ctx.beginPath();
+                ctx.moveTo(acex, acey);
+                ctx.lineTo(acex - ahl * Math.cos(acAngle - 0.4), acey - ahl * Math.sin(acAngle - 0.4));
+                ctx.lineTo(acex - ahl * Math.cos(acAngle + 0.4), acey - ahl * Math.sin(acAngle + 0.4));
+                ctx.closePath();
+                ctx.fill();
+                ctx.font = 'bold 11px Roboto, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('ac', acex + acux * 12, acey + acuy * 12);
+            }
+
+            // 投影虛線（從圓上質點垂直投影到圓心水平線）
+            ctx.strokeStyle = 'rgba(46, 204, 113, 0.5)';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(circPx, circPy);
+            ctx.lineTo(circPx, circCenterY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // 投影點（在圓心水平線上）
+            ctx.fillStyle = '#e74c3c';
+            ctx.beginPath();
+            ctx.arc(circPx, circCenterY, 5, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 角度標註
+            ctx.fillStyle = '#aaa';
+            ctx.font = '12px Roboto, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            const thetaDeg = ((theta % (2 * Math.PI)) * 180 / Math.PI).toFixed(1);
+            ctx.fillText(`θ = ${thetaDeg}°`, circCenterX + circR + 12, circCenterY - 8);
+
+            // ---- 從圓投影點垂直連接到彈簧物塊 ----
+            ctx.strokeStyle = 'rgba(231, 76, 60, 0.4)';
+            ctx.lineWidth = 1;
+            ctx.setLineDash([6, 4]);
+            ctx.beginPath();
+            ctx.moveTo(circPx, circCenterY + 5);
+            ctx.lineTo(objPx, springY - blockH / 2 - 5);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // ================================================================
+            // ---- 水平彈簧 SHM（下方）----
+            // ================================================================
+
+            // 標題
+            ctx.fillStyle = '#ecf0f1';
+            ctx.font = 'bold 15px Roboto Slab, serif';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'top';
+            ctx.fillText('水平彈簧 SHM', wallX, springY - blockH / 2 - 60);
+
+            // ---- 繪製牆壁 ----
+            ctx.fillStyle = '#555';
+            ctx.fillRect(wallX - 8, springY - 40, 8, 80);
+            ctx.strokeStyle = '#444';
+            ctx.lineWidth = 1.5;
+            for (let i = -38; i < 80; i += 8) {
+                ctx.beginPath();
+                ctx.moveTo(wallX - 8, springY - 40 + i);
+                ctx.lineTo(wallX - 16, springY - 40 + i + 8);
+                ctx.stroke();
+            }
+
+            // ---- 繪製軌道 ----
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(wallX, springY + blockH / 2 + 2);
+            ctx.lineTo(W * 0.70, springY + blockH / 2 + 2);
+            ctx.stroke();
+
+            // ---- 平衡位置標記 ----
+            ctx.fillStyle = '#888';
+            ctx.font = '13px Roboto, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            ctx.fillText('平衡點', eqX, springY + blockH / 2 + 6);
+
+            // ---- 繪製彈簧 ----
+            this.drawSpring(ctx, wallX, springY, objPx - blockW / 2, springY, 14, 12);
+
+            // ---- 繪製質量塊 ----
+            const grad = ctx.createLinearGradient(objPx - blockW / 2, springY - blockH / 2, objPx + blockW / 2, springY + blockH / 2);
+            grad.addColorStop(0, '#5dade2');
+            grad.addColorStop(1, '#2471a3');
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.roundRect(objPx - blockW / 2, springY - blockH / 2, blockW, blockH, 4);
+            ctx.fill();
+            ctx.strokeStyle = '#1a5276';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // 質量塊標籤
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 13px Roboto, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('m', objPx, springY);
+
+            // ---- 彈力箭頭 F = -kx ----
+            const curF = -this.k * curX;
+            if (Math.abs(curF) > 0.05) {
+                const fLen = Math.min(Math.abs(curF) * scale * 0.12, 70) * Math.sign(curF);
+                const fY = springY;
+                const fStartX = objPx + (Math.sign(curF) < 0 ? -blockW / 2 : blockW / 2);
+                ctx.strokeStyle = '#9b59b6';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(fStartX, fY);
+                ctx.lineTo(fStartX + fLen, fY);
+                ctx.stroke();
+                const hl = 8, dirF = Math.sign(fLen);
+                ctx.fillStyle = '#9b59b6';
+                ctx.beginPath();
+                ctx.moveTo(fStartX + fLen, fY);
+                ctx.lineTo(fStartX + fLen - hl * dirF, fY - 5);
+                ctx.lineTo(fStartX + fLen - hl * dirF, fY + 5);
+                ctx.closePath();
+                ctx.fill();
+                ctx.font = 'bold 12px Roboto, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'bottom';
+                ctx.fillText('F', fStartX + fLen / 2, fY - 6);
+            }
+
+            // ---- 速度箭頭 ----
+            if (Math.abs(curV) > 0.05) {
+                const arrowLen = Math.min(Math.abs(curV) * scale * 0.5, 80) * Math.sign(curV);
+                const arrowY = springY - blockH / 2 - 14;
+                ctx.strokeStyle = '#e74c3c';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(objPx, arrowY);
+                ctx.lineTo(objPx + arrowLen, arrowY);
+                ctx.stroke();
+                const hl = 8, dir = Math.sign(arrowLen);
+                ctx.fillStyle = '#e74c3c';
+                ctx.beginPath();
+                ctx.moveTo(objPx + arrowLen, arrowY);
+                ctx.lineTo(objPx + arrowLen - hl * dir, arrowY - 4);
+                ctx.lineTo(objPx + arrowLen - hl * dir, arrowY + 4);
+                ctx.closePath();
+                ctx.fill();
+                ctx.font = 'bold 12px Roboto, sans-serif';
+                ctx.textBaseline = 'bottom';
+                ctx.fillText('v', objPx + arrowLen / 2, arrowY - 5);
+            }
+
+            // ---- 加速度箭頭 ----
+            if (Math.abs(curA) > 0.05) {
+                const aLen = Math.min(Math.abs(curA) * scale * 0.15, 60) * Math.sign(curA);
+                const aY = springY + blockH / 2 + 18;
+                ctx.strokeStyle = '#f39c12';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([4, 3]);
+                ctx.beginPath();
+                ctx.moveTo(objPx, aY);
+                ctx.lineTo(objPx + aLen, aY);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                const hl = 6, dir = Math.sign(aLen);
+                ctx.fillStyle = '#f39c12';
+                ctx.beginPath();
+                ctx.moveTo(objPx + aLen, aY);
+                ctx.lineTo(objPx + aLen - hl * dir, aY - 4);
+                ctx.lineTo(objPx + aLen - hl * dir, aY + 4);
+                ctx.closePath();
+                ctx.fill();
+                ctx.font = 'bold 12px Roboto, sans-serif';
+                ctx.textBaseline = 'top';
+                ctx.textAlign = 'center';
+                ctx.fillText('a', objPx + aLen / 2, aY + 5);
+            }
+
+            // ---- 軌跡點（彈簧物體） ----
+            if (this.showTrail && this.trailPoints.length > 0) {
+                const trailY = springY - blockH / 2 - 32;
+                const maxTrail = 120;
+                const start = Math.max(0, this.trailPoints.length - maxTrail);
+                const count = this.trailPoints.length - start;
+                for (let i = start; i < this.trailPoints.length; i++) {
+                    const tp = this.trailPoints[i];
+                    const px = eqX + tp.x * scale;
+                    const age = (i - start) / count;
+                    const alpha = 0.05 + 0.7 * age;
+                    const r = 1.2 + 1.8 * age;
+                    ctx.fillStyle = `rgba(52, 152, 219, ${alpha.toFixed(2)})`;
+                    ctx.beginPath();
+                    ctx.arc(px, trailY, r, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            // ================================================================
+            // ---- 即時數據顯示（底部橫排）----
+            // ================================================================
+            const dataY = H - 42;
+            const panelH = 38;
+
+            // 背景面板
+            ctx.fillStyle = 'rgba(13, 17, 23, 0.85)';
+            ctx.beginPath();
+            ctx.roundRect(8, dataY - 4, W - 16, panelH, 6);
+            ctx.fill();
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            ctx.stroke();
+
+            ctx.font = '13px Roboto, sans-serif';
+            ctx.textBaseline = 'middle';
+            const dataCY = dataY + panelH / 2 - 2;
+
+            const dataItems = [
+                { label: 'ω=', val: `${this.omega.toFixed(2)}`, unit: 'rad/s', color: '#aaa' },
+                { label: 'T=', val: `${this.period.toFixed(2)}`, unit: 's', color: '#aaa' },
+                { label: 't=', val: `${this.time.toFixed(2)}`, unit: 's', color: '#95a5a6' },
+                { label: 'x=', val: `${curX.toFixed(2)}`, unit: 'm', color: '#3498db' },
+                { label: 'v=', val: `${curV.toFixed(2)}`, unit: 'm/s', color: '#e74c3c' },
+                { label: 'a=', val: `${curA.toFixed(2)}`, unit: 'm/s²', color: '#f39c12' },
+                { label: 'F=', val: `${curF.toFixed(2)}`, unit: 'N', color: '#9b59b6' },
+            ];
+
+            const totalItems = dataItems.length;
+            const itemW = (W - 32) / totalItems;
+            dataItems.forEach((item, i) => {
+                const ix = 16 + i * itemW;
+                ctx.textAlign = 'left';
+                ctx.fillStyle = '#777';
+                ctx.font = '12px Roboto, sans-serif';
+                ctx.fillText(item.label, ix, dataCY);
+                ctx.fillStyle = item.color;
+                ctx.font = 'bold 13px Roboto, sans-serif';
+                ctx.fillText(`${item.val} ${item.unit}`, ix + ctx.measureText(item.label).width + 2, dataCY);
+            });
+
+            // ---- 圖例（左下角，面板上方）----
+            const legendY2 = dataY - 22;
+            ctx.font = '11px Roboto, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            let lx = 12;
+
+            ctx.fillStyle = '#9b59b6';
+            ctx.fillRect(lx, legendY2, 10, 3);
+            ctx.fillText('彈力 F', lx + 14, legendY2 + 1);
+            lx += 70;
+
+            ctx.fillStyle = '#e74c3c';
+            ctx.fillRect(lx, legendY2, 10, 3);
+            ctx.fillText('速度 v', lx + 14, legendY2 + 1);
+            lx += 70;
+
+            ctx.fillStyle = '#f39c12';
+            ctx.fillRect(lx, legendY2, 10, 3);
+            ctx.fillText('加速度 a', lx + 14, legendY2 + 1);
+            lx += 80;
+
+            ctx.fillStyle = '#2ecc71';
+            ctx.beginPath();
+            ctx.arc(lx + 5, legendY2 + 1, 3, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillText('圓周質點', lx + 14, legendY2 + 1);
+        }
+
+        // ---- 繪製彈簧 ----
+        drawSpring(ctx, x1, y1, x2, y2, coils, amplitude) {
+            const dx = x2 - x1;
+            const dy = y2 - y1;
+            const len = Math.sqrt(dx * dx + dy * dy);
+            const ux = dx / len;
+            const uy = dy / len;
+            // 法線方向
+            const nx = -uy;
+            const ny = ux;
+
+            const endCap = 15; // 兩端直線部分
+
+            ctx.strokeStyle = '#aaa';
+            ctx.lineWidth = 2.5;
+            ctx.lineJoin = 'round';
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+
+            // 起始直線
+            const sx = x1 + ux * endCap;
+            const sy = y1 + uy * endCap;
+            ctx.lineTo(sx, sy);
+
+            // 螺旋部分
+            const springLen = len - 2 * endCap;
+            const segLen = springLen / (coils * 2);
+            for (let i = 0; i < coils * 2; i++) {
+                const t = (i + 1) * segLen;
+                const sign = (i % 2 === 0) ? 1 : -1;
+                const px = sx + ux * t + nx * amplitude * sign;
+                const py = sy + uy * t + ny * amplitude * sign;
+                ctx.lineTo(px, py);
+            }
+
+            // 結束直線
+            ctx.lineTo(x2, y2);
+            ctx.stroke();
+        }
+
+        // ===================== 圖表繪製 =====================
+        drawGraph(ctx, canvas, dataKey, color, ylabel) {
+            const W = canvas.width, H = canvas.height;
+            ctx.clearRect(0, 0, W, H);
+            ctx.fillStyle = '#0a0a1a';
+            ctx.fillRect(0, 0, W, H);
+
+            const margin = { top: 20, right: 15, bottom: 30, left: 45 };
+            const gW = W - margin.left - margin.right;
+            const gH = H - margin.top - margin.bottom;
+
+            // 計算數據範圍（取整數）
+            let yMaxRaw;
+            if (dataKey === 'x') {
+                yMaxRaw = this.A * 1.2;
+            } else if (dataKey === 'v') {
+                yMaxRaw = this.A * this.omega * 1.2;
+            } else {
+                yMaxRaw = this.A * this.omega * this.omega * 1.2;
+            }
+            if (yMaxRaw < 1) yMaxRaw = 1;
+            const yMax = Math.ceil(yMaxRaw);
+            const yMin = -yMax;
+
+            const tMax = this.maxGraphTime;
+            const tMin = 0;
+
+            const tToPx = (t) => margin.left + (t - tMin) / (tMax - tMin) * gW;
+            const yToPx = (y) => margin.top + (1 - (y - yMin) / (yMax - yMin)) * gH;
+
+            // 網格線
+            ctx.strokeStyle = '#222';
+            ctx.lineWidth = 0.5;
+            // 水平零線
+            ctx.strokeStyle = '#444';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(margin.left, yToPx(0));
+            ctx.lineTo(W - margin.right, yToPx(0));
+            ctx.stroke();
+
+            // 軸線
+            ctx.strokeStyle = '#666';
+            ctx.lineWidth = 1;
+            // Y軸
+            ctx.beginPath();
+            ctx.moveTo(margin.left, margin.top);
+            ctx.lineTo(margin.left, H - margin.bottom);
+            ctx.stroke();
+            // X軸
+            ctx.beginPath();
+            ctx.moveTo(margin.left, H - margin.bottom);
+            ctx.lineTo(W - margin.right, H - margin.bottom);
+            ctx.stroke();
+
+            // 軸標籤
+            ctx.fillStyle = '#888';
+            ctx.font = '11px Roboto, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            ctx.fillText('t (s)', margin.left + gW / 2, H - 12);
+
+            ctx.save();
+            ctx.translate(12, margin.top + gH / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(ylabel, 0, 0);
+            ctx.restore();
+
+            // Y軸刻度（整數）
+            ctx.fillStyle = '#666';
+            ctx.font = '10px Roboto, sans-serif';
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'middle';
+            // 選擇合適的整數間距
+            let tickStep = 1;
+            if (yMax > 50) tickStep = 20;
+            else if (yMax > 20) tickStep = 10;
+            else if (yMax > 10) tickStep = 5;
+            else if (yMax > 5) tickStep = 2;
+            for (let val = -yMax; val <= yMax; val += tickStep) {
+                const py = yToPx(val);
+                ctx.fillText(val.toFixed(0), margin.left - 5, py);
+                // 網格
+                ctx.strokeStyle = '#1a1a2e';
+                ctx.lineWidth = 0.5;
+                ctx.beginPath();
+                ctx.moveTo(margin.left, py);
+                ctx.lineTo(W - margin.right, py);
+                ctx.stroke();
+            }
+
+            // 繪製歷史數據（逐時繪製，不預先顯示理論曲線）
+            if (this.history.length > 1) {
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                let started = false;
+                for (let i = 0; i < this.history.length; i++) {
+                    const h = this.history[i];
+                    const px = tToPx(h.t);
+                    const py = yToPx(h[dataKey]);
+                    if (px < margin.left || px > W - margin.right) continue;
+                    if (!started) { ctx.moveTo(px, py); started = true; }
+                    else ctx.lineTo(px, py);
+                }
+                ctx.stroke();
+            }
+
+            // 當前位置標記
+            if (this.time > 0) {
+                const px = tToPx(this.time);
+                let val;
+                if (dataKey === 'x') val = this.getX(this.time);
+                else if (dataKey === 'v') val = this.getV(this.time);
+                else val = this.getAcc(this.time);
+                const py = yToPx(val);
+
+                if (px >= margin.left && px <= W - margin.right) {
+                    // 垂直虛線
+                    ctx.strokeStyle = 'rgba(255,255,255,0.3)';
+                    ctx.lineWidth = 1;
+                    ctx.setLineDash([3, 3]);
+                    ctx.beginPath();
+                    ctx.moveTo(px, margin.top);
+                    ctx.lineTo(px, H - margin.bottom);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+
+                    // 點
+                    ctx.fillStyle = '#fff';
+                    ctx.beginPath();
+                    ctx.arc(px, py, 4, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = 2;
+                    ctx.stroke();
+                }
+            }
+        }
+    }
+
+    // ==========================================
+    // 初始化
+    // ==========================================
+    let simulation;
+    document.addEventListener('DOMContentLoaded', () => {
+        simulation = new SpringSHMSimulation();
+    });
+    </script>
+    
+    <!-- Navigation Scripts -->
+    <script src="../../js/jquery-1.9.1.min.js"></script>
+    <script src="../../js/classie.js"></script>
+    <script src="../../js/main.js"></script>
+</body>
+</html>
