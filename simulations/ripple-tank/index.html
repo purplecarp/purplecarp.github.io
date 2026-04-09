@@ -1,0 +1,890 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8">
+    <title>水波槽投影模擬 - 物理模擬</title>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <link href="../../images/fish.png" rel="shortcut icon">
+    
+    <link href="../../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../../css/normalize.css" rel="stylesheet">
+    <link href="../../css/style.css" rel="stylesheet">
+    <link href="../../css/responsive.css" rel="stylesheet">
+    <link href="../../css/simulations.css" rel="stylesheet">
+    
+    <link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Roboto:400,300,500,700' rel='stylesheet' type='text/css'>
+</head>
+<body>
+    <!--HEADER -->
+    <div class="header">
+      <div class="for-sticky">
+        <!--LOGO-->
+        <div class="col-md-2 col-xs-6 logo">
+          <a href="../../index.html"><img alt="logo" class="logo-nav" src="../../images/fish.png"></a>
+        </div>
+        <!--/.LOGO END-->
+      </div>
+      <div class="menu-wrap">
+        <nav class="menu">
+          <div class="menu-list">
+            <a href="../../index.html#home">
+              <span>首頁</span>
+            </a>
+            <a href="../../index.html#about">
+              <span>關於我</span>
+            </a>
+            <a href="../../index.html#experience">
+              <span>教學經驗</span>
+            </a>
+            <a href="../../teaching-gallery.html">
+              <span>查看教學剪影</span>
+            </a>
+            <a href="../../physics-simulations.html" class="active">
+              <span>高中物理內容</span>
+            </a>
+            <a href="../../index.html#skills">
+              <span>專業技能</span>
+            </a>
+            <a href="../../index.html#achievements">
+              <span>成果展示</span>
+            </a>
+            <a href="../../index.html#philosophy">
+              <span>教育理念</span>
+            </a>
+            <a href="../../index.html#contact">
+              <span>聯絡方式</span>
+            </a>
+          </div>
+        </nav>
+        <button class="close-button" id="close-button">Close Menu</button>
+      </div>
+      <button class="menu-button" id="open-button">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button><!--/.for-sticky-->
+    </div>
+    <!--/.HEADER END-->
+    
+    <!-- 頂部導航欄 -->
+    <div class="top-nav">
+        <div class="container">
+            <a href="../../index.html" class="nav-brand">
+                <img src="../../images/fish.png" alt="Logo">
+                <h2>物鯉魚教學模擬</h2>
+            </a>
+            <a href="../../physics-simulations.html" class="btn-back">← 返回列表</a>
+        </div>
+    </div>
+    
+    <!-- 主容器 -->
+    <div class="main-container">
+        <!-- 頁面標題 -->
+        <div class="page-header">
+            <h1>🌊 水波槽投影模擬</h1>
+            <p class="subtitle">平行光 / 點光源照射水波槽，觀察下方屏幕亮暗紋 | 選修物理 III - 波動</p>
+        </div>
+        
+        <!-- 物理原理說明 -->
+        <div class="info-box">
+            <h4>📚 物理原理與公式</h4>
+            <p>
+                • <strong>水波槽原理：</strong>水波槽中的水波使水面高低起伏，當平行光由上方照射時，波峰處（凸透鏡效應）會聚光線形成亮紋，波谷處（凹透鏡效應）發散光線形成暗紋<br>
+                • <strong>一維行進波：</strong>y(x, t) = A sin(kx − ωt)，其中 k = 2π/λ，ω = 2πf<br>
+                • <strong>駐波：</strong>兩列等振幅、等頻率、反向行進的波疊加：y(x, t) = 2A sin(kx) cos(ωt)，節點處振幅恆為零<br>
+                • <strong>投影亮度：</strong>水面曲率越大（波峰/波谷頂點），對光的聚散作用越強。屏幕上亮度與水面斜率的變化（曲率）有關
+            </p>
+        </div>
+        
+        <!-- 模擬與控制面板並排 -->
+        <div class="sim-layout">
+            <!-- 左側控制面板 -->
+            <div class="sim-layout-left">
+                <div class="controls">
+                    <div class="control-section">
+                        <h3>⚙️ 波動參數</h3>
+                        
+                        <div class="control-row">
+                            <label>波的模式</label>
+                            <select id="waveMode" style="padding:6px 12px; border-radius:6px; border:1px solid #555; background:#2a2a3e; color:#ecf0f1; font-size:14px; width:100%;">
+                                <option value="traveling">行進波（向右）</option>
+                                <option value="standing">駐波</option>
+                                <option value="travelingLeft">行進波（向左）</option>
+                            </select>
+                        </div>
+                        
+                        <div class="control-row">
+                            <label>波長 (λ)</label>
+                            <input type="range" id="wavelengthSlider" min="40" max="250" step="5" value="160">
+                            <span class="value-display" id="wavelengthValue">160 px</span>
+                        </div>
+                        
+                        <div class="control-row">
+                            <label>振幅 (A)</label>
+                            <input type="range" id="amplitudeSlider" min="1" max="50" step="1" value="5">
+                            <span class="value-display" id="amplitudeValue">5 px</span>
+                        </div>
+                        
+                        <div class="control-row">
+                            <label>動畫速度</label>
+                            <input type="range" id="speedSlider" min="0.1" max="1" step="0.1" value="0.1">
+                            <span class="value-display" id="speedValue">0.1x</span>
+                        </div>
+
+                        <div class="control-row">
+                            <label>高斯光點 σ</label>
+                            <input type="range" id="sigmaSlider" min="1" max="30" step="0.5" value="9.5">
+                            <span class="value-display" id="sigmaValue">9.5</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 控制按鈕 -->
+                <div class="button-group">
+                    <button class="btn btn-start" id="startBtn">▶ 開始模擬</button>
+                    <button class="btn btn-pause" id="pauseBtn">⏸ 暫停</button>
+                    <button class="btn btn-reset" id="resetBtn">🔄 重置</button>
+                </div>
+            </div>
+            
+            <!-- 右側模擬區域 -->
+            <div class="sim-layout-right">
+                <div class="simulation-section">
+                    <div class="canvas-wrapper">
+                        <canvas id="mainCanvas" width="900" height="620"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 教學指引 -->
+        <div class="info-box teaching-note">
+            <h4>💡 教學使用指引</h4>
+            <p>
+                • <strong>觀察重點 1：</strong>注意波峰處光線被聚焦（凸透鏡效應），在屏幕上形成亮紋；波谷處光線被發散（凹透鏡效應），形成暗紋<br>
+                • <strong>觀察重點 2：</strong>切換「駐波」模式，觀察節點處屏幕亮度不變、腹點處亮度週期性變化<br>
+                • <strong>操作建議：</strong>先用行進波觀察亮暗紋隨波移動，再切換駐波觀察穩定的亮暗分布<br>
+                • <strong>思考問題：</strong>為什麼駐波的節點處屏幕亮度保持不變？改變波長時亮暗紋間距如何變化？
+            </p>
+        </div>
+    </div>
+
+    <!-- JavaScript 模擬程式碼 -->
+    <script>
+    class RippleTankSimulation {
+        constructor() {
+            this.canvas = document.getElementById('mainCanvas');
+            this.ctx = this.canvas.getContext('2d');
+            this.W = this.canvas.width;   // 顯示寬度 (900)
+            this.H = this.canvas.height;
+
+            // 內部模擬寬度（比顯示寬度寬，避免邊緣效應）
+            this.simW = 1500;
+            this.offsetX = (this.simW - this.W) / 2; // 偏移量，讓顯示區對準中央
+
+            // 佈局區域（由上到下）
+            this.lightSourceY = 10;         // 光源標示區上緣
+            this.tankTop = 80;              // 水波槽上緣
+            this.tankBottom = 280;          // 水波槽下緣
+            this.waterSurfaceY = 180;       // 水面中線 y 位置
+            this.raysTop = this.tankBottom;  // 光線區域上緣
+            this.raysBottom = this.tankBottom + 10; // 光線區域下緣（緊貼水面）
+            this.screenY = this.tankBottom + 12;    // 屏幕 y 位置（緊接水波槽）
+            this.graphTop = this.screenY + 22;      // 亮度圖上緣
+            this.graphBottom = 610;                 // 亮度圖下緣
+
+            // 物理參數
+            this.wavelength = 160;
+            this.amplitude = 5;
+            this.frequency = 1.0;
+            this.speed = 0.1;
+            this.sigma = 9.5;
+            this.waveMode = 'traveling';
+            this.lightMode = 'parallel';
+
+            // 狀態
+            this.time = 0;
+            this.isRunning = false;
+            this.animationId = null;
+
+            this.init();
+        }
+
+        init() {
+            this.bindControls();
+            this.draw();
+        }
+
+        bindControls() {
+            const self = this;
+
+            document.getElementById('wavelengthSlider').addEventListener('input', function() {
+                self.wavelength = parseFloat(this.value);
+                document.getElementById('wavelengthValue').textContent = self.wavelength + ' px';
+                if (!self.isRunning) self.draw();
+            });
+
+            document.getElementById('amplitudeSlider').addEventListener('input', function() {
+                self.amplitude = parseFloat(this.value);
+                document.getElementById('amplitudeValue').textContent = self.amplitude + ' px';
+                if (!self.isRunning) self.draw();
+            });
+
+            document.getElementById('speedSlider').addEventListener('input', function() {
+                self.speed = parseFloat(this.value);
+                document.getElementById('speedValue').textContent = self.speed.toFixed(1) + 'x';
+            });
+
+            document.getElementById('waveMode').addEventListener('change', function() {
+                self.waveMode = this.value;
+
+                if (!self.isRunning) self.draw();
+            });
+
+            document.getElementById('sigmaSlider').addEventListener('input', function() {
+                self.sigma = parseFloat(this.value);
+                document.getElementById('sigmaValue').textContent = self.sigma.toFixed(1);
+                if (!self.isRunning) self.draw();
+            });
+
+            document.getElementById('startBtn').addEventListener('click', () => this.start());
+            document.getElementById('pauseBtn').addEventListener('click', () => this.pause());
+            document.getElementById('resetBtn').addEventListener('click', () => this.reset());
+        }
+
+        start() {
+            if (this.isRunning) return;
+            this.isRunning = true;
+            document.getElementById('startBtn').disabled = true;
+            document.getElementById('pauseBtn').disabled = false;
+            this.animate();
+        }
+
+        pause() {
+            this.isRunning = false;
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('pauseBtn').disabled = true;
+            if (this.animationId) {
+                cancelAnimationFrame(this.animationId);
+                this.animationId = null;
+            }
+        }
+
+        reset() {
+            this.pause();
+            this.time = 0;
+            this.draw();
+        }
+
+        animate() {
+            if (!this.isRunning) return;
+            this.time += 0.025 * this.speed;
+            this.draw();
+            this.updateInfo();
+            this.animationId = requestAnimationFrame(() => this.animate());
+        }
+
+        updateInfo() {
+        }
+
+        // ============================================================
+        // 計算水面高度 y(x, t)
+        // ============================================================
+        waveY(x) {
+            const k = 2 * Math.PI / this.wavelength;
+            const omega = 2 * Math.PI * this.frequency;
+            if (this.waveMode === 'traveling') {
+                return this.amplitude * Math.sin(k * x - omega * this.time);
+            } else if (this.waveMode === 'travelingLeft') {
+                return this.amplitude * Math.sin(k * x + omega * this.time);
+            } else {
+                // 駐波: 2A sin(kx) cos(ωt)
+                return 2 * this.amplitude * Math.sin(k * x) * Math.cos(omega * this.time);
+            }
+        }
+
+        // 水面斜率 dy/dx
+        waveDYDX(x) {
+            const k = 2 * Math.PI / this.wavelength;
+            const omega = 2 * Math.PI * this.frequency;
+            if (this.waveMode === 'traveling') {
+                return this.amplitude * k * Math.cos(k * x - omega * this.time);
+            } else if (this.waveMode === 'travelingLeft') {
+                return this.amplitude * k * Math.cos(k * x + omega * this.time);
+            } else {
+                return 2 * this.amplitude * k * Math.cos(k * x) * Math.cos(omega * this.time);
+            }
+        }
+
+        // 水面曲率 d²y/dx²（用於亮度計算）
+        waveCurvature(x) {
+            const k = 2 * Math.PI / this.wavelength;
+            const omega = 2 * Math.PI * this.frequency;
+            if (this.waveMode === 'traveling') {
+                return -this.amplitude * k * k * Math.sin(k * x - omega * this.time);
+            } else if (this.waveMode === 'travelingLeft') {
+                return -this.amplitude * k * k * Math.sin(k * x + omega * this.time);
+            } else {
+                return -2 * this.amplitude * k * k * Math.sin(k * x) * Math.cos(omega * this.time);
+            }
+        }
+
+        // ============================================================
+        // 主繪製
+        // ============================================================
+        draw() {
+            const ctx = this.ctx;
+            // 清空整個畫布
+            ctx.fillStyle = '#f5f0e0';
+            ctx.fillRect(0, 0, this.W, this.H);
+
+            // 裁切並平移：只顯示中央 W 像素
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(0, 0, this.W, this.H);
+            ctx.clip();
+            ctx.translate(-this.offsetX, 0);
+
+            this.drawLightSource(ctx);
+            this.drawTank(ctx);
+            this.drawWaterSurface(ctx);
+            this.drawLightRays(ctx);
+            this.drawScreen(ctx);
+            this.drawBrightnessGraph(ctx);
+            this.drawLabels(ctx);
+
+            ctx.restore();
+        }
+
+        // ============================================================
+        // 繪製光源
+        // ============================================================
+        drawLightSource(ctx) {
+            if (this.lightMode === 'parallel') {
+                // 平行光標示：上方一排向下箭頭
+                ctx.strokeStyle = '#e67e22';
+                ctx.lineWidth = 2;
+                const arrowCount = 18;
+                const margin = 50 + this.offsetX;
+                const spacing = (this.simW - 2 * margin) / (arrowCount - 1);
+                for (let i = 0; i < arrowCount; i++) {
+                    const ax = margin + i * spacing;
+                    const ay1 = this.lightSourceY + 5;
+                    const ay2 = this.tankTop - 5;
+                    ctx.beginPath();
+                    ctx.moveTo(ax, ay1);
+                    ctx.lineTo(ax, ay2);
+                    ctx.stroke();
+                    // 箭頭
+                    ctx.beginPath();
+                    ctx.moveTo(ax, ay2);
+                    ctx.lineTo(ax - 4, ay2 - 8);
+                    ctx.lineTo(ax + 4, ay2 - 8);
+                    ctx.closePath();
+                    ctx.fillStyle = '#e67e22';
+                    ctx.fill();
+                }
+                // 標籤
+                ctx.fillStyle = '#c0392b';
+                ctx.font = 'bold 16px "Roboto", sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('平行光', this.simW / 2, this.lightSourceY + 20);
+            } else {
+                // 點光源
+                const sx = this.simW / 2;
+                const sy = this.tankTop - this.lightHeight;
+                // 光源圓點
+                const grad = ctx.createRadialGradient(sx, sy, 0, sx, sy, 12);
+                grad.addColorStop(0, '#fff');
+                grad.addColorStop(0.5, '#f1c40f');
+                grad.addColorStop(1, 'rgba(241,196,15,0)');
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.arc(sx, sy, 12, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#f39c12';
+                ctx.beginPath();
+                ctx.arc(sx, sy, 5, 0, Math.PI * 2);
+                ctx.fill();
+                // 標籤
+                ctx.fillStyle = '#c0392b';
+                ctx.font = 'bold 16px "Roboto", sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('點光源', sx, sy - 16);
+            }
+        }
+
+        // ============================================================
+        // 繪製水波槽外框
+        // ============================================================
+        drawTank(ctx) {
+            // 槽體
+            ctx.fillStyle = 'rgba(173, 216, 230, 0.25)';
+            ctx.fillRect(30, this.tankTop, this.simW - 60, this.tankBottom - this.tankTop);
+            ctx.strokeStyle = '#7f8c8d';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(30, this.tankTop, this.simW - 60, this.tankBottom - this.tankTop);
+
+            // 水的填充（靜水面以下）
+            ctx.fillStyle = 'rgba(100, 160, 220, 0.3)';
+            ctx.fillRect(31, this.waterSurfaceY, this.simW - 62, this.tankBottom - this.waterSurfaceY - 1);
+        }
+
+        // ============================================================
+        // 繪製水面波形
+        // ============================================================
+        drawWaterSurface(ctx) {
+            const left = 31;
+            const right = this.simW - 31;
+
+            // 填充水面到波形之間
+            ctx.beginPath();
+            ctx.moveTo(left, this.tankBottom - 1);
+            for (let x = left; x <= right; x++) {
+                const h = this.waveY(x);
+                ctx.lineTo(x, this.waterSurfaceY - h);
+            }
+            ctx.lineTo(right, this.tankBottom - 1);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(52, 152, 219, 0.5)';
+            ctx.fill();
+
+            // 波形曲線
+            ctx.beginPath();
+            for (let x = left; x <= right; x++) {
+                const h = this.waveY(x);
+                const py = this.waterSurfaceY - h;
+                if (x === left) ctx.moveTo(x, py);
+                else ctx.lineTo(x, py);
+            }
+            ctx.strokeStyle = '#2980b9';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+        }
+
+        // ============================================================
+        // 計算光線落點（用於繪製與亮度計算）
+        // ============================================================
+        computeRayHits() {
+            const left = 31;
+            const right = this.simW - 31;
+            const screenYPos = this.screenY;
+            // 密集取樣用於精確亮度計算
+            const denseCount = 1000;
+            const denseStep = (right - left) / denseCount;
+            const allHits = [];
+
+            for (let i = 0; i <= denseCount; i++) {
+                const x = left + i * denseStep;
+                allHits.push(this.traceRay(x, screenYPos));
+            }
+            return allHits;
+        }
+
+        // 折射率
+        static N_AIR = 1.0;
+        static N_WATER = 1.33;
+
+        traceRay(x, screenYPos) {
+            const h = this.waveY(x);
+            const surfaceY = this.waterSurfaceY - h;
+            const dydx = this.waveDYDX(x);
+
+            // --- 入射光方向 ---
+            let rayStartX, rayStartY;
+            if (this.lightMode === 'parallel') {
+                rayStartX = x;
+                rayStartY = this.tankTop;
+            } else {
+                rayStartX = this.simW / 2;
+                rayStartY = this.tankTop - this.lightHeight;
+            }
+
+            // 入射方向向量 (dx, dy)，從光源指向水面的命中點
+            let idx = x - rayStartX;
+            let idy = surfaceY - rayStartY;
+            const iLen = Math.sqrt(idx * idx + idy * idy);
+            idx /= iLen;
+            idy /= iLen;
+
+            // --- 水面法線 ---
+            // 水面函數 Y_surface(x) = waterSurfaceY - waveY(x)
+            // 法線方向 = (-dY_surface/dx, 1) = (dydx, 1)（指向上方/空氣側）
+            let nx = dydx;
+            let ny = 1;
+            const nLen = Math.sqrt(nx * nx + ny * ny);
+            nx /= nLen;
+            ny /= nLen;
+
+            // 確保法線指向入射光來的那一側（空氣側，即 y 較小的方向）
+            // 入射光 dot 法線 < 0 表示法線已朝入射方向
+            let cosI = -(idx * nx + idy * ny);
+            if (cosI < 0) {
+                nx = -nx;
+                ny = -ny;
+                cosI = -cosI;
+            }
+
+            // --- Snell's law: n1 sin(θ1) = n2 sin(θ2) ---
+            const n1 = RippleTankSimulation.N_AIR;
+            const n2 = RippleTankSimulation.N_WATER;
+            const ratio = n1 / n2;
+            const sin2T = ratio * ratio * (1 - cosI * cosI);
+
+            let refDx, refDy;
+            if (sin2T > 1) {
+                // 全反射（幾乎不會發生在空氣→水）
+                refDx = idx;
+                refDy = idy;
+            } else {
+                const cosT = Math.sqrt(1 - sin2T);
+                // 折射方向 = ratio * I + (ratio * cosI - cosT) * N
+                refDx = ratio * idx + (ratio * cosI - cosT) * nx;
+                refDy = ratio * idy + (ratio * cosI - cosT) * ny;
+            }
+
+            // --- 光線在水中傳播到槽底 (tankBottom) ---
+            // 從 (x, surfaceY) 沿 (refDx, refDy) 到 y = tankBottom
+            const tToBottom = (this.tankBottom - surfaceY) / refDy;
+            const bottomX = x + refDx * tToBottom;
+
+            // --- 在槽底（平面），水→空氣折射 ---
+            // 底面法線指向上 (0, -1)（指向水中，即光線來的那一側）
+            const cosI2 = -refDy; // dot(refDir, (0, -1)) = -refDy
+            const ratio2 = n2 / n1;
+            const sin2T2 = ratio2 * ratio2 * (1 - cosI2 * cosI2);
+
+            let exitDx, exitDy;
+            if (sin2T2 > 1) {
+                // 全反射：光線被困在水中
+                exitDx = refDx;
+                exitDy = -refDy; // 反彈
+            } else {
+                const cosT2 = Math.sqrt(1 - sin2T2);
+                // 法線 = (0, -1)
+                exitDx = ratio2 * refDx + (ratio2 * cosI2 - cosT2) * 0;
+                exitDy = ratio2 * refDy + (ratio2 * cosI2 - cosT2) * (-1);
+            }
+
+            // --- 從槽底到屏幕 ---
+            const tToScreen = (screenYPos - this.tankBottom) / exitDy;
+            const hitX = bottomX + exitDx * tToScreen;
+
+            return {
+                x, surfaceY, hitX,
+                rayStartX, rayStartY,
+                bottomX, bottomY: this.tankBottom
+            };
+        }
+
+        // ============================================================
+        // 繪製光線（從水面折射到屏幕）
+        // ============================================================
+        drawLightRays(ctx) {
+            const allHits = this.computeRayHits();
+
+            // 繪製用：每隔幾條畫一條光線，保持視覺清爽
+            const drawStep = Math.max(1, Math.floor(allHits.length / 120));
+            for (let i = 0; i < allHits.length; i += drawStep) {
+                const hit = allHits[i];
+                // 第1段：光源到水面（空氣中）
+                ctx.beginPath();
+                ctx.moveTo(hit.rayStartX, hit.rayStartY);
+                ctx.lineTo(hit.x, hit.surfaceY);
+                ctx.strokeStyle = 'rgba(230, 126, 34, 0.25)';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+                // 第2段：水面到槽底（水中）
+                ctx.beginPath();
+                ctx.moveTo(hit.x, hit.surfaceY);
+                ctx.lineTo(hit.bottomX, hit.bottomY);
+                ctx.strokeStyle = 'rgba(41, 128, 185, 0.30)';
+                ctx.lineWidth = 1.2;
+                ctx.stroke();
+                // 第3段：槽底到屏幕（空氣中）
+                ctx.beginPath();
+                ctx.moveTo(hit.bottomX, hit.bottomY);
+                ctx.lineTo(hit.hitX, this.screenY);
+                ctx.strokeStyle = 'rgba(230, 126, 34, 0.35)';
+                ctx.lineWidth = 1.2;
+                ctx.stroke();
+            }
+
+            // 計算屏幕亮度分布（高斯平均）
+            this._screenBrightness = this.computeScreenBrightness(allHits);
+        }
+
+        // ============================================================
+        // 計算屏幕亮度（高斯加權平均法）
+        // 對每個屏幕像素，以高斯權重統計鄰近光線落點密度
+        // ============================================================
+        computeScreenBrightness(screenHits) {
+            const bins = this.simW;
+            const brightness = new Float64Array(bins);
+
+            // 高斯核寬度：使用者可調整
+            const sigma = this.sigma;
+            const invSigma2 = 1.0 / (2.0 * sigma * sigma);
+            const cutoff = sigma * 3.5; // 截止範圍
+
+            // 預先排序光線落點以加速鄰域搜索
+            const sorted = screenHits.map(h => h.hitX).sort((a, b) => a - b);
+            const N = sorted.length;
+
+            // 對每個屏幕像素，用高斯加權計算光線密度
+            for (let px = 0; px < bins; px++) {
+                let sum = 0;
+                // 二分搜尋找到鄰近範圍的起始索引
+                let lo = 0, hi = N;
+                while (lo < hi) {
+                    const mid = (lo + hi) >> 1;
+                    if (sorted[mid] < px - cutoff) lo = mid + 1;
+                    else hi = mid;
+                }
+                // 從起始索引往右累加
+                for (let j = lo; j < N; j++) {
+                    const d = sorted[j] - px;
+                    if (d > cutoff) break;
+                    sum += Math.exp(-d * d * invSigma2);
+                }
+                brightness[px] = sum;
+            }
+
+            // 歸一化到 [0, 1]
+            let maxB = 0;
+            for (let i = 0; i < bins; i++) {
+                if (brightness[i] > maxB) maxB = brightness[i];
+            }
+            if (maxB > 0) {
+                for (let i = 0; i < bins; i++) {
+                    brightness[i] /= maxB;
+                }
+            }
+            return brightness;
+        }
+
+        // ============================================================
+        // 繪製屏幕（白紙）
+        // ============================================================
+        drawScreen(ctx) {
+            const brightness = this._screenBrightness;
+            if (!brightness) return;
+
+            const screenHeight = 18;
+            const left = 0;
+            const right = this.simW;
+
+            // 逐像素繪製屏幕亮度
+            for (let x = left; x < right; x++) {
+                const b = brightness[x] || 0;
+                // 亮紋為橙黃色，暗紋為深灰色
+                const r = Math.floor(60 + 195 * b);
+                const g = Math.floor(50 + 160 * b);
+                const bl = Math.floor(40 + 40 * b);
+                ctx.fillStyle = `rgb(${r},${g},${bl})`;
+                ctx.fillRect(x, this.screenY, 1, screenHeight);
+            }
+
+            // 屏幕邊框
+            ctx.strokeStyle = '#7f8c8d';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(0, this.screenY, this.simW, screenHeight);
+        }
+
+        // ============================================================
+        // 繪製亮度曲線圖
+        // ============================================================
+        drawBrightnessGraph(ctx) {
+            const brightness = this._screenBrightness;
+            if (!brightness) return;
+
+            const gTop = this.graphTop;
+            const gBottom = this.graphBottom;
+            const gHeight = gBottom - gTop;
+
+            // 背景
+            ctx.fillStyle = '#1a1a2e';
+            ctx.fillRect(0, gTop, this.simW, gHeight);
+
+            // 網格
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 4; i++) {
+                const gy = gTop + (gHeight / 4) * i;
+                ctx.beginPath();
+                ctx.moveTo(0, gy);
+                ctx.lineTo(this.simW, gy);
+                ctx.stroke();
+            }
+
+            // 亮度曲線
+            ctx.beginPath();
+            for (let x = 0; x < this.simW; x++) {
+                const b = brightness[x] || 0;
+                const gy = gBottom - b * gHeight * 0.9 - 5;
+                if (x === 0) ctx.moveTo(x, gy);
+                else ctx.lineTo(x, gy);
+            }
+            ctx.strokeStyle = '#f39c12';
+            ctx.lineWidth = 2.5;
+            ctx.stroke();
+
+            // 填充
+            ctx.lineTo(this.simW, gBottom);
+            ctx.lineTo(0, gBottom);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(243, 156, 18, 0.15)';
+            ctx.fill();
+
+            // 標籤
+            ctx.fillStyle = '#ecf0f1';
+            ctx.font = 'bold 13px "Roboto", Arial, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText('屏幕亮度分布', this.offsetX + 10, gTop + 18);
+
+            // 亮紋暗紋示意標記
+            ctx.font = '11px "Roboto", Arial, sans-serif';
+            ctx.fillStyle = '#f1c40f';
+            ctx.textAlign = 'right';
+            ctx.fillText('亮', this.offsetX + this.W - 10, gTop + 18);
+            ctx.fillStyle = '#7f8c8d';
+            ctx.fillText('暗', this.offsetX + this.W - 10, gBottom - 8);
+        }
+
+        // ============================================================
+        // 繪製標籤
+        // ============================================================
+        drawLabels(ctx) {
+            ctx.fillStyle = '#2c3e50';
+            ctx.font = 'bold 14px "Roboto", sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText('水波', this.offsetX + 36, this.waterSurfaceY - this.amplitude - 12);
+
+            ctx.textAlign = 'left';
+            ctx.fillText('白紙（屏幕）', this.offsetX + 10, this.screenY + 14);
+
+            ctx.setLineDash([]);
+
+            // 亮紋 / 暗紋 標示
+            this.drawBrightnessLabels(ctx);
+        }
+
+        // 尋找兩個相鄰波峰
+        findTwoPeaks(nearX) {
+            const left = 31;
+            const right = this.simW - 31;
+            const peaks = [];
+            for (let x = left + 1; x < right - 1; x++) {
+                const y0 = this.waveY(x - 1);
+                const y1 = this.waveY(x);
+                const y2 = this.waveY(x + 1);
+                if (y1 > y0 && y1 > y2 && y1 > this.amplitude * 0.3) {
+                    peaks.push(x);
+                }
+            }
+            // 找離 nearX 最近的兩個
+            peaks.sort((a, b) => Math.abs(a - nearX) - Math.abs(b - nearX));
+            if (peaks.length >= 2) {
+                const sorted = [peaks[0], peaks[1]].sort((a, b) => a - b);
+                return { x1: sorted[0], x2: sorted[1] };
+            }
+            return null;
+        }
+
+        drawArrow(ctx, fromX, fromY, toX, toY, color) {
+            const headLen = 7;
+            const angle = Math.atan2(toY - fromY, toX - fromX);
+            ctx.beginPath();
+            ctx.moveTo(toX, toY);
+            ctx.lineTo(toX - headLen * Math.cos(angle - 0.4), toY - headLen * Math.sin(angle - 0.4));
+            ctx.lineTo(toX - headLen * Math.cos(angle + 0.4), toY - headLen * Math.sin(angle + 0.4));
+            ctx.closePath();
+            ctx.fillStyle = color;
+            ctx.fill();
+        }
+
+        // 在屏幕下方標示亮紋 / 暗紋
+        drawBrightnessLabels(ctx) {
+            const brightness = this._screenBrightness;
+            if (!brightness) return;
+
+            const screenBottom = this.screenY + 20;
+            ctx.font = '11px "Roboto", Arial, sans-serif';
+            ctx.textAlign = 'center';
+
+            // 尋找局部極大（亮紋）和極小（暗紋）
+            const peaks = [];
+            const valleys = [];
+            const smoothed = this.smoothArray(brightness, 8);
+
+            // 只搜尋可見區域
+            const visLeft = this.offsetX + 20;
+            const visRight = this.offsetX + this.W - 20;
+            for (let x = visLeft; x < visRight; x++) {
+                if (smoothed[x] > smoothed[x - 1] && smoothed[x] > smoothed[x + 1] && smoothed[x] > 0.5) {
+                    peaks.push(x);
+                }
+                if (smoothed[x] < smoothed[x - 1] && smoothed[x] < smoothed[x + 1] && smoothed[x] < 0.4) {
+                    valleys.push(x);
+                }
+            }
+
+            // 去除過近的標記
+            const filterClose = (arr, minDist) => {
+                const result = [];
+                for (const v of arr) {
+                    if (result.length === 0 || v - result[result.length - 1] > minDist) {
+                        result.push(v);
+                    }
+                }
+                return result;
+            };
+
+            const filteredPeaks = filterClose(peaks, 30);
+            const filteredValleys = filterClose(valleys, 30);
+
+            // 只標示可見區域
+            for (const px of filteredPeaks) {
+                if (px > visLeft && px < visRight) {
+                    ctx.fillStyle = '#e74c3c';
+                    ctx.fillText('亮紋', px, screenBottom + 14);
+                }
+            }
+            for (const vx of filteredValleys) {
+                if (vx > visLeft && vx < visRight) {
+                    ctx.fillStyle = '#7f8c8d';
+                    ctx.fillText('暗紋', vx, screenBottom + 14);
+                }
+            }
+        }
+
+        smoothArray(arr, radius) {
+            const out = new Float64Array(arr.length);
+            for (let i = 0; i < arr.length; i++) {
+                let sum = 0, count = 0;
+                for (let j = Math.max(0, i - radius); j <= Math.min(arr.length - 1, i + radius); j++) {
+                    sum += arr[j];
+                    count++;
+                }
+                out[i] = sum / count;
+            }
+            return out;
+        }
+    }
+
+    // 初始化
+    let simulation;
+    document.addEventListener('DOMContentLoaded', () => {
+        simulation = new RippleTankSimulation();
+        simulation.updateInfo();
+    });
+    </script>
+    
+    <!-- Navigation Scripts -->
+    <script src="../../js/jquery-1.9.1.min.js"></script>
+    <script src="../../js/classie.js"></script>
+    <script src="../../js/main.js"></script>
+</body>
+</html>

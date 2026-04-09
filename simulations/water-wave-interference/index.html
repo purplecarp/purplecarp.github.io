@@ -98,85 +98,88 @@
             </p>
         </div>
         
-        <!-- 模擬區域 -->
-        <div class="simulation-section">
-        <!-- 模擬區域 -->
-        <div class="simulation-section">
-            <div class="canvas-wrapper">
-                <canvas id="intensityCanvas" width="900" height="150"></canvas>
-                <canvas id="waveCanvas" width="900" height="600"></canvas>
-            </div>
-        </div>
-        
-        <!-- 控制按鈕 -->
-        <div class="button-group">
-            <button class="btn btn-start" id="startBtn">▶ 開始模擬</button>
-            <button class="btn btn-pause" id="pauseBtn">⏸ 暫停</button>
-            <button class="btn btn-reset" id="resetBtn">🔄 重置</button>
-        </div>
-        
-        <div class="controls">
-            <div class="control-section">
-                <h3>🎯 波源配置</h3>
-                
-                <div class="control-row">
-                    <label>波源間距 (d)</label>
-                    <input type="range" id="spacingSlider" min="20" max="600" step="10" value="150">
-                    <span class="value-display" id="spacingValue">150 px</span>
+        <!-- 模擬與控制面板並排 -->
+        <div class="sim-layout">
+            <!-- 左側控制面板 -->
+            <div class="sim-layout-left">
+                <div class="controls">
+                    <div class="control-section">
+                        <h3>⚙️ 波動參數</h3>
+                        
+                        <div class="control-row">
+                            <label>波源間距 (d)</label>
+                            <input type="range" id="spacingSlider" min="20" max="600" step="10" value="150">
+                            <span class="value-display" id="spacingValue">150 px</span>
+                        </div>
+                        
+                        <div class="control-row">
+                            <label>波長 (λ)</label>
+                            <input type="range" id="wavelengthSlider" min="10" max="100" step="5" value="30">
+                            <span class="value-display" id="wavelengthValue">30 px</span>
+                        </div>
+                        
+                        <div class="control-row">
+                            <label>切面位置 (y)</label>
+                            <input type="range" id="slicePositionSlider" min="50" max="550" step="10" value="300">
+                            <span class="value-display" id="slicePositionValue">300 px</span>
+                        </div>
+                        
+                        <div class="control-row">
+                            <label>動畫速度</label>
+                            <input type="range" id="speedSlider" min="0.2" max="3" step="0.2" value="1">
+                            <span class="value-display" id="speedValue">1.0x</span>
+                        </div>
+                        
+                        <div class="wave-info wave-info-row-3" style="margin-top: 10px;">
+                            <div class="wave-info-item">
+                                <div class="wave-info-label">波源 1 位置</div>
+                                <div class="wave-info-value" id="source1Pos">-</div>
+                            </div>
+                            <div class="wave-info-item">
+                                <div class="wave-info-label">波源 2 位置</div>
+                                <div class="wave-info-value" id="source2Pos">-</div>
+                            </div>
+                            <div class="wave-info-item">
+                                <div class="wave-info-label">波源間距</div>
+                                <div class="wave-info-value" id="sourceDist">-</div>
+                            </div>
+                        </div>
+                        
+                        <div class="wave-info wave-info-row-4" style="margin-top: 6px;">
+                            <div class="wave-info-item">
+                                <div class="wave-info-label">波長 (λ)</div>
+                                <div class="wave-info-value" id="currentWavelength">30 px</div>
+                            </div>
+                            <div class="wave-info-item">
+                                <div class="wave-info-label">切面位置</div>
+                                <div class="wave-info-value" id="currentSlicePosition">300 px</div>
+                            </div>
+                            <div class="wave-info-item">
+                                <div class="wave-info-label">距離波源</div>
+                                <div class="wave-info-value" id="distanceToSource">250 px</div>
+                            </div>
+                            <div class="wave-info-item">
+                                <div class="wave-info-label">d/λ 比值</div>
+                                <div class="wave-info-value" id="spacingRatio">5.0</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                <div class="wave-info">
-                    <div class="wave-info-item">
-                        <div class="wave-info-label">波源 1 位置</div>
-                        <div class="wave-info-value" id="source1Pos">-</div>
-                    </div>
-                    <div class="wave-info-item">
-                        <div class="wave-info-label">波源 2 位置</div>
-                        <div class="wave-info-value" id="source2Pos">-</div>
-                    </div>
-                    <div class="wave-info-item">
-                        <div class="wave-info-label">波源間距</div>
-                        <div class="wave-info-value" id="sourceDist">-</div>
-                    </div>
+                
+                <!-- 控制按鈕 -->
+                <div class="button-group">
+                    <button class="btn btn-start" id="startBtn">▶ 開始模擬</button>
+                    <button class="btn btn-pause" id="pauseBtn">⏸ 暫停</button>
+                    <button class="btn btn-reset" id="resetBtn">🔄 重置</button>
                 </div>
             </div>
             
-            <div class="control-section">
-                <h3>⚙️ 波動參數</h3>
-                
-                <div class="control-row">
-                    <label>波長 (λ)</label>
-                    <input type="range" id="wavelengthSlider" min="10" max="100" step="5" value="30">
-                    <span class="value-display" id="wavelengthValue">30 px</span>
-                </div>
-                
-                <div class="control-row">
-                    <label>切面位置 (y)</label>
-                    <input type="range" id="slicePositionSlider" min="50" max="550" step="10" value="300">
-                    <span class="value-display" id="slicePositionValue">300 px</span>
-                </div>
-                
-                <div class="control-row">
-                    <label>動畫速度</label>
-                    <input type="range" id="speedSlider" min="0.2" max="3" step="0.2" value="1">
-                    <span class="value-display" id="speedValue">1.0x</span>
-                </div>
-                
-                <div class="wave-info" style="margin-top: 20px;">
-                    <div class="wave-info-item">
-                        <div class="wave-info-label">波長 (λ)</div>
-                        <div class="wave-info-value" id="currentWavelength">30 px</div>
-                    </div>
-                    <div class="wave-info-item">
-                        <div class="wave-info-label">切面位置</div>
-                        <div class="wave-info-value" id="currentSlicePosition">300 px</div>
-                    </div>
-                    <div class="wave-info-item">
-                        <div class="wave-info-label">距離波源</div>
-                        <div class="wave-info-value" id="distanceToSource">250 px</div>
-                    </div>
-                    <div class="wave-info-item">
-                        <div class="wave-info-label">d/λ 比值</div>
-                        <div class="wave-info-value" id="spacingRatio">5.0</div>
+            <!-- 右側模擬區域 -->
+            <div class="sim-layout-right">
+                <div class="simulation-section">
+                    <div class="canvas-wrapper">
+                        <canvas id="intensityCanvas" width="900" height="150"></canvas>
+                        <canvas id="waveCanvas" width="900" height="600"></canvas>
                     </div>
                 </div>
             </div>
@@ -293,6 +296,9 @@
                     this.powerAccumulator.fill(0);
                     this.powerFrameCount = 0;
                     this.updateInfo();
+                    if (!this.isRunning) {
+                        this.drawStatic();
+                    }
                 });
                 
                 // 速度控制
