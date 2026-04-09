@@ -210,12 +210,33 @@
                 this.ctx = this.canvas.getContext('2d');
                 this.width = this.canvas.width;
                 this.height = this.canvas.height;
+
+                // 高DPI支援 - 先縮放主畫布
+                this.dpr = window.devicePixelRatio || 1;
+                this.canvas.width = Math.round(this.width * this.dpr);
+                this.canvas.height = Math.round(this.height * this.dpr);
+                this.canvas.style.width = this.width + 'px';
+                this.canvas.style.height = this.height + 'px';
+                this.ctx.scale(this.dpr, this.dpr);
                 
                 // 強度圖canvas
                 this.intensityCanvas = document.getElementById('intensityCanvas');
                 this.intensityCtx = this.intensityCanvas.getContext('2d');
                 this.intensityWidth = this.intensityCanvas.width;
                 this.intensityHeight = this.intensityCanvas.height;
+
+                // 高DPI支援 - 縮放強度圖畫布
+                this.intensityCanvas.width = Math.round(this.intensityWidth * this.dpr);
+                this.intensityCanvas.height = Math.round(this.intensityHeight * this.dpr);
+                this.intensityCanvas.style.width = this.intensityWidth + 'px';
+                this.intensityCanvas.style.height = this.intensityHeight + 'px';
+                this.intensityCtx.scale(this.dpr, this.dpr);
+                
+                // 離屏畫布：用於imageData（保持CSS像素尺寸，避免putImageData座標問題）
+                this.offscreenCanvas = document.createElement('canvas');
+                this.offscreenCanvas.width = this.width;
+                this.offscreenCanvas.height = this.height;
+                this.offscreenCtx = this.offscreenCanvas.getContext('2d');
                 
                 // 物理參數
                 this.wavelength = 30;    // 波長（像素）
@@ -233,8 +254,8 @@
                 this.isRunning = false;
                 this.animationId = null;
                 
-                // 像素緩衝
-                this.imageData = this.ctx.createImageData(this.width, this.height);
+                // 像素緩衝（使用離屏畫布確保putImageData正確運作）
+                this.imageData = this.offscreenCtx.createImageData(this.width, this.height);
                 
                 // 波前追蹤（用於顯示波的擴散範圍）
                 this.showWavefront = true;
@@ -453,7 +474,8 @@
                     }
                 }
                 
-                this.ctx.putImageData(this.imageData, 0, 0);
+                this.offscreenCtx.putImageData(this.imageData, 0, 0);
+                this.ctx.drawImage(this.offscreenCanvas, 0, 0, this.width, this.height);
                 this.drawSliceLine();
                 this.drawSources();
                 this.accumulatePower();

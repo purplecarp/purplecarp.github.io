@@ -15,6 +15,11 @@
     
     <link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700' rel='stylesheet' type='text/css'>
     <link href='https://fonts.googleapis.com/css?family=Roboto:400,300,500,700' rel='stylesheet' type='text/css'>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
 </head>
 <body>
     <!--HEADER -->
@@ -92,8 +97,8 @@
             <h4>📚 物理原理與公式</h4>
             <p>
                 • <strong>水波槽原理：</strong>水波槽中的水波使水面高低起伏，當平行光由上方照射時，波峰處（凸透鏡效應）會聚光線形成亮紋，波谷處（凹透鏡效應）發散光線形成暗紋<br>
-                • <strong>一維行進波：</strong>y(x, t) = A sin(kx − ωt)，其中 k = 2π/λ，ω = 2πf<br>
-                • <strong>駐波：</strong>兩列等振幅、等頻率、反向行進的波疊加：y(x, t) = 2A sin(kx) cos(ωt)，節點處振幅恆為零<br>
+                • <strong>一維行進波：</strong>$y(x, t) = A\sin(kx - \omega t)$，其中 $k = \dfrac{2\pi}{\lambda}$，$\omega = 2\pi f$<br>
+                • <strong>駐波：</strong>兩列等振幅、等頻率、反向行進的波疊加：$y(x, t) = 2A\sin(kx)\cos(\omega t)$，節點處振幅恆為零<br>
                 • <strong>投影亮度：</strong>水面曲率越大（波峰/波谷頂點），對光的聚散作用越強。屏幕上亮度與水面斜率的變化（曲率）有關
             </p>
         </div>
@@ -179,6 +184,14 @@
             this.ctx = this.canvas.getContext('2d');
             this.W = this.canvas.width;   // 顯示寬度 (900)
             this.H = this.canvas.height;
+
+            // 高DPI支援
+            this.dpr = window.devicePixelRatio || 1;
+            this.canvas.width = Math.round(this.W * this.dpr);
+            this.canvas.height = Math.round(this.H * this.dpr);
+            this.canvas.style.width = this.W + 'px';
+            this.canvas.style.height = this.H + 'px';
+            this.ctx.scale(this.dpr, this.dpr);
 
             // 內部模擬寬度（比顯示寬度寬，避免邊緣效應）
             this.simW = 1500;

@@ -51,6 +51,11 @@
             }
         }
     </style>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
 </head>
 <body>
     <!--HEADER -->
@@ -107,12 +112,12 @@
         <div class="info-box physics-principle">
             <h4>📚 物理原理與公式</h4>
             <p>
-                • <strong>簡諧運動 (SHM)：</strong>物體在彈性恢復力 F = −kx 作用下的週期性運動<br>
-                • <strong>位移公式：</strong>x(t) = A cos(ωt)，其中 A 為振幅（釋放點），ω = √(k/m)<br>
-                • <strong>速度公式：</strong>v(t) = −Aω sin(ωt)<br>
-                • <strong>加速度公式：</strong>a(t) = −Aω² cos(ωt) = −(k/m)x<br>
-                • <strong>週期：</strong>T = 2π/ω = 2π√(m/k)<br>
-                • <strong>圓周運動對應：</strong>等速圓周運動在直徑方向的投影即為簡諧運動
+                • <strong>簡諧運動 (SHM)：</strong>物體在彈性恢復力 $F = -kx$ 作用下的週期性運動<br>
+                • <strong>位移公式：</strong>$x(t) = A\cos(\omega t)$，其中 $A$ 為振幅（釋放點），$\omega = \sqrt{k/m}$<br>
+                • <strong>速度公式：</strong>$v(t) = -A\omega\sin(\omega t)$<br>
+                • <strong>加速度公式：</strong>$a(t) = -A\omega^2\cos(\omega t) = -(k/m)x$<br>
+                • <strong>週期：</strong>$T = \dfrac{2\pi}{\omega} = 2\pi\sqrt{\dfrac{m}{k}}$<br>
+                • <strong>圓周運動對應：</strong>等速圓周運動在水平方向的投影即為簡諧運動
             </p>
         </div>
         
@@ -219,6 +224,13 @@
             this.atCanvas = document.getElementById('atCanvas');
             this.atCtx = this.atCanvas.getContext('2d');
 
+            // 高 DPI 縮放
+            this.dpr = window.devicePixelRatio || 1;
+            this.scaleCanvas(this.simCanvas, this.simCtx);
+            this.scaleCanvas(this.xtCanvas, this.xtCtx);
+            this.scaleCanvas(this.vtCanvas, this.vtCtx);
+            this.scaleCanvas(this.atCanvas, this.atCtx);
+
             // 物理參數
             this.k = 10;       // 彈簧力常數 N/m
             this.m = 2.0;      // 質量 kg
@@ -264,6 +276,18 @@
             this.bindControls();
             this.updateDataDisplay();
             this.drawAll();
+        }
+
+        // 高 DPI 縮放：將 canvas 實際像素放大，CSS 尺寸不變
+        scaleCanvas(canvas, ctx) {
+            const dpr = this.dpr;
+            const cssW = canvas.width;
+            const cssH = canvas.height;
+            canvas.width = Math.round(cssW * dpr);
+            canvas.height = Math.round(cssH * dpr);
+            canvas.style.width = cssW + 'px';
+            canvas.style.height = cssH + 'px';
+            ctx.scale(dpr, dpr);
         }
 
         bindControls() {
@@ -373,7 +397,7 @@
         drawSimulation() {
             const canvas = this.simCanvas;
             const ctx = this.simCtx;
-            const W = canvas.width, H = canvas.height;
+            const W = canvas.width / this.dpr, H = canvas.height / this.dpr;
 
             ctx.clearRect(0, 0, W, H);
             ctx.fillStyle = '#0d1117';
@@ -850,7 +874,7 @@
 
         // ===================== 圖表繪製 =====================
         drawGraph(ctx, canvas, dataKey, color, ylabel) {
-            const W = canvas.width, H = canvas.height;
+            const W = canvas.width / this.dpr, H = canvas.height / this.dpr;
             ctx.clearRect(0, 0, W, H);
             ctx.fillStyle = '#0a0a1a';
             ctx.fillRect(0, 0, W, H);

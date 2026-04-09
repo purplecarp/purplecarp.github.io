@@ -15,6 +15,11 @@
     
     <link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700' rel='stylesheet' type='text/css'>
     <link href='https://fonts.googleapis.com/css?family=Roboto:400,300,500,700' rel='stylesheet' type='text/css'>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
 </head>
 <body>
     <!--HEADER -->
@@ -89,10 +94,10 @@
         
         <div class="info-box physics-principle">
             <h4>📚 物理原理</h4>
-            <p><strong>勞倫茲力：</strong>當帶電粒子以速度 v 進入磁場 B 時，會受到垂直於速度和磁場的勞倫茲力。</p>
-            <div class="formula">F = q(v × B) = qvB sin(θ)</div>
-            <p><strong>圓周運動：</strong>當 v ⊥ B 時，粒子做等速率圓周運動，半徑 r = mv/(qB)</p>
-            <p><strong>螺旋運動：</strong>當 v 與 B 有夾角時，粒子做螺旋運動</p>
+            <p><strong>勞倫茲力：</strong>當帶電粒子以速度 $v$ 進入磁場 $B$ 時，會受到垂直於速度和磁場的勞倫茲力。</p>
+            <div class="formula">$$\mathbf{F} = q(\mathbf{v} \times \mathbf{B}) = qvB\sin\theta$$</div>
+            <p><strong>圓周運動：</strong>當 $v \perp B$ 時，粒子做等速率圓周運動，半徑 $r = \dfrac{mv}{qB}$</p>
+            <p><strong>螺旋運動：</strong>當 $v$ 與 $B$ 有夾角時，粒子做螺旋運動</p>
         </div>
         
         <!-- 模擬區域 -->

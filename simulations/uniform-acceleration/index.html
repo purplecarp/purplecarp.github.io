@@ -103,6 +103,11 @@
             }
         }
     </style>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
 </head>
 <body>
     <!--HEADER -->
@@ -160,9 +165,9 @@
             <h4>📚 物理原理與公式</h4>
             <p>
                 • <strong>等加速度運動：</strong>物體在固定加速度下的運動，速度隨時間均勻變化<br>
-                • <strong>位移公式：</strong>x(t) = x₀ + v₀t + ½at²<br>
-                • <strong>速度公式：</strong>v(t) = v₀ + at<br>
-                • <strong>加速度：</strong>a = 常數<br>
+                • <strong>位移公式：</strong>$x(t) = x_0 + v_0 t + \dfrac{1}{2}at^2$<br>
+                • <strong>速度公式：</strong>$v(t) = v_0 + at$<br>
+                • <strong>加速度：</strong>$a =$ 常數<br>
                 • <strong>圖形特徵：</strong>x-t 圖為拋物線、v-t 圖為直線、a-t 圖為水平線
             </p>
         </div>
@@ -281,6 +286,12 @@
             this.atCanvas = document.getElementById('atCanvas');
             this.atCtx = this.atCanvas.getContext('2d');
 
+            this.dpr = window.devicePixelRatio || 1;
+            this.scaleCanvas(this.simCanvas, this.simCtx);
+            this.scaleCanvas(this.xtCanvas, this.xtCtx);
+            this.scaleCanvas(this.vtCanvas, this.vtCtx);
+            this.scaleCanvas(this.atCanvas, this.atCtx);
+
             this.v0 = 5.0;
             this.a = 2.0;
             this.maxTime = 10;
@@ -299,6 +310,16 @@
             this.history = [];
 
             this.init();
+        }
+
+        scaleCanvas(canvas, ctx) {
+            const dpr = this.dpr;
+            const cssW = canvas.width, cssH = canvas.height;
+            canvas.width = Math.round(cssW * dpr);
+            canvas.height = Math.round(cssH * dpr);
+            canvas.style.width = cssW + 'px';
+            canvas.style.height = cssH + 'px';
+            ctx.scale(dpr, dpr);
         }
 
         init() {
@@ -543,7 +564,7 @@
         drawSimulation() {
             const canvas = this.simCanvas;
             const ctx = this.simCtx;
-            const W = canvas.width, H = canvas.height;
+            const W = canvas.width / this.dpr, H = canvas.height / this.dpr;
 
             ctx.clearRect(0, 0, W, H);
             ctx.fillStyle = '#0d1117';
@@ -767,7 +788,7 @@
         }
 
         drawGraph(canvas, ctx, color, valueFn, yRange, yLabel) {
-            const W = canvas.width, H = canvas.height;
+            const W = canvas.width / this.dpr, H = canvas.height / this.dpr;
             ctx.clearRect(0, 0, W, H);
             ctx.fillStyle = '#0a0a1a';
             ctx.fillRect(0, 0, W, H);
