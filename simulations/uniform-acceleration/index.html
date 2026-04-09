@@ -1,0 +1,916 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8">
+    <title>等加速度運動模擬 - 物理模擬</title>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <link href="../../images/fish.png" rel="shortcut icon">
+    
+    <link href="../../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../../css/normalize.css" rel="stylesheet">
+    <link href="../../css/style.css" rel="stylesheet">
+    <link href="../../css/responsive.css" rel="stylesheet">
+    <link href="../../css/simulations.css" rel="stylesheet">
+    
+    <link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Roboto:400,300,500,700' rel='stylesheet' type='text/css'>
+
+    <style>
+        .graphs-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .graph-box {
+            background: #1a1a2e;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+        }
+        .graph-box h5 {
+            color: #ecf0f1;
+            margin: 0 0 6px 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .graph-box canvas {
+            width: 100%;
+            border-radius: 4px;
+            background: #0a0a1a;
+        }
+        #simCanvas {
+            width: 100%;
+            border-radius: 6px;
+            background: #0d1117;
+        }
+        .view-toggle {
+            display: flex;
+            gap: 0;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 2px solid #3498db;
+        }
+        .view-toggle button {
+            flex: 1;
+            padding: 7px 10px;
+            border: none;
+            background: #f8f9fa;
+            color: #555;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .view-toggle button.active {
+            background: #3498db;
+            color: #fff;
+        }
+        .preset-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .preset-btn {
+            width: 100%;
+            padding: 7px 10px;
+            border: 1.5px solid #555;
+            border-radius: 6px;
+            background: #f8f9fa;
+            color: #444;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+        }
+        .preset-btn:hover {
+            border-color: #3498db;
+            background: #eaf4fc;
+        }
+        .preset-btn.active {
+            border-color: #3498db;
+            background: #3498db;
+            color: #fff;
+        }
+        .view-toggle button:hover:not(.active) {
+            background: #e0e0e0;
+        }
+        @media (max-width: 768px) {
+            .graphs-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!--HEADER -->
+    <div class="header">
+      <div class="for-sticky">
+        <div class="col-md-2 col-xs-6 logo">
+          <a href="../../index.html"><img alt="logo" class="logo-nav" src="../../images/fish.png"></a>
+        </div>
+      </div>
+      <div class="menu-wrap">
+        <nav class="menu">
+          <div class="menu-list">
+            <a href="../../index.html#home"><span>首頁</span></a>
+            <a href="../../index.html#about"><span>關於我</span></a>
+            <a href="../../index.html#experience"><span>教學經驗</span></a>
+            <a href="../../teaching-gallery.html"><span>查看教學剪影</span></a>
+            <a href="../../physics-simulations.html" class="active"><span>高中物理內容</span></a>
+            <a href="../../index.html#skills"><span>專業技能</span></a>
+            <a href="../../index.html#achievements"><span>成果展示</span></a>
+            <a href="../../index.html#philosophy"><span>教育理念</span></a>
+            <a href="../../index.html#contact"><span>聯絡方式</span></a>
+          </div>
+        </nav>
+        <button class="close-button" id="close-button">Close Menu</button>
+      </div>
+      <button class="menu-button" id="open-button">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <!--/.HEADER END-->
+    
+    <!-- 頂部導航欄 -->
+    <div class="top-nav">
+        <div class="container">
+            <a href="../../index.html" class="nav-brand">
+                <img src="../../images/fish.png" alt="Logo">
+                <h2>物鯉魚教學模擬</h2>
+            </a>
+            <a href="../../physics-simulations.html" class="btn-back">← 返回列表</a>
+        </div>
+    </div>
+    
+    <!-- 主容器 -->
+    <div class="main-container">
+        <!-- 頁面標題 -->
+        <div class="page-header">
+            <h1>🚀 等加速度運動模擬</h1>
+            <p class="subtitle">控制初速度與加速度，即時觀察 x-t、v-t、a-t 圖 | 選修物理 I - 力學</p>
+        </div>
+        
+        <!-- 物理原理說明 -->
+        <div class="info-box physics-principle">
+            <h4>📚 物理原理與公式</h4>
+            <p>
+                • <strong>等加速度運動：</strong>物體在固定加速度下的運動，速度隨時間均勻變化<br>
+                • <strong>位移公式：</strong>x(t) = x₀ + v₀t + ½at²<br>
+                • <strong>速度公式：</strong>v(t) = v₀ + at<br>
+                • <strong>加速度：</strong>a = 常數<br>
+                • <strong>圖形特徵：</strong>x-t 圖為拋物線、v-t 圖為直線、a-t 圖為水平線
+            </p>
+        </div>
+        
+        <!-- 模擬與控制面板並排 -->
+        <div class="sim-layout">
+            <!-- 右側控制面板 -->
+            <div class="sim-layout-left">
+                <div class="controls">
+                    <div class="control-section">
+                        <h3>⚙️ 運動參數</h3>
+                        
+                        <div class="control-row">
+                            <label>初速度 v₀ (m/s)</label>
+                            <input type="range" id="v0Slider" min="-20" max="20" step="0.5" value="5">
+                            <span class="value-display" id="v0Value">5.0</span>
+                        </div>
+                        
+                        <div class="control-row">
+                            <label>加速度 a (m/s²)</label>
+                            <input type="range" id="aSlider" min="-10" max="10" step="0.5" value="2">
+                            <span class="value-display" id="aValue">2.0</span>
+                        </div>
+
+                        <div class="control-row">
+                            <label>模擬時間 (s)</label>
+                            <input type="range" id="maxTimeSlider" min="5" max="30" step="1" value="10">
+                            <span class="value-display" id="maxTimeValue">10</span>
+                        </div>
+
+                        <div class="control-row">
+                            <label>播放速度</label>
+                            <input type="range" id="speedSlider" min="0.25" max="3" step="0.25" value="1">
+                            <span class="value-display" id="speedValue">1.0x</span>
+                        </div>
+
+                        <div class="control-row" style="flex-direction: column; align-items: stretch;">
+                            <label>座標軸視角</label>
+                            <div class="view-toggle">
+                                <button id="viewFixed" class="active">📌 固定視角</button>
+                                <button id="viewFollow">🎯 跟隨視角</button>
+                            </div>
+                        </div>
+
+                        <div class="control-row" style="flex-direction: column; align-items: stretch;">
+                            <label>🎬 預設模式</label>
+                            <div class="preset-group">
+                                <button class="preset-btn" id="preset1">① 減速再反向：v₀=10, a=−2</button>
+                                <button class="preset-btn" id="preset2">② 反向加速：v₀=−10, a=2</button>
+                                <button class="preset-btn" id="preset3">③ 先加速後減速：v₀=0, a=5→−5</button>
+                                <button class="preset-btn" id="preset4">④ 三階段：a=5→0~5s, −5→5~15s, 5→15~20s</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 控制按鈕 -->
+                <div class="button-group">
+                    <button class="btn btn-start" id="startBtn">▶ 開始模擬</button>
+                    <button class="btn btn-pause" id="pauseBtn">⏸ 暫停</button>
+                    <button class="btn btn-reset" id="resetBtn">🔄 重置</button>
+                </div>
+
+
+            </div>
+            
+            <!-- 左側模擬區域 + 圖表 -->
+            <div class="sim-layout-right">
+                <div class="simulation-section">
+                    <div class="canvas-wrapper">
+                        <canvas id="simCanvas" width="900" height="304"></canvas>
+                    </div>
+                    
+                    <!-- x-t, v-t, a-t 圖 -->
+                    <div class="graphs-container">
+                        <div class="graph-box">
+                            <h5>x-t 圖（位置-時間）</h5>
+                            <canvas id="xtCanvas" width="280" height="200"></canvas>
+                        </div>
+                        <div class="graph-box">
+                            <h5>v-t 圖（速度-時間）</h5>
+                            <canvas id="vtCanvas" width="280" height="200"></canvas>
+                        </div>
+                        <div class="graph-box">
+                            <h5>a-t 圖（加速度-時間）</h5>
+                            <canvas id="atCanvas" width="280" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 教學指引 -->
+        <div class="info-box teaching-note">
+            <h4>💡 教學使用指引</h4>
+            <p>
+                • <strong>觀察重點 1：</strong>調整初速度為正、加速度為負，觀察物體先前進再後退的運動（減速→靜止→反向加速）<br>
+                • <strong>觀察重點 2：</strong>觀察 v-t 圖的斜率即為加速度，v-t 圖下方面積即為位移<br>
+                • <strong>視角切換：</strong>「固定視角」可觀察物體在全域的位移變化；「跟隨視角」讓畫面隨物體移動，方便觀察物體附近的相對運動<br>
+                • <strong>思考問題：</strong>當 v₀ 與 a 方向相反時，物體何時速度為零？x-t 圖的極值出現在何處？<br>
+                • <strong>延伸應用：</strong>自由落體即為 v₀ = 0、a = 9.8 m/s² 的等加速度運動
+            </p>
+        </div>
+    </div>
+
+    <!-- JavaScript 模擬程式碼 -->
+    <script>
+    class UniformAccelerationSim {
+        constructor() {
+            this.simCanvas = document.getElementById('simCanvas');
+            this.simCtx = this.simCanvas.getContext('2d');
+            this.xtCanvas = document.getElementById('xtCanvas');
+            this.xtCtx = this.xtCanvas.getContext('2d');
+            this.vtCanvas = document.getElementById('vtCanvas');
+            this.vtCtx = this.vtCanvas.getContext('2d');
+            this.atCanvas = document.getElementById('atCanvas');
+            this.atCtx = this.atCanvas.getContext('2d');
+
+            this.v0 = 5.0;
+            this.a = 2.0;
+            this.maxTime = 10;
+            this.playbackSpeed = 1.0;
+            this.viewMode = 'fixed'; // 'fixed' or 'follow'
+
+            // 多階段模式
+            this.multiPhase = false;
+            // phases: [{tEnd, a}, ...] 依時間切分的加速度段
+            this.phases = [];
+
+            this.isRunning = false;
+            this.time = 0;
+            this.animationId = null;
+            this.lastTimestamp = null;
+            this.history = [];
+
+            this.init();
+        }
+
+        init() {
+            this.bindControls();
+            this.reset();
+        }
+
+        bindControls() {
+            const bind = (id, prop, display, fmt) => {
+                document.getElementById(id).addEventListener('input', (e) => {
+                    this[prop] = parseFloat(e.target.value);
+                    document.getElementById(display).textContent = fmt(this[prop]);
+                    // 手動調參時退出多階段模式與預設
+                    this.multiPhase = false;
+                    this.phases = [];
+                    document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+                    if (!this.isRunning) this.reset();
+                });
+            };
+            bind('v0Slider', 'v0', 'v0Value', v => v.toFixed(1));
+            bind('aSlider', 'a', 'aValue', v => v.toFixed(1));
+            bind('maxTimeSlider', 'maxTime', 'maxTimeValue', v => v.toFixed(0));
+            
+            document.getElementById('speedSlider').addEventListener('input', (e) => {
+                this.playbackSpeed = parseFloat(e.target.value);
+                document.getElementById('speedValue').textContent = this.playbackSpeed.toFixed(2) + 'x';
+            });
+
+            // 視角切換
+            document.getElementById('viewFixed').addEventListener('click', () => {
+                this.viewMode = 'fixed';
+                document.getElementById('viewFixed').classList.add('active');
+                document.getElementById('viewFollow').classList.remove('active');
+                if (!this.isRunning) this.drawAll();
+            });
+            document.getElementById('viewFollow').addEventListener('click', () => {
+                this.viewMode = 'follow';
+                document.getElementById('viewFollow').classList.add('active');
+                document.getElementById('viewFixed').classList.remove('active');
+                if (!this.isRunning) this.drawAll();
+            });
+
+            document.getElementById('startBtn').addEventListener('click', () => this.start());
+            document.getElementById('pauseBtn').addEventListener('click', () => this.pause());
+            document.getElementById('resetBtn').addEventListener('click', () => this.reset());
+
+            // 預設模式
+            document.getElementById('preset1').addEventListener('click', () => this.applyPreset(1));
+            document.getElementById('preset2').addEventListener('click', () => this.applyPreset(2));
+            document.getElementById('preset3').addEventListener('click', () => this.applyPreset(3));
+            document.getElementById('preset4').addEventListener('click', () => this.applyPreset(4));
+        }
+
+        applyPreset(n) {
+            // 清除所有 preset active
+            document.querySelectorAll('.preset-btn').forEach(b => b.classList.remove('active'));
+            document.getElementById('preset' + n).classList.add('active');
+
+            this.multiPhase = false;
+            this.phases = [];
+            if (n === 1) {
+                this.v0 = 10; this.a = -2; this.maxTime = 15;
+            } else if (n === 2) {
+                this.v0 = -10; this.a = 2; this.maxTime = 15;
+            } else if (n === 3) {
+                this.v0 = 0; this.a = 5; this.maxTime = 10;
+                this.multiPhase = true;
+                this.phases = [{tEnd: 5, a: 5}, {tEnd: 10, a: -5}];
+            } else if (n === 4) {
+                this.v0 = 0; this.a = 5; this.maxTime = 20;
+                this.multiPhase = true;
+                this.phases = [{tEnd: 5, a: 5}, {tEnd: 15, a: -5}, {tEnd: 20, a: 5}];
+            }
+            // 同步 UI
+            document.getElementById('v0Slider').value = this.v0;
+            document.getElementById('v0Value').textContent = this.v0.toFixed(1);
+            document.getElementById('aSlider').value = this.a;
+            document.getElementById('aValue').textContent = this.a.toFixed(1);
+            document.getElementById('maxTimeSlider').value = this.maxTime;
+            document.getElementById('maxTimeValue').textContent = this.maxTime;
+            this.reset();
+        }
+
+        // 物理計算（支援多階段）
+        getA(t) {
+            if (!this.multiPhase) return this.a;
+            for (const p of this.phases) {
+                if (t <= p.tEnd) return p.a;
+            }
+            return this.phases[this.phases.length - 1].a;
+        }
+
+        getX(t) {
+            if (!this.multiPhase) return this.v0 * t + 0.5 * this.a * t * t;
+            let x = 0, v = this.v0, tPrev = 0;
+            for (const p of this.phases) {
+                const tEnd = Math.min(t, p.tEnd);
+                const dt = tEnd - tPrev;
+                if (dt <= 0) break;
+                x += v * dt + 0.5 * p.a * dt * dt;
+                v += p.a * dt;
+                tPrev = tEnd;
+                if (t <= p.tEnd) break;
+            }
+            return x;
+        }
+
+        getV(t) {
+            if (!this.multiPhase) return this.v0 + this.a * t;
+            let v = this.v0, tPrev = 0;
+            for (const p of this.phases) {
+                const tEnd = Math.min(t, p.tEnd);
+                const dt = tEnd - tPrev;
+                if (dt <= 0) break;
+                v += p.a * dt;
+                tPrev = tEnd;
+                if (t <= p.tEnd) break;
+            }
+            return v;
+        }
+
+        // 計算整個模擬期間 x 的範圍
+        getFullXRange() {
+            // 取樣多個時間點找極值
+            const N = 200;
+            let xMin = 0, xMax = 0;
+            for (let i = 0; i <= N; i++) {
+                const t = (i / N) * this.maxTime;
+                const x = this.getX(t);
+                if (x < xMin) xMin = x;
+                if (x > xMax) xMax = x;
+            }
+            const range = xMax - xMin;
+            if (range < 2) return { min: xMin - 2, max: xMax + 2 };
+            return { min: xMin - range * 0.12, max: xMax + range * 0.12 };
+        }
+
+        // 取得目前視窗的 x 範圍
+        getViewXRange() {
+            if (this.viewMode === 'fixed') {
+                return this.getFullXRange();
+            }
+            // 跟隨模式：以物體為中心，顯示固定寬度窗口
+            const fullRange = this.getFullXRange();
+            const fullSpan = fullRange.max - fullRange.min;
+            const windowSize = Math.max(fullSpan * 0.4, 10); // 窗口至少 10m 或全域的 40%
+            const cx = this.getX(this.time);
+            return { min: cx - windowSize / 2, max: cx + windowSize / 2 };
+        }
+
+        getXGraphRange() {
+            const N = 200;
+            let xMin = 0, xMax = 0;
+            for (let i = 0; i <= N; i++) {
+                const t = (i / N) * this.maxTime;
+                const x = this.getX(t);
+                if (x < xMin) xMin = x;
+                if (x > xMax) xMax = x;
+            }
+            const range = xMax - xMin;
+            if (range < 1) return { min: xMin - 1, max: xMax + 1 };
+            return { min: xMin - range * 0.1, max: xMax + range * 0.1 };
+        }
+
+        getVRange() {
+            const N = 200;
+            let vMin = Infinity, vMax = -Infinity;
+            for (let i = 0; i <= N; i++) {
+                const t = (i / N) * this.maxTime;
+                const v = this.getV(t);
+                if (v < vMin) vMin = v;
+                if (v > vMax) vMax = v;
+            }
+            const range = vMax - vMin;
+            if (range < 1) return { min: vMin - 1, max: vMax + 1 };
+            return { min: vMin - range * 0.1, max: vMax + range * 0.1 };
+        }
+
+        start() {
+            if (this.isRunning) return;
+            if (this.time >= this.maxTime) this.reset();
+            this.isRunning = true;
+            this.lastTimestamp = null;
+            this.animationId = requestAnimationFrame((ts) => this.animate(ts));
+        }
+
+        pause() {
+            this.isRunning = false;
+            if (this.animationId) {
+                cancelAnimationFrame(this.animationId);
+                this.animationId = null;
+            }
+        }
+
+        reset() {
+            this.pause();
+            this.time = 0;
+            this.history = [];
+            this.updateDataDisplay();
+            this.drawAll();
+        }
+
+        animate(timestamp) {
+            if (!this.isRunning) return;
+            if (this.lastTimestamp === null) this.lastTimestamp = timestamp;
+
+            const elapsed = (timestamp - this.lastTimestamp) / 1000;
+            this.lastTimestamp = timestamp;
+            this.time += elapsed * this.playbackSpeed;
+
+            if (this.time >= this.maxTime) {
+                this.time = this.maxTime;
+                this.isRunning = false;
+            }
+
+            // 取樣記錄（控制記錄密度）
+            const lastT = this.history.length > 0 ? this.history[this.history.length - 1].t : -1;
+            if (this.time - lastT >= 0.02) {
+                this.history.push({ t: this.time, x: this.getX(this.time), v: this.getV(this.time) });
+            }
+
+            this.updateDataDisplay();
+            this.drawAll();
+
+            if (this.isRunning) {
+                this.animationId = requestAnimationFrame((ts) => this.animate(ts));
+            }
+        }
+
+        updateDataDisplay() {
+            // 數據直接顯示在模擬畫面上，不需額外 DOM 更新
+        }
+
+        drawAll() {
+            this.drawSimulation();
+            this.drawXTGraph();
+            this.drawVTGraph();
+            this.drawATGraph();
+        }
+
+        // ===================== 主模擬畫面 =====================
+        drawSimulation() {
+            const canvas = this.simCanvas;
+            const ctx = this.simCtx;
+            const W = canvas.width, H = canvas.height;
+
+            ctx.clearRect(0, 0, W, H);
+            ctx.fillStyle = '#0d1117';
+            ctx.fillRect(0, 0, W, H);
+
+            const xRange = this.getViewXRange();
+            const xMin = xRange.min, xMax = xRange.max;
+
+            const margin = 50;
+            const trackL = margin, trackR = W - margin;
+            const trackW = trackR - trackL;
+            const trackY = H * 0.45;
+
+            const xToPx = (xVal) => trackL + (xVal - xMin) / (xMax - xMin) * trackW;
+
+            // 軌道
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(trackL, trackY);
+            ctx.lineTo(trackR, trackY);
+            ctx.stroke();
+
+            // 刻度
+            const xSpan = xMax - xMin;
+            let tickStep = 1;
+            if (xSpan > 100) tickStep = 20;
+            else if (xSpan > 50) tickStep = 10;
+            else if (xSpan > 20) tickStep = 5;
+            else if (xSpan > 10) tickStep = 2;
+
+            ctx.fillStyle = '#666';
+            ctx.font = '14px Roboto, sans-serif';
+            ctx.textAlign = 'center';
+
+            const firstTick = Math.ceil(xMin / tickStep) * tickStep;
+            for (let xVal = firstTick; xVal <= xMax; xVal += tickStep) {
+                const px = xToPx(xVal);
+                ctx.strokeStyle = '#3a3a3a';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(px, trackY - 8);
+                ctx.lineTo(px, trackY + 8);
+                ctx.stroke();
+                ctx.fillStyle = '#666';
+                ctx.fillText(xVal.toFixed(0), px, trackY + 22);
+            }
+
+            // x 軸標籤
+            ctx.fillStyle = '#888';
+            ctx.font = '16px Roboto, sans-serif';
+            ctx.fillText('x (m)', W / 2, trackY + 42);
+
+            // 原點標記
+            if (xMin <= 0 && xMax >= 0) {
+                const opx = xToPx(0);
+                ctx.strokeStyle = '#555';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([4, 4]);
+                ctx.beginPath();
+                ctx.moveTo(opx, 16);
+                ctx.lineTo(opx, trackY - 10);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.fillStyle = '#999';
+                ctx.font = 'bold 15px Roboto, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('原點', opx, 15);
+            }
+
+            // 軌跡記錄點
+            if (this.history.length > 1) {
+                const step = Math.max(1, Math.floor(this.history.length / 60));
+                for (let i = 0; i < this.history.length; i += step) {
+                    const h = this.history[i];
+                    const px = xToPx(h.x);
+                    if (px < trackL - 20 || px > trackR + 20) continue;
+                    ctx.fillStyle = '#3498db';
+                    ctx.beginPath();
+                    ctx.arc(px, trackY - 28, 3, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            // 物體
+            const curX = this.getX(this.time);
+            const objPx = xToPx(curX);
+            const objY = trackY - 28;
+
+            // 光暈
+            ctx.fillStyle = 'rgba(52,152,219,0.25)';
+            ctx.beginPath();
+            ctx.arc(objPx, objY, 19, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 本體漸層
+            const grad = ctx.createRadialGradient(objPx - 3, objY - 3, 2, objPx, objY, 14);
+            grad.addColorStop(0, '#5dade2');
+            grad.addColorStop(1, '#2980b9');
+            ctx.fillStyle = grad;
+            ctx.beginPath();
+            ctx.arc(objPx, objY, 14, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#1a5276';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // 速度箭頭
+            const curV = this.getV(this.time);
+            const curA = this.getA(this.time);
+            if (Math.abs(curV) > 0.05) {
+                const arrowLen = Math.min(Math.abs(curV) * 4, 90) * Math.sign(curV);
+                ctx.strokeStyle = '#e74c3c';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(objPx, objY);
+                ctx.lineTo(objPx + arrowLen, objY);
+                ctx.stroke();
+                const hl = 8, dir = Math.sign(arrowLen);
+                ctx.fillStyle = '#e74c3c';
+                ctx.beginPath();
+                ctx.moveTo(objPx + arrowLen, objY);
+                ctx.lineTo(objPx + arrowLen - hl * dir, objY - 5);
+                ctx.lineTo(objPx + arrowLen - hl * dir, objY + 5);
+                ctx.closePath();
+                ctx.fill();
+                ctx.fillStyle = '#e74c3c';
+                ctx.font = 'bold 14px Roboto, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('v', objPx + arrowLen / 2, objY - 12);
+            }
+
+            // 加速度箭頭
+            if (Math.abs(curA) > 0.05) {
+                const aLen = Math.min(Math.abs(curA) * 6, 60) * Math.sign(curA);
+                const aY = objY + 34;
+                ctx.strokeStyle = '#f39c12';
+                ctx.lineWidth = 2;
+                ctx.setLineDash([4, 3]);
+                ctx.beginPath();
+                ctx.moveTo(objPx, aY);
+                ctx.lineTo(objPx + aLen, aY);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                const hl = 6, dir = Math.sign(aLen);
+                ctx.fillStyle = '#f39c12';
+                ctx.beginPath();
+                ctx.moveTo(objPx + aLen, aY);
+                ctx.lineTo(objPx + aLen - hl * dir, aY - 4);
+                ctx.lineTo(objPx + aLen - hl * dir, aY + 4);
+                ctx.closePath();
+                ctx.fill();
+                ctx.fillStyle = '#f39c12';
+                ctx.font = 'bold 14px Roboto, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('a', objPx + aLen / 2, aY + 18);
+            }
+
+            // 圖例
+            ctx.font = '15px Roboto, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillStyle = '#e74c3c';
+            ctx.fillRect(W - 170, 14, 18, 3);
+            ctx.fillText('速度 v', W - 148, 20);
+            ctx.fillStyle = '#f39c12';
+            ctx.setLineDash([4, 3]);
+            ctx.strokeStyle = '#f39c12';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(W - 170, 36);
+            ctx.lineTo(W - 152, 36);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.fillText('加速度 a', W - 148, 41);
+
+            // 視角標示
+            ctx.fillStyle = '#555';
+            ctx.font = '14px Roboto, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText(this.viewMode === 'fixed' ? '📌 固定視角' : '🎯 跟隨視角', 10, 19);
+
+            // 即時數據顯示在畫面上
+            const curXVal = this.getX(this.time);
+            const curVVal = this.getV(this.time);
+            ctx.font = 'bold 16px Roboto Mono, monospace';
+            ctx.textAlign = 'left';
+            ctx.fillStyle = '#aaa';
+            ctx.fillText(`t = ${this.time.toFixed(2)} s`, 10, H - 10);
+            ctx.fillStyle = '#3498db';
+            ctx.fillText(`x = ${curXVal.toFixed(2)} m`, 170, H - 10);
+            ctx.fillStyle = '#e74c3c';
+            ctx.fillText(`v = ${curVVal.toFixed(2)} m/s`, 370, H - 10);
+            ctx.fillStyle = '#f39c12';
+            ctx.fillText(`a = ${this.getA(this.time).toFixed(2)} m/s²`, 580, H - 10);
+        }
+
+        // ===================== 圖表繪製 =====================
+        drawXTGraph() {
+            this.drawGraph(this.xtCanvas, this.xtCtx, '#3498db',
+                (t) => this.getX(t), this.getXGraphRange(), 'x (m)');
+        }
+
+        drawVTGraph() {
+            this.drawGraph(this.vtCanvas, this.vtCtx, '#e74c3c',
+                (t) => this.getV(t), this.getVRange(), 'v (m/s)');
+        }
+
+        drawATGraph() {
+            let aMin, aMax;
+            if (this.multiPhase) {
+                aMin = Math.min(...this.phases.map(p => p.a));
+                aMax = Math.max(...this.phases.map(p => p.a));
+            } else {
+                aMin = this.a;
+                aMax = this.a;
+            }
+            const absMax = Math.max(Math.abs(aMin), Math.abs(aMax), 1);
+            const range = { min: -absMax * 1.5, max: absMax * 1.5 };
+            this.drawGraph(this.atCanvas, this.atCtx, '#f39c12',
+                (t) => this.getA(t), range, 'a (m/s²)');
+        }
+
+        drawGraph(canvas, ctx, color, valueFn, yRange, yLabel) {
+            const W = canvas.width, H = canvas.height;
+            ctx.clearRect(0, 0, W, H);
+            ctx.fillStyle = '#0a0a1a';
+            ctx.fillRect(0, 0, W, H);
+
+            const m = { top: 15, right: 15, bottom: 30, left: 48 };
+            const pW = W - m.left - m.right;
+            const pH = H - m.top - m.bottom;
+            const tMax = this.maxTime;
+            const yMin = yRange.min, yMax = yRange.max;
+
+            const tToPx = (t) => m.left + (t / tMax) * pW;
+            const yToPx = (y) => m.top + pH - ((y - yMin) / (yMax - yMin)) * pH;
+
+            // 網格（Y 軸以整數間隔）
+            ctx.strokeStyle = '#1a2a3a';
+            ctx.lineWidth = 0.5;
+
+            const ySpan = yMax - yMin;
+            let yTickStep = 1;
+            if (ySpan > 200) yTickStep = 50;
+            else if (ySpan > 100) yTickStep = 20;
+            else if (ySpan > 50) yTickStep = 10;
+            else if (ySpan > 20) yTickStep = 5;
+            else if (ySpan > 10) yTickStep = 2;
+
+            ctx.fillStyle = '#556';
+            ctx.font = '10px Roboto, sans-serif';
+            ctx.textAlign = 'right';
+            const firstYTick = Math.ceil(yMin / yTickStep) * yTickStep;
+            for (let yVal = firstYTick; yVal <= yMax; yVal += yTickStep) {
+                const py = yToPx(yVal);
+                ctx.beginPath();
+                ctx.moveTo(m.left, py);
+                ctx.lineTo(W - m.right, py);
+                ctx.stroke();
+                ctx.fillText(Math.round(yVal).toString(), m.left - 4, py + 3);
+            }
+
+            const tTicks = 5;
+            const tStep = tMax / tTicks;
+            ctx.textAlign = 'center';
+            for (let i = 0; i <= tTicks; i++) {
+                const tVal = i * tStep;
+                const px = tToPx(tVal);
+                ctx.beginPath();
+                ctx.moveTo(px, m.top);
+                ctx.lineTo(px, H - m.bottom);
+                ctx.stroke();
+                ctx.fillText(tVal.toFixed(0), px, H - m.bottom + 14);
+            }
+
+            // 零線
+            if (yMin < 0 && yMax > 0) {
+                const zy = yToPx(0);
+                ctx.strokeStyle = '#445';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([4, 4]);
+                ctx.beginPath();
+                ctx.moveTo(m.left, zy);
+                ctx.lineTo(W - m.right, zy);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+
+            // 軸標籤
+            ctx.fillStyle = '#888';
+            ctx.font = '11px Roboto, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('t (s)', W / 2, H - 3);
+            ctx.save();
+            ctx.translate(11, m.top + pH / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.fillText(yLabel, 0, 0);
+            ctx.restore();
+
+            // 完整曲線（淡預覽）
+            ctx.strokeStyle = color + '33';
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            for (let i = 0; i <= 200; i++) {
+                const t = (i / 200) * tMax;
+                const y = valueFn(t);
+                const px = tToPx(t);
+                const py = yToPx(Math.max(yMin, Math.min(yMax, y)));
+                i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+            }
+            ctx.stroke();
+
+            // 已走過的曲線（高亮）
+            if (this.time > 0) {
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 2.5;
+                ctx.beginPath();
+                const steps = Math.max(1, Math.min(300, Math.floor(this.time / tMax * 300)));
+                for (let i = 0; i <= steps; i++) {
+                    const t = (i / steps) * this.time;
+                    const y = valueFn(t);
+                    const px = tToPx(t);
+                    const py = yToPx(Math.max(yMin, Math.min(yMax, y)));
+                    i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+                }
+                ctx.stroke();
+
+                // 當前點
+                const cy = valueFn(this.time);
+                const cpx = tToPx(this.time);
+                const cpy = yToPx(Math.max(yMin, Math.min(yMax, cy)));
+                ctx.fillStyle = color;
+                ctx.beginPath();
+                ctx.arc(cpx, cpy, 5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#fff';
+                ctx.beginPath();
+                ctx.arc(cpx, cpy, 2, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // 邊框
+            ctx.strokeStyle = '#334';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(m.left, m.top, pW, pH);
+        }
+    }
+
+    // 初始化
+    const sim = new UniformAccelerationSim();
+
+    // 側邊欄選單
+    (function() {
+        var openBtn = document.getElementById('open-button');
+        var closeBtn = document.getElementById('close-button');
+        var menuWrap = document.querySelector('.menu-wrap');
+        if (openBtn && closeBtn && menuWrap) {
+            openBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                menuWrap.classList.add('active');
+            });
+            closeBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                menuWrap.classList.remove('active');
+            });
+        }
+    })();
+    </script>
+</body>
+</html>
