@@ -33,7 +33,7 @@
         }
         /* 15% 控制 / 20% 模擬 / 65% 圖表 → flex 比例 3:4:13 */
         .sim-chart-layout .ctrl-panel  { flex: 3; min-width: 0; display: flex; flex-direction: column; }
-        .sim-chart-layout .sim-panel   { flex: 4; min-width: 0; display: flex; flex-direction: column; }
+        .sim-chart-layout .sim-panel   { flex: 4.4; min-width: 0; display: flex; flex-direction: column; }
         .sim-chart-layout .chart-panel { flex: 13; min-width: 0; display: flex; flex-direction: column; }
 
         /* Canvas 區塊 */
@@ -64,12 +64,14 @@
             display: block;
         }
         .sim-panel canvas {
-            width: 100%;
-            height: auto;
+            /* 高度填滿 wrapper，寬度自動流出，保持重要比 400:480 */
+            width: auto;
+            height: 100%;
+            max-width: 100%;
             border-radius: 6px;
             display: block;
         }
-        #simCanvas    { background: #ececec; aspect-ratio: 400 / 480; }
+        #simCanvas    { background: #ececec; }
         #energyCanvas { background: #f0f0f0; aspect-ratio: 800 / 480; }
 
         /* =====================================================
@@ -170,6 +172,8 @@
             .sim-chart-layout .sim-panel   { flex: 1 1 calc(50% - 8px); }
             .sim-chart-layout .ctrl-panel  { flex: 1 1 calc(50% - 8px); }
             .sim-chart-layout .chart-panel { flex: 1 1 100%; order: 3; }
+            /* 平板：改回寬度驅動 + aspect-ratio */
+            .sim-panel canvas { width: 100%; height: auto; max-width: none; aspect-ratio: 400 / 480; }
         }
 
         /* =====================================================
@@ -181,6 +185,8 @@
             .sim-chart-layout .sim-panel   { order: 1; }
             .sim-chart-layout .chart-panel { order: 2; }
             .sim-chart-layout .ctrl-panel  { order: 3; }
+            /* 手機：改回寬度驅動 + aspect-ratio */
+            .sim-panel canvas { width: 100%; height: auto; max-width: none; aspect-ratio: 400 / 480; }
 
             /* 手機：按鈕 3 欄（5 個按鈕較緊湊） */
             .ctrl-panel .button-group { grid-template-columns: 1fr 1fr 1fr; }
@@ -609,8 +615,8 @@
                 ctx.fill();
 
                 ctx.fillStyle = '#3f4750';
-                ctx.font = '12px Roboto, sans-serif';
-                ctx.fillText('Light Source', x - 46, y - 78);
+                ctx.font = '16px Roboto, sans-serif';
+                ctx.fillText('Light Source', x - 46, y - 58);
             }
 
             /* 生成視覺光子粒子（純視覺，不影響物理計算） */
@@ -657,18 +663,18 @@
                     const y = sy + dy * t + ny * p.spread;
 
                     // 外層光暈
-                    const grd = ctx.createRadialGradient(x, y, 0, x, y, 9);
+                    const grd = ctx.createRadialGradient(x, y, 0, x, y, 12.6);
                     grd.addColorStop(0, p.color);
                     grd.addColorStop(1, 'rgba(255,255,255,0)');
                     ctx.fillStyle = grd;
                     ctx.beginPath();
-                    ctx.arc(x, y, 9, 0, Math.PI * 2);
+                    ctx.arc(x, y, 12.6, 0, Math.PI * 2);
                     ctx.fill();
 
                     // 亮白核心
                     ctx.fillStyle = '#ffffff';
                     ctx.beginPath();
-                    ctx.arc(x, y, 2.5, 0, Math.PI * 2);
+                    ctx.arc(x, y, 3.5, 0, Math.PI * 2);
                     ctx.fill();
                 }
             }
@@ -693,7 +699,7 @@
                 ctx.fillRect(cx - w / 2 - d, topY + d, w, h);
 
                 ctx.fillStyle = '#3f4750';
-                ctx.font = '12px Roboto, sans-serif';
+                ctx.font = '16px Roboto, sans-serif';
                 ctx.fillText(this.metalSelect.value + ' (φ = ' + this.workFunction.toFixed(2) + ' eV)', cx - 52, H * 0.92);
             }
 
@@ -701,39 +707,13 @@
                 for (const e of this.electrons) {
                     ctx.fillStyle = 'rgba(64, 124, 255,' + e.alpha.toFixed(3) + ')';
                     ctx.beginPath();
-                    ctx.arc(e.x, e.y, e.radius, 0, Math.PI * 2);
+                    ctx.arc(e.x, e.y, e.radius * 1.4, 0, Math.PI * 2);
                     ctx.fill();
                 }
             }
 
             drawOverlay(ctx, W, H) {
-                const rows = [
-                    'λ = ' + this.wavelengthNm.toFixed(0) + ' nm',
-                    'f = ' + this.frequencyTHz.toFixed(0) + ' THz',
-                    'E = ' + this.photonEnergyEV.toFixed(2) + ' eV',
-                    'φ = ' + this.workFunction.toFixed(2) + ' eV',
-                    'KE = ' + this.kineticEnergyEV.toFixed(2) + ' eV',
-                    'Mode: ' + (this.mode === 'laser' ? 'Laser' : 'White Light')
-                ];
-                const boxW = Math.min(170, W * 0.48);
-                const boxX = W - boxW - 10;
-                const boxY = 10;
-                const lineH = 17;
-                const boxH = rows.length * lineH + 14;
-
-                ctx.fillStyle = 'rgba(255,255,255,0.84)';
-                ctx.strokeStyle = 'rgba(120,130,145,0.65)';
-                ctx.lineWidth = 1;
-                ctx.beginPath();
-                ctx.roundRect(boxX, boxY, boxW, boxH, 8);
-                ctx.fill();
-                ctx.stroke();
-
-                ctx.fillStyle = '#374151';
-                ctx.font = '12px Roboto, monospace';
-                for (let i = 0; i < rows.length; i++) {
-                    ctx.fillText(rows[i], boxX + 10, boxY + 18 + i * lineH);
-                }
+                // 資料框已移至實時數据區，不在畫布上顯示
             }
 
             /* ===== 繪圖：動能散佈圖 ===== */
@@ -803,7 +783,7 @@
                         ctx.arc(pad.left, dotY, 5, 0, Math.PI * 2);
                         ctx.fill();
                         ctx.fillStyle = '#c0392b';
-                        ctx.font = 'bold 12px Roboto, sans-serif';
+                        ctx.font = 'bold 14px Roboto, sans-serif';
                         ctx.fillText('-φ = ' + keAt0.toFixed(2) + ' eV', pad.left + 8, dotY - 58);
                     }
 
@@ -816,7 +796,7 @@
                         ctx.arc(dotX, yZero, 5, 0, Math.PI * 2);
                         ctx.fill();
                         ctx.fillStyle = '#c0392b';
-                        ctx.font = 'bold 12px Roboto, sans-serif';
+                        ctx.font = 'bold 14px Roboto, sans-serif';
                         ctx.fillText('f₀=' + f0_THz.toFixed(0) + ' THz', dotX + 6, yZero - 58);
                     }
 
@@ -825,7 +805,7 @@
 
                 // 軸標籤
                 ctx.fillStyle = '#555d66';
-                ctx.font = '12px Roboto, sans-serif';
+                ctx.font = '14px Roboto, sans-serif';
                 for (let x = 0; x <= 1500; x += 300) {
                     const px = pad.left + ((x - xMin) / (xMax - xMin)) * pw;
                     ctx.fillText(String(x), px - 10, H - 16);
@@ -836,7 +816,7 @@
                 }
 
                 ctx.fillStyle = '#2c3e50';
-                ctx.font = 'bold 13px Roboto, sans-serif';
+                ctx.font = 'bold 15px Roboto, sans-serif';
                 ctx.fillText('KE (eV)', 8, pad.top - 10);
                 ctx.fillText('Frequency (THz)', W - 130, H - 4);
 
