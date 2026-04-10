@@ -555,10 +555,10 @@
 
             const items = [
                 { label: 't', value: this.time.toFixed(2), unit: 's' },
-                { label: 'p 初始', value: this.initialMomentum.toFixed(2), unit: 'kg·m/s' },
-                { label: 'p 現在', value: this.totalMomentum().toFixed(2), unit: 'kg·m/s' },
-                { label: 'K 初始', value: this.initialKinetic.toFixed(2), unit: 'J' },
-                { label: 'K 現在', value: this.totalKinetic().toFixed(2), unit: 'J' }
+                { label: '初始動量p', value: this.initialMomentum.toFixed(2), unit: 'kg·m/s' },
+                { label: '現在動量p', value: this.totalMomentum().toFixed(2), unit: 'kg·m/s' },
+                { label: '初始動能K', value: this.initialKinetic.toFixed(2), unit: 'J' },
+                { label: '現在動能K', value: this.totalKinetic().toFixed(2), unit: 'J' }
             ];
 
             const colW = W / items.length;
