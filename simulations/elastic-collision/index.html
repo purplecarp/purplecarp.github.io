@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8">
+    <title>一維彈性碰撞模擬 - 物理模擬</title>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <link href="../../images/fish.png" rel="shortcut icon">
+
+    <link href="../../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../../css/normalize.css" rel="stylesheet">
+    <link href="../../css/style.css" rel="stylesheet">
+    <link href="../../css/responsive.css" rel="stylesheet">
+    <link href="../../css/simulations.css" rel="stylesheet">
+
+    <link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Roboto:400,300,500,700' rel='stylesheet' type='text/css'>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+
+    <style>
+        #simCanvas {
+            width: 100%;
+            border-radius: 6px;
+            background: #0d1117;
+        }
+        .graphs-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .graph-box {
+            background: #1a1a2e;
+            border-radius: 8px;
+            padding: 10px;
+            text-align: center;
+        }
+        .graph-box h5 {
+            color: #ecf0f1;
+            margin: 0 0 6px 0;
+            font-size: 14px;
+            font-weight: 600;
+        }
+        .graph-box canvas {
+            width: 100%;
+            border-radius: 4px;
+            background: #0a0a1a;
+        }
+        .collision-note {
+            color: #95a5a6;
+            font-size: 13px;
+            margin-top: 10px;
+            line-height: 1.5;
+        }
+        .preset-group {
+            margin-top: 14px;
+            display: grid;
+            gap: 8px;
+        }
+        .preset-btn {
+            border: 1px solid #314355;
+            background: #1a1a2e;
+            color: #ecf0f1;
+            border-radius: 6px;
+            padding: 8px 10px;
+            text-align: left;
+            font-size: 13px;
+            transition: background 0.2s ease;
+        }
+        .preset-btn:hover {
+            background: #243447;
+        }
+        @media (max-width: 768px) {
+            .graphs-container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+      <div class="for-sticky">
+        <div class="col-md-2 col-xs-6 logo">
+          <a href="../../index.html"><img alt="logo" class="logo-nav" src="../../images/fish.png"></a>
+        </div>
+      </div>
+      <div class="menu-wrap">
+        <nav class="menu">
+          <div class="menu-list">
+            <a href="../../index.html#home"><span>首頁</span></a>
+            <a href="../../index.html#about"><span>關於我</span></a>
+            <a href="../../index.html#experience"><span>教學經驗</span></a>
+            <a href="../../teaching-gallery.html"><span>查看教學剪影</span></a>
+            <a href="../../physics-simulations.html" class="active"><span>高中物理內容</span></a>
+            <a href="../../index.html#skills"><span>專業技能</span></a>
+            <a href="../../index.html#achievements"><span>成果展示</span></a>
+            <a href="../../index.html#philosophy"><span>教育理念</span></a>
+            <a href="../../index.html#contact"><span>聯絡方式</span></a>
+          </div>
+        </nav>
+        <button class="close-button" id="close-button">Close Menu</button>
+      </div>
+      <button class="menu-button" id="open-button">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+
+    <div class="top-nav">
+        <div class="container">
+            <a href="../../index.html" class="nav-brand">
+                <img src="../../images/fish.png" alt="Logo">
+                <h2>物鯉魚教學模擬</h2>
+            </a>
+            <a href="../../physics-simulations.html" class="btn-back">← 返回列表</a>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="page-header">
+            <h1>🔬 一維彈性碰撞模擬</h1>
+            <p class="subtitle">觀察兩物體碰撞前後的速度變化、動量守恆與動能守恆 | 選修物理 I - 力學</p>
+        </div>
+
+        <div class="info-box physics-principle">
+            <h4>📚 物理原理與公式</h4>
+            <p>
+                • <strong>動量守恆：</strong>在無外力的一維碰撞中，$m_1u_1 + m_2u_2 = m_1v_1 + m_2v_2$<br>
+                • <strong>動能守恆（彈性碰撞）：</strong>$\dfrac{1}{2}m_1u_1^2 + \dfrac{1}{2}m_2u_2^2 = \dfrac{1}{2}m_1v_1^2 + \dfrac{1}{2}m_2v_2^2$<br>
+                • <strong>碰撞後速度：</strong>
+                $v_1 = \dfrac{m_1-m_2}{m_1+m_2}u_1 + \dfrac{2m_2}{m_1+m_2}u_2$，
+                $v_2 = \dfrac{2m_1}{m_1+m_2}u_1 + \dfrac{m_2-m_1}{m_1+m_2}u_2$<br>
+                • <strong>教學重點：</strong>質量比越懸殊時，碰撞後速度分配越不對稱
+            </p>
+        </div>
+
+        <div class="sim-layout">
+            <div class="sim-layout-left">
+                <div class="controls">
+                    <div class="control-section">
+                        <h3>⚙️ 參數控制</h3>
+
+                        <div class="control-row">
+                            <label>物體 A 質量 $m_1$ (kg)</label>
+                            <input type="range" id="m1Slider" min="0.5" max="10" step="0.5" value="2.0">
+                            <span class="value-display" id="m1Value">2.0</span>
+                        </div>
+
+                        <div class="control-row">
+                            <label>物體 B 質量 $m_2$ (kg)</label>
+                            <input type="range" id="m2Slider" min="0.5" max="10" step="0.5" value="4.0">
+                            <span class="value-display" id="m2Value">4.0</span>
+                        </div>
+
+                        <div class="control-row">
+                            <label>物體 A 初速 $u_1$ (m/s)</label>
+                            <input type="range" id="u1Slider" min="-8" max="8" step="0.5" value="5.0">
+                            <span class="value-display" id="u1Value">5.0</span>
+                        </div>
+
+                        <div class="control-row">
+                            <label>物體 B 初速 $u_2$ (m/s)</label>
+                            <input type="range" id="u2Slider" min="-8" max="8" step="0.5" value="-1.5">
+                            <span class="value-display" id="u2Value">-1.5</span>
+                        </div>
+
+                        <div class="control-row">
+                            <label>播放速度</label>
+                            <input type="range" id="speedSlider" min="0.25" max="2.5" step="0.25" value="1.0">
+                            <span class="value-display" id="speedValue">1.00x</span>
+                        </div>
+
+                        <div class="control-row" style="display:flex;gap:20px;flex-wrap:wrap;">
+                            <label style="display:flex;align-items:center;gap:6px;margin:0;">
+                                <input type="checkbox" id="vectorToggle" checked>顯示速度向量
+                            </label>
+                            <label style="display:flex;align-items:center;gap:6px;margin:0;">
+                                <input type="checkbox" id="wallToggle" checked>啟用牆壁反彈
+                            </label>
+                        </div>
+
+                        <div class="preset-group">
+                            <button id="presetEqualMassBtn" class="preset-btn">⚡ 快速預設 1：兩球質量相同、速度不同碰撞</button>
+                            <button id="presetDoubleMassBtn" class="preset-btn">⚡ 快速預設 2：兩球質量 2 倍關係、相同速率相向</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-start" id="startBtn">▶ 開始模擬</button>
+                    <button class="btn btn-pause" id="pauseBtn">⏸ 暫停</button>
+                    <button class="btn btn-reset" id="resetBtn">🔄 重置</button>
+                </div>
+            </div>
+
+            <div class="sim-layout-right">
+                <div class="simulation-section">
+                    <div class="canvas-wrapper">
+                        <canvas id="simCanvas" width="900" height="480"></canvas>
+                    </div>
+                    <div class="graphs-container">
+                        <div class="graph-box">
+                            <h5>v-t 圖（速度-時間）</h5>
+                            <canvas id="vtCanvas" width="280" height="200"></canvas>
+                        </div>
+                        <div class="graph-box">
+                            <h5>p-t 圖（動量-時間）</h5>
+                            <canvas id="ptCanvas" width="280" height="200"></canvas>
+                        </div>
+                        <div class="graph-box">
+                            <h5>E-t 圖（動能-時間）</h5>
+                            <canvas id="etCanvas" width="280" height="200"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-box teaching-note">
+            <h4>💡 教學使用指引</h4>
+            <p>
+                • <strong>觀察重點 1：</strong>碰撞前後系統總動量 $p$ 與總動能 $K$ 維持不變<br>
+                • <strong>觀察重點 2：</strong>固定一個質量，改變另一個質量，觀察碰撞後速度分配<br>
+                • <strong>操作建議：</strong>先設 $m_1 = m_2$，再改成 $m_1 \gg m_2$ 與 $m_1 \ll m_2$ 比較<br>
+                • <strong>思考問題：</strong>為什麼同質量、正面碰撞時，兩物體速度看起來會交換？
+            </p>
+        </div>
+    </div>
+
+    <script>
+    class ElasticCollisionSimulation {
+        constructor() {
+            this.simCanvas = document.getElementById('simCanvas');
+            this.simCtx = this.simCanvas.getContext('2d');
+            this.vtCanvas = document.getElementById('vtCanvas');
+            this.vtCtx = this.vtCanvas.getContext('2d');
+            this.ptCanvas = document.getElementById('ptCanvas');
+            this.ptCtx = this.ptCanvas.getContext('2d');
+            this.etCanvas = document.getElementById('etCanvas');
+            this.etCtx = this.etCanvas.getContext('2d');
+
+            this.dpr = window.devicePixelRatio || 1;
+            this.scaleCanvas(this.simCanvas, this.simCtx);
+            this.scaleCanvas(this.vtCanvas, this.vtCtx);
+            this.scaleCanvas(this.ptCanvas, this.ptCtx);
+            this.scaleCanvas(this.etCanvas, this.etCtx);
+
+            this.m1 = 2.0;
+            this.m2 = 4.0;
+            this.u1 = 5.0;
+            this.u2 = -1.5;
+            this.playbackSpeed = 1.0;
+            this.showVectors = true;
+
+            this.pxPerMeter = 42;
+            this.isRunning = false;
+            this.animationId = null;
+            this.lastTimestamp = null;
+            this.time = 0;
+            this.message = '';
+            this.collisionCount = 0;
+            this.history = [];
+            this.historyInterval = 0.02;
+            this.lastHistoryTime = -1;
+            this.maxHistoryPoints = 1500;
+            this.maxGraphTime = 10;
+            this.wallLeft = 35;
+            this.wallRight = 0;
+            this.showWalls = true;
+
+            this.init();
+        }
+
+        scaleCanvas(canvas, ctx) {
+            const dpr = this.dpr;
+            const cssW = canvas.width;
+            const cssH = canvas.height;
+            canvas.width = Math.round(cssW * dpr);
+            canvas.height = Math.round(cssH * dpr);
+            canvas.style.width = cssW + 'px';
+            canvas.style.height = cssH + 'px';
+            ctx.scale(dpr, dpr);
+        }
+
+        init() {
+            this.bindControls();
+            this.reset();
+        }
+
+        bindControls() {
+            const bindSlider = (sliderId, prop, valueId, formatter) => {
+                document.getElementById(sliderId).addEventListener('input', (e) => {
+                    this[prop] = parseFloat(e.target.value);
+                    document.getElementById(valueId).textContent = formatter(this[prop]);
+                    this.reset();
+                });
+            };
+
+            bindSlider('m1Slider', 'm1', 'm1Value', (v) => v.toFixed(1));
+            bindSlider('m2Slider', 'm2', 'm2Value', (v) => v.toFixed(1));
+            bindSlider('u1Slider', 'u1', 'u1Value', (v) => v.toFixed(1));
+            bindSlider('u2Slider', 'u2', 'u2Value', (v) => v.toFixed(1));
+            bindSlider('speedSlider', 'playbackSpeed', 'speedValue', (v) => v.toFixed(2) + 'x');
+
+            document.getElementById('vectorToggle').addEventListener('change', (e) => {
+                this.showVectors = e.target.checked;
+                if (!this.isRunning) this.draw();
+            });
+
+            document.getElementById('wallToggle').addEventListener('change', (e) => {
+                this.showWalls = e.target.checked;
+                if (!this.isRunning) this.draw();
+            });
+
+            document.getElementById('presetEqualMassBtn').addEventListener('click', () => {
+                this.applyPreset({ m1: 2.0, m2: 2.0, u1: 5.0, u2: -1.0 });
+            });
+
+            document.getElementById('presetDoubleMassBtn').addEventListener('click', () => {
+                this.applyPreset({ m1: 2.0, m2: 4.0, u1: 4.0, u2: -4.0 });
+            });
+
+            document.getElementById('startBtn').addEventListener('click', () => this.start());
+            document.getElementById('pauseBtn').addEventListener('click', () => this.pause());
+            document.getElementById('resetBtn').addEventListener('click', () => this.reset());
+        }
+
+        applyPreset(preset) {
+            this.m1 = preset.m1;
+            this.m2 = preset.m2;
+            this.u1 = preset.u1;
+            this.u2 = preset.u2;
+
+            document.getElementById('m1Slider').value = this.m1;
+            document.getElementById('m2Slider').value = this.m2;
+            document.getElementById('u1Slider').value = this.u1;
+            document.getElementById('u2Slider').value = this.u2;
+            document.getElementById('m1Value').textContent = this.m1.toFixed(1);
+            document.getElementById('m2Value').textContent = this.m2.toFixed(1);
+            document.getElementById('u1Value').textContent = this.u1.toFixed(1);
+            document.getElementById('u2Value').textContent = this.u2.toFixed(1);
+
+            this.reset();
+        }
+
+        start() {
+            if (this.isRunning) return;
+            this.isRunning = true;
+            this.lastTimestamp = null;
+            this.animationId = requestAnimationFrame((ts) => this.loop(ts));
+        }
+
+        pause() {
+            this.isRunning = false;
+            if (this.animationId) {
+                cancelAnimationFrame(this.animationId);
+                this.animationId = null;
+            }
+        }
+
+        reset() {
+            this.pause();
+            this.time = 0;
+            this.message = '';
+            this.collisionCount = 0;
+
+            const W = this.simCanvas.width / this.dpr;
+            const centerY = 210;
+            this.wallRight = W - 35;
+
+            this.ball1 = {
+                x: W * 0.25,
+                y: centerY,
+                r: 16 + this.m1 * 2,
+                v: this.u1,
+                color: '#74c0fc',
+                name: 'A'
+            };
+
+            this.ball2 = {
+                x: W * 0.75,
+                y: centerY,
+                r: 16 + this.m2 * 2,
+                v: this.u2,
+                color: '#f39c12',
+                name: 'B'
+            };
+
+            this.initialMomentum = this.totalMomentum();
+            this.initialKinetic = this.totalKinetic();
+            this.history = [];
+            this.lastHistoryTime = -1;
+            this.recordHistory();
+            this.draw();
+        }
+
+        loop(timestamp) {
+            if (!this.isRunning) return;
+
+            if (this.lastTimestamp !== null) {
+                const dt = Math.min((timestamp - this.lastTimestamp) / 1000, 0.05);
+                this.time += dt * this.playbackSpeed;
+                this.update(dt * this.playbackSpeed);
+            }
+
+            this.lastTimestamp = timestamp;
+            this.draw();
+            this.animationId = requestAnimationFrame((ts) => this.loop(ts));
+        }
+
+        update(dt) {
+            this.ball1.x += this.ball1.v * this.pxPerMeter * dt;
+            this.ball2.x += this.ball2.v * this.pxPerMeter * dt;
+
+            const overlap = (this.ball2.x - this.ball2.r) <= (this.ball1.x + this.ball1.r);
+            const approaching = (this.ball1.v - this.ball2.v) > 0;
+
+            if (approaching && overlap) {
+                this.resolveCollision();
+                this.collisionCount += 1;
+                this.message = '第 ' + this.collisionCount + ' 次球-球彈性碰撞';
+
+                const mid = (this.ball1.x + this.ball2.x) / 2;
+                this.ball1.x = mid - this.ball1.r;
+                this.ball2.x = mid + this.ball2.r;
+            }
+
+            if (this.showWalls) {
+                if (this.ball1.x - this.ball1.r <= this.wallLeft) {
+                    this.ball1.x = this.wallLeft + this.ball1.r;
+                    this.ball1.v = Math.abs(this.ball1.v);
+                    this.message = 'A 球碰左牆反彈';
+                } else if (this.ball1.x + this.ball1.r >= this.wallRight) {
+                    this.ball1.x = this.wallRight - this.ball1.r;
+                    this.ball1.v = -Math.abs(this.ball1.v);
+                    this.message = 'A 球碰右牆反彈';
+                }
+
+                if (this.ball2.x - this.ball2.r <= this.wallLeft) {
+                    this.ball2.x = this.wallLeft + this.ball2.r;
+                    this.ball2.v = Math.abs(this.ball2.v);
+                    this.message = 'B 球碰左牆反彈';
+                } else if (this.ball2.x + this.ball2.r >= this.wallRight) {
+                    this.ball2.x = this.wallRight - this.ball2.r;
+                    this.ball2.v = -Math.abs(this.ball2.v);
+                    this.message = 'B 球碰右牆反彈';
+                }
+            } else {
+                const b1Out = this.ball1.x + this.ball1.r <= this.wallLeft ||
+                              this.ball1.x - this.ball1.r >= this.wallRight;
+                const b2Out = this.ball2.x + this.ball2.r <= this.wallLeft ||
+                              this.ball2.x - this.ball2.r >= this.wallRight;
+                if (b1Out || b2Out) {
+                    this.pause();
+                    this.message = '模擬結束：可按「重置」再試不同參數';
+                }
+            }
+
+            if (this.time - this.lastHistoryTime >= this.historyInterval) {
+                this.recordHistory();
+            }
+        }
+
+        resolveCollision() {
+            const m1 = this.m1;
+            const m2 = this.m2;
+            const u1 = this.ball1.v;
+            const u2 = this.ball2.v;
+
+            this.ball1.v = ((m1 - m2) / (m1 + m2)) * u1 + ((2 * m2) / (m1 + m2)) * u2;
+            this.ball2.v = ((2 * m1) / (m1 + m2)) * u1 + ((m2 - m1) / (m1 + m2)) * u2;
+        }
+
+        totalMomentum() {
+            return this.m1 * this.ball1.v + this.m2 * this.ball2.v;
+        }
+
+        totalKinetic() {
+            return 0.5 * this.m1 * this.ball1.v * this.ball1.v + 0.5 * this.m2 * this.ball2.v * this.ball2.v;
+        }
+
+        recordHistory() {
+            const e1 = 0.5 * this.m1 * this.ball1.v * this.ball1.v;
+            const e2 = 0.5 * this.m2 * this.ball2.v * this.ball2.v;
+            this.history.push({
+                t: this.time,
+                v1: this.ball1.v,
+                v2: this.ball2.v,
+                p1: this.m1 * this.ball1.v,
+                p2: this.m2 * this.ball2.v,
+                pTotal: this.totalMomentum(),
+                e1: e1,
+                e2: e2,
+                eTotal: e1 + e2
+            });
+            if (this.history.length > this.maxHistoryPoints) {
+                this.history.shift();
+            }
+            this.lastHistoryTime = this.time;
+        }
+
+        drawVelocityArrow(x, y, v, color) {
+            const ctx = this.simCtx;
+            const arrowLen = Math.max(16, Math.min(90, Math.abs(v) * 10));
+            const dir = v >= 0 ? 1 : -1;
+            const endX = x + dir * arrowLen;
+
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            ctx.lineTo(endX, y);
+            ctx.stroke();
+
+            ctx.beginPath();
+            ctx.moveTo(endX, y);
+            ctx.lineTo(endX - dir * 8, y - 5);
+            ctx.lineTo(endX - dir * 8, y + 5);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        drawBall(ball) {
+            const ctx = this.simCtx;
+            ctx.fillStyle = ball.color;
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.r, 0, Math.PI * 2);
+            ctx.fill();
+
+            ctx.fillStyle = '#0d1117';
+            ctx.font = 'bold 15px Roboto, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(ball.name, ball.x, ball.y);
+
+            ctx.fillStyle = '#ecf0f1';
+            ctx.font = '13px Roboto, sans-serif';
+            ctx.fillText('m=' + (ball.name === 'A' ? this.m1.toFixed(1) : this.m2.toFixed(1)) + 'kg', ball.x, ball.y + ball.r + 16);
+            ctx.fillText('v=' + ball.v.toFixed(2) + 'm/s', ball.x, ball.y - ball.r - 14);
+        }
+
+        drawDataBar(W, H) {
+            const ctx = this.simCtx;
+            const barH = 42;
+            const barY = H - barH;
+
+            ctx.fillStyle = 'rgba(10,10,26,0.85)';
+            ctx.fillRect(0, barY, W, barH);
+
+            const items = [
+                { label: 't', value: this.time.toFixed(2), unit: 's' },
+                { label: 'p 初始', value: this.initialMomentum.toFixed(2), unit: 'kg·m/s' },
+                { label: 'p 現在', value: this.totalMomentum().toFixed(2), unit: 'kg·m/s' },
+                { label: 'K 初始', value: this.initialKinetic.toFixed(2), unit: 'J' },
+                { label: 'K 現在', value: this.totalKinetic().toFixed(2), unit: 'J' }
+            ];
+
+            const colW = W / items.length;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+
+            items.forEach((item, i) => {
+                const x = colW * (i + 0.5);
+                ctx.fillStyle = '#95a5a6';
+                ctx.font = '12px Roboto, sans-serif';
+                ctx.fillText(item.label, x, barY + 13);
+
+                ctx.fillStyle = '#ecf0f1';
+                ctx.font = '13px Roboto, sans-serif';
+                ctx.fillText(item.value + ' ' + item.unit, x, barY + 28);
+            });
+        }
+
+        drawGraphs() {
+            this.drawMultiSeriesGraph(this.vtCanvas, this.vtCtx, {
+                ylabel: 'v (m/s)',
+                series: [
+                    { key: 'v1', color: '#74c0fc', label: 'A 速度' },
+                    { key: 'v2', color: '#f39c12', label: 'B 速度' }
+                ],
+                centerAtZero: true
+            });
+
+            this.drawMultiSeriesGraph(this.ptCanvas, this.ptCtx, {
+                ylabel: 'p (kg·m/s)',
+                series: [
+                    { key: 'p1', color: '#74c0fc', label: 'A 動量' },
+                    { key: 'p2', color: '#f39c12', label: 'B 動量' },
+                    { key: 'pTotal', color: '#a855f7', label: '總動量' }
+                ],
+                centerAtZero: true
+            });
+
+            this.drawMultiSeriesGraph(this.etCanvas, this.etCtx, {
+                ylabel: 'E (J)',
+                series: [
+                    { key: 'e1', color: '#74c0fc', label: 'A 動能' },
+                    { key: 'e2', color: '#f39c12', label: 'B 動能' },
+                    { key: 'eTotal', color: '#69db7c', label: '總動能' }
+                ],
+                nonNegative: true
+            });
+        }
+
+        drawMultiSeriesGraph(canvas, ctx, options) {
+            const W = canvas.width / this.dpr;
+            const H = canvas.height / this.dpr;
+            const margin = { left: 46, right: 12, top: 18, bottom: 28 };
+            const gW = W - margin.left - margin.right;
+            const gH = H - margin.top - margin.bottom;
+
+            ctx.clearRect(0, 0, W, H);
+            ctx.fillStyle = '#0a0a1a';
+            ctx.fillRect(0, 0, W, H);
+
+            const tMax = Math.max(this.maxGraphTime, this.time);
+            const tMin = Math.max(0, tMax - this.maxGraphTime);
+
+            let yMin = Infinity;
+            let yMax = -Infinity;
+            this.history.forEach((h) => {
+                options.series.forEach((s) => {
+                    yMin = Math.min(yMin, h[s.key]);
+                    yMax = Math.max(yMax, h[s.key]);
+                });
+            });
+
+            if (!isFinite(yMin) || !isFinite(yMax)) {
+                yMin = -1;
+                yMax = 1;
+            }
+
+            if (options.nonNegative) {
+                yMin = 0;
+                yMax = Math.max(1, Math.ceil(yMax * 1.2));
+            } else {
+                const span = Math.max(1, yMax - yMin);
+                const pad = span * 0.18;
+                yMin -= pad;
+                yMax += pad;
+                if (options.centerAtZero) {
+                    const a = Math.max(Math.abs(yMin), Math.abs(yMax), 1);
+                    yMin = -Math.ceil(a);
+                    yMax = Math.ceil(a);
+                }
+            }
+
+            yMin = Math.floor(yMin);
+            yMax = Math.ceil(yMax);
+            if (yMin === yMax) {
+                yMin -= 1;
+                yMax += 1;
+            }
+
+            const tToPx = (t) => margin.left + ((t - tMin) / (tMax - tMin || 1)) * gW;
+            const yToPx = (y) => margin.top + (1 - (y - yMin) / (yMax - yMin || 1)) * gH;
+
+            const chooseIntegerStep = (range) => {
+                if (range <= 6) return 1;
+                if (range <= 12) return 2;
+                if (range <= 24) return 4;
+                if (range <= 40) return 5;
+                if (range <= 80) return 10;
+                if (range <= 160) return 20;
+                return 50;
+            };
+            const tickStep = chooseIntegerStep(yMax - yMin);
+
+            ctx.strokeStyle = '#1a2a3a';
+            ctx.lineWidth = 0.8;
+            for (let tick = Math.ceil(yMin / tickStep) * tickStep; tick <= yMax; tick += tickStep) {
+                const y = yToPx(tick);
+                ctx.beginPath();
+                ctx.moveTo(margin.left, y);
+                ctx.lineTo(W - margin.right, y);
+                ctx.stroke();
+            }
+
+            ctx.strokeStyle = '#5f6c7b';
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.moveTo(margin.left, margin.top);
+            ctx.lineTo(margin.left, H - margin.bottom);
+            ctx.lineTo(W - margin.right, H - margin.bottom);
+            ctx.stroke();
+
+            if (yMin < 0 && yMax > 0) {
+                ctx.strokeStyle = '#3a4858';
+                ctx.beginPath();
+                ctx.moveTo(margin.left, yToPx(0));
+                ctx.lineTo(W - margin.right, yToPx(0));
+                ctx.stroke();
+            }
+
+            ctx.fillStyle = '#95a5a6';
+            ctx.font = '10px Roboto, sans-serif';
+            ctx.textAlign = 'right';
+            ctx.textBaseline = 'middle';
+            for (let tick = Math.ceil(yMin / tickStep) * tickStep; tick <= yMax; tick += tickStep) {
+                ctx.fillText(String(tick), margin.left - 6, yToPx(tick));
+            }
+
+            ctx.fillStyle = '#95a5a6';
+            ctx.font = '11px Roboto, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            ctx.fillText('t (s)', margin.left + gW / 2, H - 14);
+
+            ctx.save();
+            ctx.translate(12, margin.top + gH / 2);
+            ctx.rotate(-Math.PI / 2);
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(options.ylabel, 0, 0);
+            ctx.restore();
+
+            options.series.forEach((series) => {
+                ctx.strokeStyle = series.color;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                let started = false;
+                this.history.forEach((h) => {
+                    if (h.t < tMin || h.t > tMax) return;
+                    const x = tToPx(h.t);
+                    const y = yToPx(h[series.key]);
+                    if (!started) {
+                        ctx.moveTo(x, y);
+                        started = true;
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                });
+                ctx.stroke();
+            });
+
+            if (this.time >= tMin && this.time <= tMax) {
+                const px = tToPx(this.time);
+                ctx.strokeStyle = 'rgba(255,255,255,0.25)';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([3, 3]);
+                ctx.beginPath();
+                ctx.moveTo(px, margin.top);
+                ctx.lineTo(px, H - margin.bottom);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+
+            let legendX = margin.left;
+            const legendY = 8;
+            ctx.font = '10px Roboto, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            options.series.forEach((series) => {
+                ctx.strokeStyle = series.color;
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(legendX, legendY);
+                ctx.lineTo(legendX + 14, legendY);
+                ctx.stroke();
+                ctx.fillStyle = '#cbd5e1';
+                ctx.fillText(series.label, legendX + 18, legendY);
+                legendX += 18 + ctx.measureText(series.label).width + 10;
+            });
+        }
+
+        draw() {
+            const W = this.simCanvas.width / this.dpr;
+            const H = this.simCanvas.height / this.dpr;
+            const ctx = this.simCtx;
+
+            ctx.clearRect(0, 0, W, H);
+            ctx.fillStyle = '#0d1117';
+            ctx.fillRect(0, 0, W, H);
+
+            ctx.strokeStyle = '#1a2a3a';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(35, 210);
+            ctx.lineTo(W - 35, 210);
+            ctx.stroke();
+
+            this.drawBall(this.ball1);
+            this.drawBall(this.ball2);
+
+            if (this.showVectors) {
+                this.drawVelocityArrow(this.ball1.x, this.ball1.y - this.ball1.r - 30, this.ball1.v, '#74c0fc');
+                this.drawVelocityArrow(this.ball2.x, this.ball2.y - this.ball2.r - 30, this.ball2.v, '#f39c12');
+            }
+
+            ctx.fillStyle = '#ecf0f1';
+            ctx.font = '15px Roboto, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'alphabetic';
+            ctx.fillText('一維直線運動（無外力）', 24, 32);
+            if (this.showWalls) {
+                ctx.fillStyle = '#95a5a6';
+                ctx.font = '12px Roboto, sans-serif';
+                ctx.fillText('牆壁', this.wallLeft - 18, 186);
+                ctx.fillText('牆壁', this.wallRight - 16, 186);
+
+                ctx.strokeStyle = '#8da2b5';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(this.wallLeft, 120);
+                ctx.lineTo(this.wallLeft, 300);
+                ctx.moveTo(this.wallRight, 120);
+                ctx.lineTo(this.wallRight, 300);
+                ctx.stroke();
+            }
+
+            if (this.message) {
+                ctx.fillStyle = this.message.includes('碰撞') ? '#69db7c' : '#f39c12';
+                ctx.font = '14px Roboto, sans-serif';
+                ctx.fillText(this.message, 24, 56);
+            }
+
+            this.drawDataBar(W, H);
+            this.drawGraphs();
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        new ElasticCollisionSimulation();
+    });
+    </script>
+
+    <script src="../../js/jquery-1.9.1.min.js"></script>
+    <script src="../../js/classie.js"></script>
+    <script src="../../js/main.js"></script>
+</body>
+</html>
