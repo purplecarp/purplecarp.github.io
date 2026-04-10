@@ -23,134 +23,62 @@
 
     <style>
         /* =====================================================
-           三欄並排：25% 模擬 / 50% 圖表 / 25% 控制
+           新版佈局：上排 10% 控制列 / 下排 90% (左35%模擬+右65%圖表)
+           使用 calc(100vh) 讓整體填滿可視區域
            ===================================================== */
-        .sim-chart-layout {
+        .sim-layout {
             display: flex;
-            gap: 15px;
-            align-items: stretch;
+            flex-direction: column;
+            gap: 10px;
             margin-bottom: 30px;
         }
-        /* 15% 控制 / 20% 模擬 / 65% 圖表 → flex 比例 3:4:13 */
-        .sim-chart-layout .ctrl-panel  { flex: 3; min-width: 0; display: flex; flex-direction: column; }
-        .sim-chart-layout .sim-panel   { flex: 4.4; min-width: 0; display: flex; flex-direction: column; }
-        .sim-chart-layout .chart-panel { flex: 13; min-width: 0; display: flex; flex-direction: column; }
 
-        /* Canvas 區塊 */
-        .sim-panel .canvas-wrapper,
-        .chart-panel .canvas-wrapper {
-            flex: 1;                  /* 撐滿 panel 高度 */
-            background: #1a1a2e;
-            border-radius: 8px;
-            padding: 15px;
+        /* === 上排控制列（約 10%） === */
+        .ctrl-bar {
+            background: #fff;
+            border: 1px solid #e0e4e8;
+            border-radius: 10px;
+            padding: 8px 14px;
             display: flex;
-            flex-direction: column;
+            flex-wrap: nowrap;
             align-items: center;
-            justify-content: center;
+            gap: 10px;
+            overflow-x: auto;
         }
-        .sim-panel .canvas-wrapper h5,
-        .chart-panel .canvas-wrapper h5 {
-            color: #ecf0f1;
-            margin: 0 0 8px 0;
-            font-size: 15px;
-            font-weight: 600;
-            align-self: flex-start;   /* 標題靠左 */
-        }
-        .chart-panel canvas {
-            width: 100%;
-            height: auto;
-            max-height: 100%;
-            border-radius: 6px;
-            display: block;
-        }
-        .sim-panel canvas {
-            /* 高度填滿 wrapper，寬度自動流出，保持重要比 400:480 */
-            width: auto;
-            height: 100%;
-            max-width: 100%;
-            border-radius: 6px;
-            display: block;
-        }
-        #simCanvas    { background: #ececec; }
-        #energyCanvas { background: #f0f0f0; aspect-ratio: 800 / 480; }
-
-        /* =====================================================
-           右側控制面板
-           ===================================================== */
-        .ctrl-panel .controls {
-            flex: 1;                  /* 撐滿 panel 高度 */
-            margin-bottom: 0;
-            padding: 12px;
+        .ctrl-item {
             display: flex;
             flex-direction: column;
-            overflow-y: auto;         /* 萬一內容過長才出現捲軸 */
+            gap: 2px;
+            min-width: 0;
         }
-        .ctrl-panel .control-section { margin-bottom: 4px; flex-shrink: 0; }
-        .ctrl-panel .control-section h3 {
-            font-size: 14px;
-            margin-bottom: 6px;
-            padding-bottom: 5px;
-        }
-
-        /* 縱向 control-row（15% 欄寬較窄，改直排） */
-        .ctrl-panel .control-row {
-            flex-direction: column;
-            align-items: stretch;
-            gap: 3px;
-            padding: 5px 8px;
-            margin: 3px 0;
-        }
-        .ctrl-panel .control-row label {
-            min-width: auto;
-            font-size: 12px;
+        .ctrl-item label {
+            font-size: 11px;
             font-weight: 600;
+            color: #555d66;
+            white-space: nowrap;
         }
-        .ctrl-panel .control-row input[type="range"] { width: 100%; }
-        .ctrl-panel .control-row select {
-            width: 100%;
+        .ctrl-item input[type="range"] { width: 165px; }
+        .ctrl-item .value-display {
+            font-size: 11px;
+            color: #2c3e50;
+            font-weight: 600;
+            text-align: right;
+        }
+        .ctrl-item select {
             font-size: 12px;
             padding: 4px 6px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
         }
-        .ctrl-panel .value-display {
-            text-align: right;
-            font-size: 12px;
-            min-width: auto;
-        }
-
-        /* 2 欄按鈕格線 */
-        .ctrl-panel .button-group {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 6px;
-            margin: 6px 0;
-            padding: 6px;
-            box-shadow: none;
+        .ctrl-sep {
+            width: 1px;
+            height: 38px;
+            background: #d0d5dd;
             flex-shrink: 0;
         }
-        .ctrl-panel .button-group .btn {
-            padding: 7px 6px;
-            font-size: 12px;
-            min-height: 36px;
-            letter-spacing: 0;
-        }
-
-        /* wave-info 2×2 */
-        .ctrl-panel .wave-info {
-            gap: 6px;
-            padding: 8px;
-            margin-top: 6px;
-            grid-template-columns: 1fr 1fr !important;
-            flex-shrink: 0;
-        }
-        .ctrl-panel .wave-info-item  { padding: 6px; }
-        .ctrl-panel .wave-info-label { font-size: 11px; margin-bottom: 4px; }
-        .ctrl-panel .wave-info-value { font-size: 13px; }
-
-        /* 模式按鈕 */
-        .mode-btn-group { display: flex; gap: 6px; flex: 1; }
-        .mode-btn-group .btn-mode {
-            flex: 1;
-            padding: 5px 8px;
+        .ctrl-bar .mode-btn-group { display: flex; gap: 4px; flex-shrink: 0; }
+        .ctrl-bar .btn-mode {
+            padding: 5px 10px;
             border: 2px solid #ddd;
             border-radius: 5px;
             background: #f8f9fa;
@@ -159,40 +87,88 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s ease;
+            white-space: nowrap;
         }
-        .mode-btn-group .btn-mode.active { background: #3498db; color: #fff; border-color: #2980b9; }
-        .mode-btn-group .btn-mode:hover:not(.active) { border-color: #3498db; background: #ecf0f1; }
+        .ctrl-bar .btn-mode.active { background: #3498db; color: #fff; border-color: #2980b9; }
+        .ctrl-bar .btn-mode:hover:not(.active) { border-color: #3498db; background: #ecf0f1; }
+        .ctrl-bar .action-btns { display: flex; gap: 4px; flex-shrink: 0; }
+        .ctrl-bar .action-btns .btn {
+            padding: 5px 8px;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+        .ctrl-bar .wave-info {
+            display: flex;
+            gap: 6px;
+            flex-shrink: 0;
+            margin: 0;
+            padding: 0;
+            background: none;
+            border: none;
+        }
+        .ctrl-bar .wave-info-item {
+            padding: 4px 8px;
+            background: #f4f6f8;
+            border-radius: 6px;
+            text-align: center;
+            min-width: 68px;
+        }
+        .ctrl-bar .wave-info-label { font-size: 10px; color: #7f8c8d; margin-bottom: 2px; }
+        .ctrl-bar .wave-info-value { font-size: 12px; font-weight: 700; color: #2c3e50; }
+
+        /* === 下排畫布列（約 90%） === */
+        .canvas-row {
+            display: flex;
+            gap: 15px;
+            align-items: stretch;
+        }
+        .canvas-row .sim-panel   { flex: 35; min-width: 0; display: flex; flex-direction: column; }
+        .canvas-row .chart-panel { flex: 65; min-width: 0; display: flex; flex-direction: column; }
+
+        .sim-panel .canvas-wrapper,
+        .chart-panel .canvas-wrapper {
+            flex: 1;
+            background: #1a1a2e;
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+        }
+        .sim-panel .canvas-wrapper h5,
+        .chart-panel .canvas-wrapper h5 {
+            color: #ecf0f1;
+            margin: 0 0 8px 0;
+            font-size: 15px;
+            font-weight: 600;
+            align-self: flex-start;
+        }
+        .sim-panel canvas,
+        .chart-panel canvas {
+            width: 100%;
+            height: auto;
+            border-radius: 6px;
+            display: block;
+        }
+        #simCanvas    { background: #ececec; aspect-ratio: 400 / 528; }
+        #energyCanvas { background: #f0f0f0; aspect-ratio: 800 / 480; }
 
         /* =====================================================
-           響應式：平板橫向 (768–1099 px)
-           模擬 + 控制並排 → 圖表全寬置底
+           響應式：平板 (≤ 1099 px)
            ===================================================== */
         @media (max-width: 1099px) {
-            .sim-chart-layout { flex-wrap: wrap; align-items: flex-start; }
-            .sim-chart-layout .sim-panel   { flex: 1 1 calc(50% - 8px); }
-            .sim-chart-layout .ctrl-panel  { flex: 1 1 calc(50% - 8px); }
-            .sim-chart-layout .chart-panel { flex: 1 1 100%; order: 3; }
-            /* 平板：改回寬度驅動 + aspect-ratio */
-            .sim-panel canvas { width: 100%; height: auto; max-width: none; aspect-ratio: 400 / 480; }
+            .ctrl-bar { flex-wrap: wrap; }
+            .canvas-row { flex-direction: column; }
         }
 
         /* =====================================================
-           響應式：小型平板 / 手機 (< 768 px)
-           全部垂直堆疊：模擬 → 圖表 → 控制
+           響應式：手機 (< 768 px)
            ===================================================== */
         @media (max-width: 767px) {
-            .sim-chart-layout { flex-direction: column; align-items: stretch; }
-            .sim-chart-layout .sim-panel   { order: 1; }
-            .sim-chart-layout .chart-panel { order: 2; }
-            .sim-chart-layout .ctrl-panel  { order: 3; }
-            /* 手機：改回寬度驅動 + aspect-ratio */
-            .sim-panel canvas { width: 100%; height: auto; max-width: none; aspect-ratio: 400 / 480; }
-
-            /* 手機：按鈕 3 欄（5 個按鈕較緊湊） */
-            .ctrl-panel .button-group { grid-template-columns: 1fr 1fr 1fr; }
-
-            /* 主容器 padding 縮小 */
             .main-container { padding: 20px 15px; }
+            .ctrl-bar { flex-wrap: wrap; gap: 6px; }
+            .ctrl-sep { display: none; }
         }
     </style>
 </head>
@@ -259,83 +235,87 @@
             </p>
         </div>
 
-        <!-- 三欄佈局：25% 模擬 / 50% 圖表 / 25% 控制 -->
-        <div class="sim-chart-layout">
-            <div class="sim-panel">
-                <div class="canvas-wrapper">
-                    <h5>光電子產生示意模擬</h5>
-                    <canvas id="simCanvas" width="400" height="480"></canvas>
+        <!-- 上排控制列 + 下排 35% 模擬 / 65% 圖表 -->
+        <div class="sim-layout">
+            <!-- 上排：橫向控制列 -->
+            <div class="ctrl-bar">
+                <div class="ctrl-item">
+                    <label>波長 λ (nm)</label>
+                    <input type="range" id="wavelengthSlider" min="200" max="800" step="1" value="250">
+                    <span class="value-display" id="wavelengthValue">250 nm</span>
+                </div>
+                <div class="ctrl-sep"></div>
+                <div class="ctrl-item">
+                    <label>光強度 (%)</label>
+                    <input type="range" id="intensitySlider" min="0" max="100" step="1" value="60">
+                    <span class="value-display" id="intensityValue">60%</span>
+                </div>
+                <div class="ctrl-sep"></div>
+                <div class="ctrl-item">
+                    <label>金屬材料</label>
+                    <select id="metalSelect">
+                        <option value="Cs" selected>Cs (φ = 2.14 eV)</option>
+                        <option value="K">K (φ = 2.30 eV)</option>
+                        <option value="Na">Na (φ = 2.28 eV)</option>
+                        <option value="Mg">Mg (φ = 3.66 eV)</option>
+                        <option value="Zn">Zn (φ = 3.74 eV)</option>
+                        <option value="Al">Al (φ = 4.08 eV)</option>
+                        <option value="Ag">Ag (φ = 4.26 eV)</option>
+                        <option value="Cu">Cu (φ = 4.70 eV)</option>
+                        <option value="Au">Au (φ = 5.10 eV)</option>
+                        <option value="Ni">Ni (φ = 5.15 eV)</option>
+                        <option value="Pt">Pt (φ = 5.65 eV)</option>
+                    </select>
+                </div>
+                <div class="ctrl-sep"></div>
+                <div class="ctrl-item">
+                    <label>光源模式</label>
+                    <div class="mode-btn-group">
+                        <button class="btn-mode active" id="laserModeBtn">Laser</button>
+                        <button class="btn-mode" id="whiteModeBtn">White</button>
+                    </div>
+                </div>
+                <div class="ctrl-sep"></div>
+                <div class="action-btns">
+                    <button class="btn btn-start" id="runBtn">▶ 開始</button>
+                    <button class="btn btn-pause" id="pauseBtn">⏸ 暫停</button>
+                    <button class="btn btn-reset" id="resetBtn">🔄 重置</button>
+                    <button class="btn btn-reset" id="clearDataBtn">🗑️ 清空</button>
+                    <button class="btn btn-start" id="theoryLineBtn">📈 理論線</button>
+                </div>
+                <div class="ctrl-sep"></div>
+                <div class="wave-info">
+                    <div class="wave-info-item">
+                        <div class="wave-info-label">頻率 f</div>
+                        <div class="wave-info-value" id="dataFreq">-</div>
+                    </div>
+                    <div class="wave-info-item">
+                        <div class="wave-info-label">光子能量 E</div>
+                        <div class="wave-info-value" id="dataEnergy">-</div>
+                    </div>
+                    <div class="wave-info-item">
+                        <div class="wave-info-label">功函數 φ</div>
+                        <div class="wave-info-value" id="dataWorkFunc">-</div>
+                    </div>
+                    <div class="wave-info-item">
+                        <div class="wave-info-label">最大動能 KE</div>
+                        <div class="wave-info-value" id="dataKE">-</div>
+                    </div>
                 </div>
             </div>
-            <div class="chart-panel">
-                <div class="canvas-wrapper">
-                    <h5>電子最大動能 vs 光頻率</h5>
-                    <canvas id="energyCanvas" width="800" height="480"></canvas>
+
+            <!-- 下排：35% 模擬 + 65% 圖表 -->
+            <div class="canvas-row">
+                <div class="sim-panel">
+                    <div class="canvas-wrapper">
+                        <h5>光電子產生示意模擬</h5>
+                        <canvas id="simCanvas" width="400" height="528"></canvas>
+                    </div>
                 </div>
-            </div>
-            <div class="ctrl-panel">
-                <div class="controls">
-                    <div class="control-section">
-                        <h3>⚙️ 參數控制</h3>
-
-                        <div class="control-row">
-                            <label>波長 λ (nm)</label>
-                            <input type="range" id="wavelengthSlider" min="200" max="800" step="1" value="250">
-                            <span class="value-display" id="wavelengthValue">250 nm</span>
-                        </div>
-
-                        <div class="control-row">
-                            <label>光強度 (%)</label>
-                            <input type="range" id="intensitySlider" min="0" max="100" step="1" value="60">
-                            <span class="value-display" id="intensityValue">60%</span>
-                        </div>
-
-                        <div class="control-row">
-                            <label>金屬材料</label>
-                            <select id="metalSelect">
-                                <option value="Zn" selected>Zn (φ = 3.74 eV)</option>
-                                <option value="Na">Na (φ = 2.28 eV)</option>
-                                <option value="Cu">Cu (φ = 4.70 eV)</option>
-                                <option value="Cs">Cs (φ = 2.14 eV)</option>
-                            </select>
-                        </div>
-
-                        <div class="control-row">
-                            <label>光源模式</label>
-                            <div class="mode-btn-group">
-                                <button class="btn-mode active" id="laserModeBtn">Laser</button>
-                                <button class="btn-mode" id="whiteModeBtn">White</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 控制按鈕 -->
-                    <div class="button-group">
-                        <button class="btn btn-start" id="runBtn">▶ 開始</button>
-                        <button class="btn btn-pause" id="pauseBtn">⏸ 暫停</button>
-                        <button class="btn btn-reset" id="resetBtn">🔄 重置</button>
-                        <button class="btn btn-reset" id="clearDataBtn">🗑️ 清空數據</button>
-                        <button class="btn btn-start" id="theoryLineBtn">📈 顯示理論線</button>
-                    </div>
-
-                    <!-- 即時數據顯示 -->
-                    <div class="wave-info">
-                        <div class="wave-info-item">
-                            <div class="wave-info-label">頻率 f</div>
-                            <div class="wave-info-value" id="dataFreq">-</div>
-                        </div>
-                        <div class="wave-info-item">
-                            <div class="wave-info-label">光子能量 E</div>
-                            <div class="wave-info-value" id="dataEnergy">-</div>
-                        </div>
-                        <div class="wave-info-item">
-                            <div class="wave-info-label">功函數 φ</div>
-                            <div class="wave-info-value" id="dataWorkFunc">-</div>
-                        </div>
-                        <div class="wave-info-item">
-                            <div class="wave-info-label">最大動能 KE</div>
-                            <div class="wave-info-value" id="dataKE">-</div>
-                        </div>
+                <div class="chart-panel">
+                    <div class="canvas-wrapper">
+                        <h5>電子最大動能 vs 光頻率</h5>
+                        <canvas id="energyCanvas" width="800" height="480"></canvas>
                     </div>
                 </div>
             </div>
@@ -378,7 +358,20 @@
                 this.clearDataBtn = document.getElementById('clearDataBtn');
                 this.theoryLineBtn = document.getElementById('theoryLineBtn');
 
-                this.workFunctions = { Zn: 3.74, Na: 2.28, Cu: 4.70, Cs: 2.14 };
+                this.workFunctions = { Cs: 2.14, K: 2.30, Na: 2.28, Mg: 3.66, Zn: 3.74, Al: 4.08, Ag: 4.26, Cu: 4.70, Au: 5.10, Ni: 5.15, Pt: 5.65 };
+                this.metalColors = {
+                    Cs: { top: '#C9B458', front: '#A89040' },
+                    K:  { top: '#D4D4D8', front: '#B0B0B6' },
+                    Na: { top: '#D6D6DA', front: '#B2B2B8' },
+                    Mg: { top: '#BBBFC4', front: '#989CA2' },
+                    Zn: { top: '#B8BFC6', front: '#959CA4' },
+                    Al: { top: '#C8CDD2', front: '#A6ABB0' },
+                    Ag: { top: '#E8E8EC', front: '#C4C4CA' },
+                    Cu: { top: '#D4764E', front: '#B05A38' },
+                    Au: { top: '#E6C545', front: '#C4A530' },
+                    Ni: { top: '#CACDC2', front: '#A8AB9E' },
+                    Pt: { top: '#D8D8DC', front: '#B6B6BC' }
+                };
 
                 this.mode = 'laser';
                 this.isRunning = true;
@@ -613,10 +606,6 @@
                 ctx.beginPath();
                 ctx.arc(x + 24, y + 24, 9, 0, Math.PI * 2);
                 ctx.fill();
-
-                ctx.fillStyle = '#3f4750';
-                ctx.font = '16px Roboto, sans-serif';
-                ctx.fillText('Light Source', x - 46, y - 58);
             }
 
             /* 生成視覺光子粒子（純視覺，不影響物理計算） */
@@ -686,7 +675,8 @@
                 const h = Math.round(H * 0.065);           // 金屬板厚（比例）
                 const d = Math.round(H * 0.04);            // 3D 深度（比例）
 
-                ctx.fillStyle = '#c6cbd1';
+                const mc = this.metalColors[this.metalSelect.value] || { top: '#c6cbd1', front: '#b0b6bd' };
+                ctx.fillStyle = mc.top;
                 ctx.beginPath();
                 ctx.moveTo(cx - w / 2, topY);
                 ctx.lineTo(cx + w / 2, topY);
@@ -695,7 +685,7 @@
                 ctx.closePath();
                 ctx.fill();
 
-                ctx.fillStyle = '#b0b6bd';
+                ctx.fillStyle = mc.front;
                 ctx.fillRect(cx - w / 2 - d, topY + d, w, h);
 
                 ctx.fillStyle = '#3f4750';
