@@ -315,6 +315,29 @@ const items = [
 ];
 ```
 
+### 數據圖 Y 軸刻度規則
+
+- **所有數據圖（x-t、v-t、a-t 等）的 Y 軸刻度必須使用整數**，方便學生讀值
+- 計算刻度步距時，先求出合適的步距後無條件進位至整數，再產生刻度標籤
+- 標準作法：根據資料範圍算出 `step`，確保 `step = Math.ceil(step)` 或 `Math.round(step)` 為整數
+- Y 軸最大值與最小值也應對齊整數刻度，避免頂端或底部出現非整數邊界
+
+```javascript
+// 範例：計算整數刻度的通用函式
+function calcIntegerTicks(minVal, maxVal, tickCount = 5) {
+    const range = maxVal - minVal || 1;
+    const rawStep = range / (tickCount - 1);
+    const step = Math.ceil(rawStep);           // 步距無條件進位至整數
+    const niceMin = Math.floor(minVal / step) * step;
+    const niceMax = Math.ceil(maxVal / step) * step;
+    const ticks = [];
+    for (let v = niceMin; v <= niceMax + step * 0.01; v += step) {
+        ticks.push(Math.round(v));             // 確保整數，消除浮點誤差
+    }
+    return { ticks, niceMin, niceMax };
+}
+```
+
 ---
 
 ## 參數控制行為
@@ -377,4 +400,5 @@ ctx.globalAlpha = 1;
 7. [ ] JavaScript 類別實作 `scaleCanvas` 高 DPI 縮放
 8. [ ] 所有繪圖方法的尺寸讀取用 `canvas.width / this.dpr`
 9. [ ] 任何滑桿調整皆呼叫 `this.reset()` 重置模擬
-10. [ ] 在 `physics-simulations.html` 加入連結
+10. [ ] 所有數據圖 Y 軸刻度使用整數（參考「數據圖 Y 軸刻度規則」段落）
+11. [ ] 在 `physics-simulations.html` 加入連結
