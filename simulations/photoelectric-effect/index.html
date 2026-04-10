@@ -172,7 +172,9 @@
             .sim-chart-layout .sim-panel   { flex: 1 1 calc(50% - 8px); }
             .sim-chart-layout .ctrl-panel  { flex: 1 1 calc(50% - 8px); }
             .sim-chart-layout .chart-panel { flex: 1 1 100%; order: 3; }
-            /* 畫布寬度由容器決定，高度由 aspect-ratio 自動計算 */
+            /* 平板：sim canvas 改用 aspect-ratio 自決高度，避免 flex:1 無限展長迴圈 */
+            .sim-panel canvas { flex: none; height: auto; aspect-ratio: 400 / 480; }
+            .sim-panel .canvas-wrapper { justify-content: flex-start; }
         }
 
         /* =====================================================
@@ -184,7 +186,9 @@
             .sim-chart-layout .sim-panel   { order: 1; }
             .sim-chart-layout .chart-panel { order: 2; }
             .sim-chart-layout .ctrl-panel  { order: 3; }
-            /* 畫布寬度 100%，aspect-ratio 自動對應高度，不需手動指定 */
+            /* 手機：同樣用 aspect-ratio 讓 sim canvas 自定高度 */
+            .sim-panel canvas { flex: none; height: auto; aspect-ratio: 400 / 480; }
+            .sim-panel .canvas-wrapper { justify-content: flex-start; }
 
             /* 手機：按鈕 3 欄（5 個按鈕較緊湊） */
             .ctrl-panel .button-group { grid-template-columns: 1fr 1fr 1fr; }
@@ -413,8 +417,12 @@
                 const rect = this.simCanvas.getBoundingClientRect();
                 if (rect.width < 2 || rect.height < 2) return;
                 const dpr = this.dpr;
-                this.simCanvas.width  = Math.round(rect.width  * dpr);
-                this.simCanvas.height = Math.round(rect.height * dpr);
+                const newW = Math.round(rect.width  * dpr);
+                const newH = Math.round(rect.height * dpr);
+                // 尺寸未變則不重新設置，避免 ResizeObserver 無限迴圈
+                if (this.simCanvas.width === newW && this.simCanvas.height === newH) return;
+                this.simCanvas.width  = newW;
+                this.simCanvas.height = newH;
                 this.simCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
             }
 
