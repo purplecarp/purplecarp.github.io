@@ -168,13 +168,17 @@
            模擬 + 控制並排 → 圖表全寬置底
            ===================================================== */
         @media (max-width: 1099px) {
-            .sim-chart-layout { flex-wrap: wrap; }
+            /* align-items: flex-start 打斷 sim-panel vs ctrl-panel 互相拉伸的循環依賴 */
+            .sim-chart-layout { flex-wrap: wrap; align-items: flex-start; }
             .sim-chart-layout .sim-panel   { flex: 1 1 calc(50% - 8px); }
             .sim-chart-layout .ctrl-panel  { flex: 1 1 calc(50% - 8px); }
             .sim-chart-layout .chart-panel { flex: 1 1 100%; order: 3; }
-            /* 平板：sim canvas 改用 aspect-ratio 自決高度，避免 flex:1 無限展長迴圈 */
-            .sim-panel canvas { flex: none; height: auto; aspect-ratio: 400 / 480; }
-            .sim-panel .canvas-wrapper { justify-content: flex-start; }
+            /* 平板：canvas-wrapper 不再 flex:1 拉伸，自對內容收縮 */
+            .sim-panel .canvas-wrapper { flex: none; justify-content: flex-start; }
+            /* sim canvas 改用 aspect-ratio 自決高度 */
+            .sim-panel canvas { flex: none; width: 100%; height: auto; aspect-ratio: 400 / 480; }
+            /* ctrl-panel controls 不再 flex:1 拉伸 */
+            .ctrl-panel .controls { flex: none; }
         }
 
         /* =====================================================
@@ -182,13 +186,13 @@
            全部垂直堆疊：模擬 → 圖表 → 控制
            ===================================================== */
         @media (max-width: 767px) {
-            .sim-chart-layout { flex-direction: column; }
+            .sim-chart-layout { flex-direction: column; align-items: stretch; }
             .sim-chart-layout .sim-panel   { order: 1; }
             .sim-chart-layout .chart-panel { order: 2; }
             .sim-chart-layout .ctrl-panel  { order: 3; }
-            /* 手機：同樣用 aspect-ratio 讓 sim canvas 自定高度 */
-            .sim-panel canvas { flex: none; height: auto; aspect-ratio: 400 / 480; }
-            .sim-panel .canvas-wrapper { justify-content: flex-start; }
+            .sim-panel .canvas-wrapper { flex: none; justify-content: flex-start; }
+            .sim-panel canvas { flex: none; width: 100%; height: auto; aspect-ratio: 400 / 480; }
+            .ctrl-panel .controls { flex: none; }
 
             /* 手機：按鈕 3 欄（5 個按鈕較緊湊） */
             .ctrl-panel .button-group { grid-template-columns: 1fr 1fr 1fr; }
@@ -369,9 +373,10 @@
                 this.scaleCanvas(this.simCanvas, this.simCtx);
                 this.scaleCanvas(this.energyCanvas, this.energyCtx);
 
-                // 動態調整模擬畫布 buffer 以填滿 flex 容器
+                // 動態調整模擬畫布 buffer：觀察父容器（wrapper）而非 canvas 本身
+                // 避免更新 canvas.width 觸發 layout reflow 再次激活 observer 的無限迴圈
                 const ro = new ResizeObserver(() => this._resizeSimCanvas());
-                ro.observe(this.simCanvas);
+                ro.observe(this.simCanvas.parentElement);
 
                 this.wavelengthSlider = document.getElementById('wavelengthSlider');
                 this.intensitySlider = document.getElementById('intensitySlider');
