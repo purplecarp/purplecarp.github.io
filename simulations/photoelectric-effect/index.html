@@ -546,7 +546,9 @@
                     alpha: 1
                 });
 
-                this.scatterPoints.push({ freq: 299792.458 / lambdaNm, ke, t: this.time });
+                // 實際電子動能分布在 0 ~ KE_max 之間（不是所有電子都具有最大動能）
+                const recordedKE = Math.random() * ke;
+                this.scatterPoints.push({ freq: 299792.458 / lambdaNm, ke: recordedKE, lambda: lambdaNm, t: this.time });
                 if (this.scatterPoints.length > this.maxScatterPoints) this.scatterPoints.shift();
             }
 
@@ -626,7 +628,7 @@
 
                 ctx.fillStyle = '#3f4750';
                 ctx.font = '12px Roboto, sans-serif';
-                ctx.fillText('Light Source', x - 46, y - 38);
+                ctx.fillText('Light Source', x - 46, y - 78);
             }
 
             /* 生成視覺光子粒子（純視覺，不影響物理計算） */
@@ -820,7 +822,7 @@
                         ctx.fill();
                         ctx.fillStyle = '#c0392b';
                         ctx.font = 'bold 12px Roboto, sans-serif';
-                        ctx.fillText('-φ = ' + keAt0.toFixed(2) + ' eV', pad.left + 8, dotY - 18);
+                        ctx.fillText('-φ = ' + keAt0.toFixed(2) + ' eV', pad.left + 8, dotY - 58);
                     }
 
                     // 標示截止頻率 f₀
@@ -833,7 +835,7 @@
                         ctx.fill();
                         ctx.fillStyle = '#c0392b';
                         ctx.font = 'bold 12px Roboto, sans-serif';
-                        ctx.fillText('f₀=' + f0_THz.toFixed(0) + ' THz', dotX + 6, yZero - 18);
+                        ctx.fillText('f₀=' + f0_THz.toFixed(0) + ' THz', dotX + 6, yZero - 58);
                     }
 
                     ctx.restore();
@@ -861,7 +863,7 @@
                     const px = pad.left + ((p.freq - xMin) / (xMax - xMin)) * pw;
                     const py = pad.top + ((yMax - p.ke) / (yMax - yMin)) * ph;
                     if (px < pad.left || px > pad.left + pw || py < pad.top || py > pad.top + ph) continue;
-                    ctx.fillStyle = 'rgba(52, 152, 219, 0.7)';
+                    ctx.fillStyle = this.wavelengthToColor(p.lambda || 450);
                     ctx.beginPath();
                     ctx.arc(px, py, 3, 0, Math.PI * 2);
                     ctx.fill();
