@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8">
+    <title>繩波傳遞與反射 - 物理模擬</title>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <link href="../../images/fish.png" rel="shortcut icon">
+
+    <link href="../../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../../css/normalize.css" rel="stylesheet">
+    <link href="../../css/style.css" rel="stylesheet">
+    <link href="../../css/responsive.css" rel="stylesheet">
+    <link href="../../css/simulations.css" rel="stylesheet">
+
+    <link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Roboto:400,300,500,700' rel='stylesheet' type='text/css'>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+
+    <style>
+        #simCanvas {
+            width: 100%;
+            border-radius: 6px;
+            background: #0d1117;
+        }
+        .controls select {
+            background: #1a2a3a;
+            color: #ecf0f1;
+            border: 1px solid #2a3a4a;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 2px;
+        }
+        .scenario-legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 12px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 12px;
+            color: #aaa;
+        }
+        .legend-dot {
+            width: 12px;
+            height: 4px;
+            border-radius: 2px;
+        }
+        .coeff-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 8px;
+            font-size: 12px;
+        }
+        .coeff-table th, .coeff-table td {
+            padding: 4px 6px;
+            border: 1px solid #2a3a4a;
+            text-align: center;
+            color: #ccc;
+        }
+        .coeff-table th {
+            background: #1a2a3a;
+            color: #ecf0f1;
+            font-weight: 600;
+        }
+        .coeff-table tr:nth-child(even) td {
+            background: #0d1a26;
+        }
+    </style>
+</head>
+<body>
+    <!--HEADER -->
+    <div class="header">
+      <div class="for-sticky">
+        <div class="col-md-2 col-xs-6 logo">
+          <a href="../../index.html"><img alt="logo" class="logo-nav" src="../../images/fish.png"></a>
+        </div>
+      </div>
+      <div class="menu-wrap">
+        <nav class="menu">
+          <div class="menu-list">
+            <a href="../../index.html#home"><span>首頁</span></a>
+            <a href="../../index.html#about"><span>關於我</span></a>
+            <a href="../../index.html#experience"><span>教學經驗</span></a>
+            <a href="../../teaching-gallery.html"><span>查看教學剪影</span></a>
+            <a href="../../physics-simulations.html" class="active"><span>高中物理內容</span></a>
+            <a href="../../index.html#skills"><span>專業技能</span></a>
+            <a href="../../index.html#achievements"><span>成果展示</span></a>
+            <a href="../../index.html#philosophy"><span>教育理念</span></a>
+            <a href="../../index.html#contact"><span>聯絡方式</span></a>
+          </div>
+        </nav>
+        <button class="close-button" id="close-button">Close Menu</button>
+      </div>
+      <button class="menu-button" id="open-button">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <!--/.HEADER END-->
+
+    <!-- 頂部導航欄 -->
+    <div class="top-nav">
+        <div class="container">
+            <a href="../../index.html" class="nav-brand">
+                <img src="../../images/fish.png" alt="Logo">
+                <h2>物鯉魚教學模擬</h2>
+            </a>
+            <a href="../../physics-simulations.html" class="btn-back">← 返回列表</a>
+        </div>
+    </div>
+
+    <!-- 主容器 -->
+    <div class="main-container">
+        <!-- 頁面標題 -->
+        <div class="page-header">
+            <h1>🌊 繩波傳遞與反射</h1>
+            <p class="subtitle">觀察波在不同密度繩子與邊界條件下的反射及透射行為 | 選修物理 II - 波動</p>
+        </div>
+
+        <!-- 物理原理說明 -->
+        <div class="info-box physics-principle">
+            <h4>📚 物理原理與公式</h4>
+            <p>
+                • <strong>繩波速度：</strong>$v = \sqrt{T/\mu}$，$T$ 為張力（各段相同），$\mu$ 為<strong>線密度</strong>（每公尺繩的質量，g/m）；$\mu$ 越大（越重）波速越慢<br>
+                • <strong>反射係數：</strong>$r = \dfrac{v_2 - v_1}{v_2 + v_1}$　　$r > 0$：反射波與入射波<strong>同相</strong>（不倒相）；$r < 0$：<strong>反相</strong>（倒相）<br>
+                • <strong>透射係數：</strong>$t = \dfrac{2v_2}{v_2 + v_1}$，透射波振幅 $= t \times A_i$<br>
+                • <strong>固定端</strong>（$v_2 = 0$）：$r = -1$（完全倒相反射），無透射<br>
+                • <strong>活動端</strong>（$v_2 \to \infty$）：$r = +1$（完全同相反射），無透射<br>
+                • <strong>能量守恆：</strong>反射能量 + 透射能量 = 入射能量，即 $r^2 + \dfrac{v_1}{v_2} t^2 = 1$
+            </p>
+        </div>
+
+        <!-- 模擬與控制面板並排 -->
+        <div class="sim-layout">
+            <!-- 右側控制面板 -->
+            <div class="sim-layout-left">
+                <div class="controls">
+                    <div class="control-section">
+                        <h3>⚙️ 波源設定</h3>
+
+                        <div class="control-row">
+                            <label>波形種類</label>
+                            <select id="waveTypeSelect">
+                                <option value="sine">週期波（正弦）</option>
+                                <option value="pulse">脈衝波（高斯包）</option>
+                            </select>
+                        </div>
+
+                        <div class="control-row">
+                            <label>振幅 A（格）</label>
+                            <input type="range" id="ampSlider" min="5" max="35" step="1" value="20">
+                            <span class="value-display" id="ampValue">20</span>
+                        </div>
+
+                        <div class="control-row">
+                            <label id="freqLabel">頻率（相對值）</label>
+                            <input type="range" id="freqSlider" min="1" max="5" step="1" value="3">
+                            <span class="value-display" id="freqValue">3</span>
+                        </div>
+
+                        <div class="control-row">
+                            <label>播放速度</label>
+                            <input type="range" id="speedSlider" min="0.5" max="3" step="0.5" value="1">
+                            <span class="value-display" id="speedValue">1.0x</span>
+                        </div>
+
+                        <div class="control-row">
+                            <label>顯示係數標記</label>
+                            <input type="checkbox" id="showCoeffToggle" checked>
+                        </div>
+                    </div>
+
+                    <div class="control-section">
+                        <h3>⚙️ 繩子材質</h3>
+
+                        <div class="control-row">
+                            <label>重繩線密度 μ₁ (g/m)</label>
+                            <input type="range" id="mu1Slider" min="2" max="16" step="1" value="4">
+                            <span class="value-display" id="mu1Value">4</span>
+                        </div>
+
+                        <div class="control-row">
+                            <label>輕繩線密度 μ₂ (g/m)</label>
+                            <input type="range" id="mu2Slider" min="1" max="15" step="1" value="1">
+                            <span class="value-display" id="mu2Value">1</span>
+                        </div>
+
+                        <div class="wave-info" style="margin-top:10px;">
+                            <div class="wave-info-item">
+                                <div class="wave-info-label">v₁（重繩）</div>
+                                <div class="wave-info-value" id="v1Display">2.00</div>
+                            </div>
+                            <div class="wave-info-item">
+                                <div class="wave-info-label">v₂（輕繩）</div>
+                                <div class="wave-info-value" id="v2Display">4.00</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="control-section">
+                        <h3>📊 理論反射/透射係數</h3>
+                        <table class="coeff-table">
+                            <thead>
+                                <tr><th>情境</th><th>r</th><th>t</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td style="color:#74c0fc;">重→輕</td>
+                                    <td id="r1Cell" style="color:#a9e34b;">+0.33</td>
+                                    <td id="t1Cell">1.33</td>
+                                </tr>
+                                <tr>
+                                    <td style="color:#f7a44b;">輕→重</td>
+                                    <td id="r2Cell" style="color:#ff8787;">−0.33</td>
+                                    <td id="t2Cell">0.67</td>
+                                </tr>
+                                <tr>
+                                    <td style="color:#69db7c;">固定端</td>
+                                    <td style="color:#ff8787;">−1.00</td>
+                                    <td>0</td>
+                                </tr>
+                                <tr>
+                                    <td style="color:#cc5de8;">活動端</td>
+                                    <td style="color:#a9e34b;">+1.00</td>
+                                    <td>0</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <div class="scenario-legend">
+                            <div class="legend-item">
+                                <div class="legend-dot" style="background:#74c0fc;"></div>重繩（慢）
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-dot" style="background:#f7a44b;"></div>輕繩（快）
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-dot" style="background:#69db7c;"></div>固定端
+                            </div>
+                            <div class="legend-item">
+                                <div class="legend-dot" style="background:#cc5de8;"></div>活動端
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 控制按鈕 -->
+                <div class="button-group">
+                    <button class="btn btn-start" id="startBtn">▶ 開始模擬</button>
+                    <button class="btn btn-pause" id="pauseBtn">⏸ 暫停</button>
+                    <button class="btn btn-reset" id="resetBtn">🔄 重置</button>
+                </div>
+            </div>
+
+            <!-- 左側模擬區域 -->
+            <div class="sim-layout-right">
+                <div class="simulation-section">
+                    <div class="canvas-wrapper">
+                        <canvas id="simCanvas" width="900" height="480"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 教學指引 -->
+        <div class="info-box teaching-note">
+            <h4>💡 教學使用指引</h4>
+            <p>
+                • <strong>比較觀察：</strong>四種情境同時進行，重點觀察<strong>接面/端點右側</strong>的波形變化，以及反射波的相位（是否倒相）<br>
+                • <strong>重到輕（密→疏）：</strong>反射波<strong>不倒相</strong>，透射波振幅<strong>變大</strong>（$t > 1$）但能量仍守恆（傳入能量流減少）<br>
+                • <strong>輕到重（疏→密）：</strong>反射波<strong>倒相</strong>，透射波振幅<strong>變小</strong>（$t < 1$）<br>
+                • <strong>固定端：</strong>完全反射且倒相，可觀察到接近<strong>駐波</strong>的干涉圖形<br>
+                • <strong>活動端：</strong>完全反射且不倒相，反射波振幅等於入射波振幅<br>
+                • <strong>脈衝波模式：</strong>切換為「脈衝波」可清楚看到入射脈衝、反射脈衝（相位是否翻轉）及透射脈衝（振幅大小）各自分開傳遞，不受疊加干擾<br>
+                • <strong>調整線密度：</strong>μ₁/μ₂ 比值越大，速度差異越大，r 值越接近 ±1，反射越強；比值趨近 1 時反射幾乎消失<br>
+                • <strong>思考問題：</strong>固定端與輕→重的反射波相位都是倒相，兩者有何不同？提示：觀察透射端<br>
+                • <strong>操作建議：</strong>先用脈衝波觀察反射行為，再切換週期波觀察穩態干涉與駐波條件
+            </p>
+        </div>
+    </div>
+
+    <!-- JavaScript 模擬程式碼 -->
+    <script>
+        class RopeWaveSimulation {
+            constructor() {
+                this.simCanvas = document.getElementById('simCanvas');
+                this.simCtx = this.simCanvas.getContext('2d');
+                this.dpr = window.devicePixelRatio || 1;
+                this.scaleCanvas(this.simCanvas, this.simCtx);
+
+                // 繩子材質：線密度 (g/m)，T_REF=16 使 μ=1→v=4, μ=4→v=2
+                this.T_REF = 16.0;
+                this.mu1   = 4;   // 重繩線密度
+                this.mu2   = 1;   // 輕繩線密度
+                this.computeSpeeds();
+
+                // 物理參數
+                this.N = 130;
+                this.SIM_SPEED = 5;
+
+                // 波源設定
+                this.waveType  = 'sine';
+                this.amplitude = 20;
+                this.freqLevel = 3;
+                this.frequency = 3 * 0.015;
+                // pulseHalfPeriod 由 get 屬性動態計算，無需儲存
+
+                this.playbackSpeed = 1.0;
+                this.showCoeff = true;
+
+                // 模擬狀態
+                this.isRunning = false;
+                this.time = 0;
+                this.animationId = null;
+                this.lastTimestamp = null;
+
+                this.scenarios = null;
+                this.init();
+            }
+
+            // 脈衝半週期：freqLevel 越大 → T_half 越大（脈衝越寬）
+            get pulseHalfPeriod() {
+                return this.freqLevel * 0.8;
+            }
+
+            // 由線密度計算波速與子步長
+            computeSpeeds() {
+                this.v_slow = Math.sqrt(this.T_REF / this.mu1);
+                this.v_fast = Math.sqrt(this.T_REF / this.mu2);
+                this.DT_SUB = 0.8 / Math.max(this.v_slow, this.v_fast);
+            }
+
+            // 高 DPI 縮放（必須）
+            scaleCanvas(canvas, ctx) {
+                const dpr = this.dpr;
+                const cssW = canvas.width, cssH = canvas.height;
+                canvas.width = Math.round(cssW * dpr);
+                canvas.height = Math.round(cssH * dpr);
+                canvas.style.width = cssW + 'px';
+                canvas.style.height = cssH + 'px';
+                ctx.scale(dpr, dpr);
+            }
+
+            init() {
+                this.resetScenarios();
+                this.bindControls();
+                this.updateCoeffDisplay();
+                this.updateSpeedDisplay();
+                this.draw();
+            }
+
+            // ────────────────────────────────────────
+            // 建立四種情境的初始狀態
+            // ────────────────────────────────────────
+            resetScenarios() {
+                const N = this.N;
+                const configs = [
+                    { type: 'heavy-to-light', label: '1. 重到輕（密→疏）' },
+                    { type: 'light-to-heavy', label: '2. 輕到重（疏→密）' },
+                    { type: 'fixed',          label: '3. 固定端' },
+                    { type: 'free',           label: '4. 活動端' },
+                ];
+                this.scenarios = configs.map(cfg => this.createScenario(cfg.type, cfg.label, N));
+            }
+
+            createScenario(type, label, N) {
+                const y      = new Float64Array(N); // 目前位移
+                const y_prev = new Float64Array(N); // 前一步位移
+                const v      = new Float64Array(N); // 各節點波速
+
+                // 設定各節點波速
+                for (let i = 0; i < N; i++) {
+                    if (type === 'heavy-to-light') {
+                        v[i] = i < N / 2 ? this.v_slow : this.v_fast;
+                    } else if (type === 'light-to-heavy') {
+                        v[i] = i < N / 2 ? this.v_fast : this.v_slow;
+                    } else {
+                        v[i] = this.v_slow; // 均勻繩
+                    }
+                }
+
+                // 接面節點使用能量加權有效速度，提升模擬精度
+                if (type === 'heavy-to-light' || type === 'light-to-heavy') {
+                    const mid = Math.floor(N / 2);
+                    const vs = this.v_slow, vf = this.v_fast;
+                    // v_eff = sqrt(2 * vs^2 * vf^2 / (vs^2 + vf^2))
+                    v[mid] = Math.sqrt(2 * vs * vs * vf * vf / (vs * vs + vf * vf));
+                }
+
+                return { type, label, y, y_prev, v };
+            }
+
+            // ────────────────────────────────────────
+            // 控制項繫結
+            // ────────────────────────────────────────
+            bindControls() {
+                // 波形種類
+                document.getElementById('waveTypeSelect').addEventListener('change', (e) => {
+                    this.waveType = e.target.value;
+                    document.getElementById('freqLabel').textContent =
+                        this.waveType === 'pulse' ? '脈衝寬度（越大越寬）' : '頻率（相對值）';
+                    // 脈衝模式：freqLevel 越大 → pulseHalfPeriod 越大 → 脈衝越寬，標籤已正確
+                    this.reset();
+                });
+
+                document.getElementById('ampSlider').addEventListener('input', (e) => {
+                    this.amplitude = parseFloat(e.target.value);
+                    document.getElementById('ampValue').textContent = this.amplitude;
+                    this.reset();
+                });
+
+                document.getElementById('freqSlider').addEventListener('input', (e) => {
+                    this.freqLevel = parseFloat(e.target.value);
+                    this.frequency = this.freqLevel * 0.015;
+                    document.getElementById('freqValue').textContent = this.freqLevel;
+                    this.reset();
+                });
+
+                document.getElementById('speedSlider').addEventListener('input', (e) => {
+                    this.playbackSpeed = parseFloat(e.target.value);
+                    document.getElementById('speedValue').textContent = this.playbackSpeed.toFixed(1) + 'x';
+                });
+
+                document.getElementById('showCoeffToggle').addEventListener('change', (e) => {
+                    this.showCoeff = e.target.checked;
+                    if (!this.isRunning) this.draw();
+                });
+
+                // 重繩線密度 μ₁
+                document.getElementById('mu1Slider').addEventListener('input', (e) => {
+                    this.mu1 = parseInt(e.target.value);
+                    if (this.mu1 <= this.mu2) {
+                        this.mu2 = Math.max(1, this.mu1 - 1);
+                        document.getElementById('mu2Slider').value = this.mu2;
+                        document.getElementById('mu2Value').textContent = this.mu2;
+                    }
+                    document.getElementById('mu1Value').textContent = this.mu1;
+                    this.computeSpeeds();
+                    this.updateCoeffDisplay();
+                    this.updateSpeedDisplay();
+                    this.reset();
+                });
+
+                // 輕繩線密度 μ₂
+                document.getElementById('mu2Slider').addEventListener('input', (e) => {
+                    this.mu2 = parseInt(e.target.value);
+                    if (this.mu2 >= this.mu1) {
+                        this.mu1 = Math.min(16, this.mu2 + 1);
+                        document.getElementById('mu1Slider').value = this.mu1;
+                        document.getElementById('mu1Value').textContent = this.mu1;
+                    }
+                    document.getElementById('mu2Value').textContent = this.mu2;
+                    this.computeSpeeds();
+                    this.updateCoeffDisplay();
+                    this.updateSpeedDisplay();
+                    this.reset();
+                });
+
+                document.getElementById('startBtn').addEventListener('click', () => this.start());
+                document.getElementById('pauseBtn').addEventListener('click', () => this.pause());
+                document.getElementById('resetBtn').addEventListener('click', () => this.reset());
+            }
+
+            updateSpeedDisplay() {
+                document.getElementById('v1Display').textContent = this.v_slow.toFixed(2);
+                document.getElementById('v2Display').textContent = this.v_fast.toFixed(2);
+            }
+
+            // 更新左側係數表格
+            updateCoeffDisplay() {
+                const v1s = this.v_slow, v2f = this.v_fast;
+                const r1 = (v2f - v1s) / (v2f + v1s);
+                const t1 = 2 * v2f / (v2f + v1s);
+                const r2 = (v1s - v2f) / (v1s + v2f);
+                const t2 = 2 * v1s / (v1s + v2f);
+
+                document.getElementById('r1Cell').textContent = (r1 >= 0 ? '+' : '') + r1.toFixed(2);
+                document.getElementById('t1Cell').textContent = t1.toFixed(2);
+                document.getElementById('r2Cell').textContent = (r2 >= 0 ? '+' : '') + r2.toFixed(2);
+                document.getElementById('t2Cell').textContent = t2.toFixed(2);
+            }
+
+            // ────────────────────────────────────────
+            // 模擬控制
+            // ────────────────────────────────────────
+            start() {
+                if (this.isRunning) return;
+                this.isRunning = true;
+                this.lastTimestamp = null;
+                this.animationId = requestAnimationFrame((ts) => this.loop(ts));
+            }
+
+            pause() {
+                this.isRunning = false;
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                    this.animationId = null;
+                }
+            }
+
+            reset() {
+                this.pause();
+                this.time = 0;
+                this.resetScenarios();
+                this.draw();
+            }
+
+            // ────────────────────────────────────────
+            // 動畫主迴圈
+            // ────────────────────────────────────────
+            loop(timestamp) {
+                if (!this.isRunning) return;
+
+                if (this.lastTimestamp !== null) {
+                    const dt_real = Math.min((timestamp - this.lastTimestamp) / 1000, 0.05);
+                    const dt_sim  = dt_real * this.playbackSpeed * this.SIM_SPEED;
+
+                    // 子步長分割，確保 Courant 數穩定
+                    const numSteps = Math.max(1, Math.ceil(dt_sim / this.DT_SUB));
+                    const dt_step  = dt_sim / numSteps;
+
+                    for (let step = 0; step < numSteps; step++) {
+                        this.time += dt_step;
+                        for (const s of this.scenarios) {
+                            this.stepScenario(s, dt_step);
+                        }
+                    }
+                }
+
+                this.lastTimestamp = timestamp;
+                this.draw();
+                this.animationId = requestAnimationFrame((ts) => this.loop(ts));
+            }
+
+            // ────────────────────────────────────────
+            // 有限差分更新（Störmer-Verlet）
+            // ────────────────────────────────────────
+            stepScenario(s, dt) {
+                const { y, y_prev, v, type } = s;
+                const N = this.N;
+                const y_new = new Float64Array(N);
+
+                // 左端：驅動波源
+                let srcVal = 0;
+                if (this.waveType === 'sine') {
+                    srcVal = Math.sin(2 * Math.PI * this.frequency * this.time);
+                } else {
+                    // 半個正弦波脈衝：從 t=0 振到 t=T_half 後停止（一個完整的凸起）
+                    const T_half = this.pulseHalfPeriod;
+                    if (this.time <= T_half) {
+                        srcVal = Math.sin(Math.PI * this.time / T_half);
+                    }
+                }
+                y_new[0] = srcVal;
+
+                // 內部節點：二階差分（dx = 1）
+                for (let i = 1; i < N - 1; i++) {
+                    const C = v[i] * dt; // Courant 數
+                    y_new[i] = 2 * y[i] - y_prev[i] + C * C * (y[i + 1] - 2 * y[i] + y[i - 1]);
+                }
+
+                // 右端邊界條件
+                if (type === 'fixed') {
+                    // 固定端：強制零位移
+                    y_new[N - 1] = 0;
+                } else if (type === 'free') {
+                    // 活動端：零坡度（ghost node: y[N] = y[N-2]）
+                    const C = v[N - 2] * dt;
+                    y_new[N - 1] = 2 * y[N - 1] - y_prev[N - 1] + 2 * C * C * (y[N - 2] - y[N - 1]);
+                } else {
+                    // 吸收邊界（Mur 一階），防止右牆二次反射
+                    const C_end = v[N - 1] * dt;
+                    const coef  = (C_end - 1) / (C_end + 1);
+                    y_new[N - 1] = y[N - 2] + coef * (y_new[N - 2] - y[N - 1]);
+                }
+
+                y_prev.set(y);
+                y.set(y_new);
+            }
+
+            // ────────────────────────────────────────
+            // 繪圖
+            // ────────────────────────────────────────
+            draw() {
+                const W   = this.simCanvas.width / this.dpr;
+                const H   = this.simCanvas.height / this.dpr;
+                const ctx = this.simCtx;
+
+                ctx.clearRect(0, 0, W, H);
+                ctx.fillStyle = '#0d1117';
+                ctx.fillRect(0, 0, W, H);
+
+                const numScenarios = this.scenarios.length;
+                const stripH = H / numScenarios;
+
+                for (let i = 0; i < numScenarios; i++) {
+                    this.drawStrip(ctx, i, W, i * stripH, stripH);
+                }
+            }
+
+            drawStrip(ctx, idx, W, y0, stripH) {
+                const scenario = this.scenarios[idx];
+                const { y, v, type, label } = scenario;
+                const N = this.N;
+
+                // 各條帶中心線
+                const centerY = y0 + stripH * 0.52;
+                const amp     = this.amplitude;
+
+                // 帶狀背景（交錯深色）
+                ctx.fillStyle = idx % 2 === 0 ? '#0d1117' : '#0e1520';
+                ctx.fillRect(0, y0, W, stripH);
+
+                // 條帶分隔線
+                ctx.strokeStyle = '#2a3a4a';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(0, y0);
+                ctx.lineTo(W, y0);
+                ctx.stroke();
+
+                // ── 繩子的左右邊距 ──
+                const marginL = 55;   // 波源左側留白
+                const marginR = 55;   // 右端邊界留白
+                const ropeX0  = marginL;
+                const ropeX1  = W - marginR;
+                const ropeW   = ropeX1 - ropeX0;
+
+                // ── 平衡位置虛線 ──
+                ctx.strokeStyle = '#1e2e40';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath();
+                ctx.moveTo(ropeX0, centerY);
+                ctx.lineTo(ropeX1, centerY);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                // ── 分段介面 / 右端標記 ──
+                if (type === 'heavy-to-light' || type === 'light-to-heavy') {
+                    const jx = ropeX0 + ropeW * 0.5;
+                    ctx.save();
+                    ctx.strokeStyle = '#fcc419';
+                    ctx.lineWidth = 1.5;
+                    ctx.setLineDash([4, 4]);
+                    ctx.beginPath();
+                    ctx.moveTo(jx, y0 + 4);
+                    ctx.lineTo(jx, y0 + stripH - 4);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+                    ctx.restore();
+                } else if (type === 'fixed') {
+                    // 固定牆
+                    const wx = ropeX1;
+                    ctx.fillStyle = '#555';
+                    ctx.fillRect(wx, centerY - 22, 10, 44);
+                    ctx.strokeStyle = '#888';
+                    ctx.lineWidth = 1;
+                    for (let k = 0; k < 6; k++) {
+                        ctx.beginPath();
+                        ctx.moveTo(wx + 10, centerY - 22 + k * 8);
+                        ctx.lineTo(wx + 18, centerY - 22 + k * 8 + 8);
+                        ctx.stroke();
+                    }
+                } else if (type === 'free') {
+                    // 活動端：垂直桿 + 環
+                    const ex = ropeX1;
+                    ctx.strokeStyle = '#666';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.moveTo(ex, y0 + 6);
+                    ctx.lineTo(ex, y0 + stripH - 6);
+                    ctx.stroke();
+                    // 滑環（跟隨波形位移）
+                    const ringY = centerY + y[N - 1] * amp;
+                    ctx.strokeStyle = '#cc5de8';
+                    ctx.lineWidth = 2;
+                    ctx.beginPath();
+                    ctx.arc(ex, ringY, 6, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+
+                // ── 繪製繩波（分段著色） ──
+                const drawSegment = (iFrom, iTo, color, lineW) => {
+                    ctx.beginPath();
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = lineW || 2.5;
+                    ctx.lineJoin = 'round';
+                    for (let i = iFrom; i <= iTo; i++) {
+                        const px = ropeX0 + (i / (N - 1)) * ropeW;
+                        const py = centerY + y[i] * amp;
+                        i === iFrom ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+                    }
+                    ctx.stroke();
+                };
+
+                const mid = Math.floor(N / 2);
+                if (type === 'heavy-to-light') {
+                    drawSegment(0,   mid, '#74c0fc');  // 重繩（藍）
+                    drawSegment(mid, N-1, '#f7a44b');  // 輕繩（橙）
+                } else if (type === 'light-to-heavy') {
+                    drawSegment(0,   mid, '#f7a44b');  // 輕繩（橙）
+                    drawSegment(mid, N-1, '#74c0fc');  // 重繩（藍）
+                } else if (type === 'fixed') {
+                    drawSegment(0,   N-1, '#69db7c');  // 固定端（綠）
+                } else {
+                    drawSegment(0,   N-1, '#cc5de8');  // 活動端（紫）
+                }
+
+                // ── 波源指示點 ──
+                const srcY = centerY + y[0] * amp;
+                ctx.fillStyle = '#ffd43b';
+                ctx.beginPath();
+                ctx.arc(ropeX0, srcY, 5, 0, Math.PI * 2);
+                ctx.fill();
+
+                // ── 波源符號（~）──
+                ctx.fillStyle = '#ffd43b';
+                ctx.font = 'bold 14px Roboto, sans-serif';
+                ctx.textAlign = 'right';
+                ctx.fillText('〜', ropeX0 - 6, centerY + 5);
+
+                // ── 左側標籤 ──
+                ctx.font = 'bold 13px Roboto, sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillStyle = '#ecf0f1';
+                ctx.fillText(label, 4, y0 + 15);
+
+                // ── 反射/透射係數標記（右上角）──
+                if (this.showCoeff) {
+                    ctx.font = '12px Roboto, sans-serif';
+                    ctx.textAlign = 'right';
+
+                    let coeffText = '';
+                    let coeffColor = '#ecf0f1';
+
+                    if (type === 'heavy-to-light') {
+                        const r = ((this.v_fast - this.v_slow) / (this.v_fast + this.v_slow)).toFixed(2);
+                        const t = (2 * this.v_fast / (this.v_fast + this.v_slow)).toFixed(2);
+                        coeffText  = `r = +${r}（不倒相）   t = ${t}`;
+                        coeffColor = '#74c0fc';
+                    } else if (type === 'light-to-heavy') {
+                        const r = ((this.v_slow - this.v_fast) / (this.v_slow + this.v_fast)).toFixed(2);
+                        const t = (2 * this.v_slow / (this.v_slow + this.v_fast)).toFixed(2);
+                        coeffText  = `r = ${r}（倒相）   t = ${t}`;
+                        coeffColor = '#f7a44b';
+                    } else if (type === 'fixed') {
+                        coeffText  = 'r = −1（完全倒相反射）   t = 0';
+                        coeffColor = '#69db7c';
+                    } else {
+                        coeffText  = 'r = +1（完全不倒相反射）   t = 0';
+                        coeffColor = '#cc5de8';
+                    }
+
+                    ctx.fillStyle = coeffColor;
+                    ctx.fillText(coeffText, W - 5, y0 + 15);
+                }
+
+                // ── 分段文字標籤（分兩段的情境） ──
+                if (type === 'heavy-to-light' || type === 'light-to-heavy') {
+                    const jx = ropeX0 + ropeW * 0.5;
+                    ctx.font = '11px Roboto, sans-serif';
+                    ctx.textAlign = 'center';
+
+                    if (type === 'heavy-to-light') {
+                        ctx.fillStyle = '#74c0fc';
+                        ctx.fillText(`μ₁=${this.mu1} g/m  v₁=${this.v_slow.toFixed(1)}`, (ropeX0 + jx) / 2, y0 + stripH - 7);
+                        ctx.fillStyle = '#f7a44b';
+                        ctx.fillText(`μ₂=${this.mu2} g/m  v₂=${this.v_fast.toFixed(1)}`, (jx + ropeX1) / 2, y0 + stripH - 7);
+                    } else {
+                        ctx.fillStyle = '#f7a44b';
+                        ctx.fillText(`μ₂=${this.mu2} g/m  v₂=${this.v_fast.toFixed(1)}`, (ropeX0 + jx) / 2, y0 + stripH - 7);
+                        ctx.fillStyle = '#74c0fc';
+                        ctx.fillText(`μ₁=${this.mu1} g/m  v₁=${this.v_slow.toFixed(1)}`, (jx + ropeX1) / 2, y0 + stripH - 7);
+                    }
+                }
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            new RopeWaveSimulation();
+        });
+    </script>
+
+    <!-- 標準 JS -->
+    <script src="../../js/jquery-1.9.1.min.js"></script>
+    <script src="../../js/bootstrap.min.js"></script>
+    <script src="../../js/main.js"></script>
+</body>
+</html>

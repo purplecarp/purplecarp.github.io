@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8">
+    <title>氫原子軌道物質波駐波 - 物理模擬</title>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <link href="../../images/fish.png" rel="shortcut icon">
+
+    <link href="../../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../../css/normalize.css" rel="stylesheet">
+    <link href="../../css/style.css" rel="stylesheet">
+    <link href="../../css/responsive.css" rel="stylesheet">
+    <link href="../../css/simulations.css" rel="stylesheet">
+
+    <link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Roboto:400,300,500,700' rel='stylesheet' type='text/css'>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+
+    <style>
+        #simCanvas {
+            width: 100%;
+            border-radius: 8px;
+            background: #0d1117;
+        }
+        .control-row input[type="checkbox"] {
+            transform: scale(1.1);
+        }
+        .sim-top-buttons {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 12px;
+        }
+    </style>
+</head>
+<body>
+    <!--HEADER - 側邊導覽欄 -->
+    <div class="header">
+      <div class="for-sticky">
+        <div class="col-md-2 col-xs-6 logo">
+          <a href="../../index.html"><img alt="logo" class="logo-nav" src="../../images/fish.png"></a>
+        </div>
+      </div>
+      <div class="menu-wrap">
+        <nav class="menu">
+          <div class="menu-list">
+            <a href="../../index.html#home"><span>首頁</span></a>
+            <a href="../../index.html#about"><span>關於我</span></a>
+            <a href="../../index.html#experience"><span>教學經驗</span></a>
+            <a href="../../teaching-gallery.html"><span>查看教學剪影</span></a>
+            <a href="../../physics-simulations.html" class="active"><span>高中物理內容</span></a>
+            <a href="../../index.html#skills"><span>專業技能</span></a>
+            <a href="../../index.html#achievements"><span>成果展示</span></a>
+            <a href="../../index.html#philosophy"><span>教育理念</span></a>
+            <a href="../../index.html#contact"><span>聯絡方式</span></a>
+          </div>
+        </nav>
+        <button class="close-button" id="close-button">Close Menu</button>
+      </div>
+      <button class="menu-button" id="open-button">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+    <!--/.HEADER END-->
+
+    <!-- 頂部導航欄 -->
+    <div class="top-nav">
+        <div class="container">
+            <a href="../../index.html" class="nav-brand">
+                <img src="../../images/fish.png" alt="Logo">
+                <h2>物鯉魚教學模擬</h2>
+            </a>
+            <a href="../../physics-simulations.html" class="btn-back">← 返回列表</a>
+        </div>
+    </div>
+
+    <!-- 主容器 -->
+    <div class="main-container">
+        <!-- 頁面標題 -->
+        <div class="page-header">
+            <h1>🧪 氫原子軌道物質波駐波</h1>
+            <p class="subtitle">德布羅意物質波在軌道周長首尾銜接形成駐波 | 選修物理 V - 近代物理</p>
+        </div>
+
+        <!-- 物理原理說明 -->
+        <div class="info-box physics-principle">
+            <h4>📚 物理原理與公式</h4>
+            <p>
+                • <strong>德布羅意波長：</strong>$\lambda = \dfrac{h}{p}$，粒子同時具有波動性<br>
+                • <strong>軌道駐波條件：</strong>電子繞核一圈後相位要重合，需滿足 $2\pi r = n\lambda$（$n=1,2,3,...$）<br>
+                • <strong>氫原子允許半徑：</strong>穩定態可寫成 $r_n=n^2a_0$，因此 $n$ 增加時半徑會快速變大<br>
+                • <strong>角動量量子化：</strong>由上式可得 $mvr = n\hbar$，對應波耳模型允許軌道<br>
+                • <strong>不符合整數圈數時：</strong>軌道首尾無法平滑接上，波形彼此抵銷，形成不穩定狀態
+            </p>
+        </div>
+
+        <div class="sim-layout">
+            <!-- 右側控制面板 -->
+            <div class="sim-layout-left">
+                <div class="controls">
+                    <div class="control-section">
+                        <h3>⚙️ 參數控制</h3>
+
+                        <div class="control-row">
+                            <label>軌道半徑 $r$（$a_0$）</label>
+                            <input type="range" id="radiusSlider" min="1.00" max="49.00" step="0.01" value="4.00">
+                            <span class="value-display" id="radiusValue">4.00</span>
+                        </div>
+
+                        <div class="control-row">
+                            <label>物質波長 $\lambda$（$a_0$）</label>
+                            <input type="range" id="lambdaSlider" min="0.50" max="45.00" step="0.01" value="12.57">
+                            <span class="value-display" id="lambdaValue">12.57</span>
+                        </div>
+
+                        <div class="control-row">
+                            <label>主量子數 $n$（整數）</label>
+                            <input type="range" id="nSlider" min="1" max="7" step="1" value="2">
+                            <span class="value-display" id="nValue">2</span>
+                        </div>
+
+                        <div class="control-row">
+                            <label>波振幅（像素）</label>
+                            <input type="range" id="ampSlider" min="4" max="28" step="1" value="14">
+                            <span class="value-display" id="ampValue">14</span>
+                        </div>
+
+                        <div class="control-row">
+                            <label>動畫速度</label>
+                            <input type="range" id="speedSlider" min="0.5" max="3.0" step="0.1" value="1.2">
+                            <span class="value-display" id="speedValue">1.2x</span>
+                        </div>
+
+                        <div class="control-row">
+                            <label>鎖定為允許軌道（$\lambda = 2\pi r / n$）</label>
+                            <input type="checkbox" id="lockQuantizedToggle" checked>
+                        </div>
+
+                        <div class="control-row">
+                            <label>顯示節點位置</label>
+                            <input type="checkbox" id="showNodeToggle" checked>
+                        </div>
+
+                        <div class="control-row">
+                            <label>顯示電子繞行</label>
+                            <input type="checkbox" id="showElectronToggle" checked>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 左側模擬區域 -->
+            <div class="sim-layout-right">
+                <!-- 控制按鈕（畫面上方橫式排列） -->
+                <div class="button-group sim-top-buttons">
+                    <button class="btn btn-start" id="startBtn">▶ 開始模擬</button>
+                    <button class="btn btn-pause" id="pauseBtn">⏸ 暫停</button>
+                    <button class="btn btn-reset" id="resetBtn">🔄 重置</button>
+                </div>
+
+                <div class="simulation-section">
+                    <div class="canvas-wrapper">
+                        <canvas id="simCanvas" width="900" height="500"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 教學指引 -->
+        <div class="info-box teaching-note">
+            <h4>💡 教學使用指引</h4>
+            <p>
+                • <strong>先鎖定允許軌道：</strong>勾選「鎖定為允許軌道」，調整 $n$ 觀察 $r_n=n^2a_0$ 下半徑、波長與駐波型態同步改變<br>
+                • <strong>再解除鎖定：</strong>手動改變 $\lambda$，觀察右側展開圖的首尾高度與相位不一致（非本徵態）<br>
+                • <strong>關鍵觀察：</strong>當 $N$ 接近整數時，圓軌道波形幾乎閉合；偏離整數時，首尾錯位快速增加<br>
+                • <strong>紙帶類比：</strong>比較 $n=1,2,3,4$ 時，半徑比例為 $1:4:9:16$，可對照課本圓形駐波紙帶示意；本模擬可延伸到 $n=7$<br>
+                • <strong>連結到量子化：</strong>$2\pi r=n\lambda$ 與 $mvr=n\hbar$ 是同一量子條件的兩種表述
+            </p>
+        </div>
+    </div>
+
+    <script>
+        class HydrogenStandingWaveSimulation {
+            constructor() {
+                this.simCanvas = document.getElementById('simCanvas');
+                this.simCtx = this.simCanvas.getContext('2d');
+                this.dpr = window.devicePixelRatio || 1;
+                this.scaleCanvas(this.simCanvas, this.simCtx);
+
+                this.radiusA0 = 4.0;
+                this.lambdaA0 = 12.57;
+                this.quantumN = 2;
+                this.amplitudePx = 14;
+                this.playbackSpeed = 1.2;
+                this.lockQuantized = true;
+                this.showNodes = true;
+                this.showElectron = true;
+                this.bohrBaseA0 = 1.0;
+
+                this.isRunning = false;
+                this.time = 0;
+                this.animationId = null;
+                this.lastTimestamp = null;
+
+                this.init();
+            }
+
+            scaleCanvas(canvas, ctx) {
+                const dpr = this.dpr;
+                const cssW = canvas.width;
+                const cssH = canvas.height;
+                canvas.width = Math.round(cssW * dpr);
+                canvas.height = Math.round(cssH * dpr);
+                canvas.style.width = cssW + 'px';
+                canvas.style.height = cssH + 'px';
+                ctx.scale(dpr, dpr);
+            }
+
+            init() {
+                this.bindControls();
+                this.applyQuantizedCondition();
+                document.getElementById('radiusSlider').disabled = this.lockQuantized;
+                document.getElementById('lambdaSlider').disabled = this.lockQuantized;
+                this.updateInfoPanel();
+                this.syncPauseButton();
+                this.draw();
+            }
+
+            bindControls() {
+                const radiusSlider = document.getElementById('radiusSlider');
+                const radiusValue = document.getElementById('radiusValue');
+                radiusSlider.addEventListener('input', (e) => {
+                    this.radiusA0 = parseFloat(e.target.value);
+                    radiusValue.textContent = this.radiusA0.toFixed(2);
+                    if (this.lockQuantized) {
+                            this.quantumN = Math.max(1, Math.round(Math.sqrt(this.radiusA0 / this.bohrBaseA0)));
+                            document.getElementById('nSlider').value = this.quantumN.toString();
+                            document.getElementById('nValue').textContent = this.quantumN.toString();
+                            this.applyQuantizedCondition();
+                    }
+                    this.safeRedraw();
+                });
+
+                const lambdaSlider = document.getElementById('lambdaSlider');
+                const lambdaValue = document.getElementById('lambdaValue');
+                lambdaSlider.addEventListener('input', (e) => {
+                    this.lambdaA0 = parseFloat(e.target.value);
+                    lambdaValue.textContent = this.lambdaA0.toFixed(2);
+                    this.safeRedraw();
+                });
+
+                const nSlider = document.getElementById('nSlider');
+                const nValue = document.getElementById('nValue');
+                nSlider.addEventListener('input', (e) => {
+                    this.quantumN = parseInt(e.target.value, 10);
+                    nValue.textContent = this.quantumN.toString();
+                    if (this.lockQuantized) {
+                        this.applyQuantizedCondition();
+                    }
+                    this.safeRedraw();
+                });
+
+                const ampSlider = document.getElementById('ampSlider');
+                const ampValue = document.getElementById('ampValue');
+                ampSlider.addEventListener('input', (e) => {
+                    this.amplitudePx = parseInt(e.target.value, 10);
+                    ampValue.textContent = this.amplitudePx.toString();
+                    this.safeRedraw();
+                });
+
+                const speedSlider = document.getElementById('speedSlider');
+                const speedValue = document.getElementById('speedValue');
+                speedSlider.addEventListener('input', (e) => {
+                    this.playbackSpeed = parseFloat(e.target.value);
+                    speedValue.textContent = this.playbackSpeed.toFixed(1) + 'x';
+                });
+
+                const lockToggle = document.getElementById('lockQuantizedToggle');
+                lockToggle.addEventListener('change', (e) => {
+                    this.lockQuantized = e.target.checked;
+                    document.getElementById('radiusSlider').disabled = this.lockQuantized;
+                    document.getElementById('lambdaSlider').disabled = this.lockQuantized;
+                    if (this.lockQuantized) {
+                        this.applyQuantizedCondition();
+                    }
+                    this.safeRedraw();
+                });
+
+                document.getElementById('showNodeToggle').addEventListener('change', (e) => {
+                    this.showNodes = e.target.checked;
+                    this.safeRedraw();
+                });
+
+                document.getElementById('showElectronToggle').addEventListener('change', (e) => {
+                    this.showElectron = e.target.checked;
+                    this.safeRedraw();
+                });
+
+                document.getElementById('startBtn').addEventListener('click', () => this.start());
+                document.getElementById('pauseBtn').addEventListener('click', () => this.pause());
+                document.getElementById('resetBtn').addEventListener('click', () => this.reset());
+            }
+
+            applyQuantizedCondition() {
+                this.radiusA0 = this.bohrBaseA0 * this.quantumN * this.quantumN;
+                document.getElementById('radiusSlider').value = this.radiusA0.toFixed(2);
+                document.getElementById('radiusValue').textContent = this.radiusA0.toFixed(2);
+
+                const circumference = 2 * Math.PI * this.radiusA0;
+                this.lambdaA0 = circumference / this.quantumN;
+                document.getElementById('lambdaSlider').value = this.lambdaA0.toFixed(2);
+                document.getElementById('lambdaValue').textContent = this.lambdaA0.toFixed(2);
+            }
+
+            getDerivedValues() {
+                const circumference = 2 * Math.PI * this.radiusA0;
+                const nEffective = circumference / this.lambdaA0;
+                const nearestN = Math.max(1, Math.round(nEffective));
+                const phaseMismatch = 2 * Math.PI * (nEffective - nearestN);
+                return { circumference, nEffective, nearestN, phaseMismatch };
+            }
+
+            updateInfoPanel() {
+                // 即時數據面板已移除，保留函式以維持既有呼叫流程。
+            }
+
+            safeRedraw() {
+                this.updateInfoPanel();
+                if (!this.isRunning) {
+                    this.draw();
+                }
+            }
+
+            syncPauseButton() {
+                document.getElementById('startBtn').disabled = this.isRunning;
+                document.getElementById('pauseBtn').disabled = !this.isRunning;
+            }
+
+            start() {
+                if (this.isRunning) return;
+                this.isRunning = true;
+                this.lastTimestamp = null;
+                this.syncPauseButton();
+                this.animationId = requestAnimationFrame((ts) => this.loop(ts));
+            }
+
+            pause() {
+                this.isRunning = false;
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                    this.animationId = null;
+                }
+                this.syncPauseButton();
+            }
+
+            reset() {
+                this.pause();
+                this.time = 0;
+
+                this.radiusA0 = 4.0;
+                this.lambdaA0 = 12.57;
+                this.quantumN = 2;
+                this.amplitudePx = 14;
+                this.playbackSpeed = 1.2;
+                this.lockQuantized = true;
+                this.showNodes = true;
+                this.showElectron = true;
+
+                document.getElementById('radiusSlider').value = '4.00';
+                document.getElementById('radiusValue').textContent = '4.00';
+                document.getElementById('lambdaSlider').value = '12.57';
+                document.getElementById('lambdaValue').textContent = '12.57';
+                document.getElementById('nSlider').value = '2';
+                document.getElementById('nValue').textContent = '2';
+                document.getElementById('ampSlider').value = '14';
+                document.getElementById('ampValue').textContent = '14';
+                document.getElementById('speedSlider').value = '1.2';
+                document.getElementById('speedValue').textContent = '1.2x';
+                document.getElementById('lockQuantizedToggle').checked = true;
+                document.getElementById('showNodeToggle').checked = true;
+                document.getElementById('showElectronToggle').checked = true;
+                document.getElementById('radiusSlider').disabled = true;
+                document.getElementById('lambdaSlider').disabled = true;
+
+                this.applyQuantizedCondition();
+                this.updateInfoPanel();
+                this.draw();
+            }
+
+            loop(timestamp) {
+                if (!this.isRunning) return;
+
+                if (this.lastTimestamp !== null) {
+                    const dt = Math.min((timestamp - this.lastTimestamp) / 1000, 0.05);
+                    this.time += dt * this.playbackSpeed;
+                }
+                this.lastTimestamp = timestamp;
+
+                this.updateInfoPanel();
+                this.draw();
+                this.animationId = requestAnimationFrame((ts) => this.loop(ts));
+            }
+
+            drawBackground(ctx, W, H) {
+                const grd = ctx.createLinearGradient(0, 0, 0, H);
+                grd.addColorStop(0, '#0a0f1f');
+                grd.addColorStop(1, '#141a2f');
+                ctx.fillStyle = grd;
+                ctx.fillRect(0, 0, W, H);
+            }
+
+            draw() {
+                const ctx = this.simCtx;
+                const W = this.simCanvas.width / this.dpr;
+                const H = this.simCanvas.height / this.dpr;
+
+                ctx.clearRect(0, 0, W, H);
+                this.drawBackground(ctx, W, H);
+
+                const { circumference, nEffective, nearestN, phaseMismatch } = this.getDerivedValues();
+                const closureError = Math.abs(nEffective - nearestN);
+                const isAllowed = closureError < 0.025;
+
+                const cx = W * 0.34;
+                const cy = H * 0.50;
+                const orbitRadiusPx = 45 + 24 * Math.sqrt(this.radiusA0);
+                const omega = 4.8;
+                const phaseTime = Math.cos(this.time * omega);
+
+                // 軌道基準圓
+                ctx.strokeStyle = '#334155';
+                ctx.lineWidth = 1.6;
+                ctx.setLineDash([6, 5]);
+                ctx.beginPath();
+                ctx.arc(cx, cy, orbitRadiusPx, 0, 2 * Math.PI);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                // 核心
+                ctx.fillStyle = '#f1c40f';
+                ctx.beginPath();
+                ctx.arc(cx, cy, 11, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.strokeStyle = '#d35400';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // 圓軌道上的駐波
+                const points = 720;
+                ctx.lineWidth = 2.5;
+                ctx.strokeStyle = isAllowed ? '#74c0fc' : '#ff8787';
+                ctx.beginPath();
+                for (let i = 0; i <= points; i++) {
+                    const theta = (i / points) * 2 * Math.PI;
+                    const radialDisp = this.amplitudePx * Math.sin(nEffective * theta) * phaseTime;
+                    const r = orbitRadiusPx + radialDisp;
+                    const x = cx + r * Math.cos(theta);
+                    const y = cy + r * Math.sin(theta);
+                    if (i === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                }
+                ctx.stroke();
+
+                // 節點
+                if (this.showNodes && nEffective > 0.2) {
+                    const nodeCount = Math.floor(2 * nEffective);
+                    ctx.fillStyle = '#69db7c';
+                    for (let m = 0; m <= nodeCount; m++) {
+                        const thetaNode = (m * Math.PI) / nEffective;
+                        if (thetaNode > 2 * Math.PI) break;
+                        const x = cx + orbitRadiusPx * Math.cos(thetaNode);
+                        const y = cy + orbitRadiusPx * Math.sin(thetaNode);
+                        ctx.beginPath();
+                        ctx.arc(x, y, 2.8, 0, 2 * Math.PI);
+                        ctx.fill();
+                    }
+                }
+
+                // 電子位置
+                if (this.showElectron) {
+                    const eTheta = this.time * 0.9;
+                    const eDisp = this.amplitudePx * Math.sin(nEffective * eTheta) * phaseTime;
+                    const er = orbitRadiusPx + eDisp;
+                    const ex = cx + er * Math.cos(eTheta);
+                    const ey = cy + er * Math.sin(eTheta);
+
+                    ctx.fillStyle = '#5dade2';
+                    ctx.beginPath();
+                    ctx.arc(ex, ey, 7, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.strokeStyle = '#ecf0f1';
+                    ctx.lineWidth = 1.3;
+                    ctx.stroke();
+                }
+
+                // 右側展開圖
+                const panelX = W * 0.64;
+                const panelY = 90;
+                const panelW = W * 0.31;
+                const panelH = H * 0.66;
+
+                ctx.fillStyle = 'rgba(13, 23, 39, 0.85)';
+                ctx.fillRect(panelX, panelY, panelW, panelH);
+                ctx.strokeStyle = '#2a3a4a';
+                ctx.lineWidth = 1.2;
+                ctx.strokeRect(panelX, panelY, panelW, panelH);
+
+                const x0 = panelX + 18;
+                const y0 = panelY + panelH / 2;
+                const x1 = panelX + panelW - 18;
+
+                ctx.strokeStyle = '#64748b';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(x0, y0);
+                ctx.lineTo(x1, y0);
+                ctx.stroke();
+
+                ctx.strokeStyle = isAllowed ? '#74c0fc' : '#ff8787';
+                ctx.lineWidth = 2.2;
+                ctx.beginPath();
+                const sampleN = 320;
+                let yStart = 0;
+                let yEnd = 0;
+                for (let i = 0; i <= sampleN; i++) {
+                    const sRatio = i / sampleN;
+                    const s = sRatio * circumference;
+                    const yWave = this.amplitudePx * Math.sin((2 * Math.PI * s) / this.lambdaA0) * phaseTime;
+                    const x = x0 + sRatio * (x1 - x0);
+                    const y = y0 - yWave;
+                    if (i === 0) {
+                        yStart = y;
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                    if (i === sampleN) {
+                        yEnd = y;
+                    }
+                }
+                ctx.stroke();
+
+                ctx.fillStyle = '#f8fafc';
+                ctx.font = '13px Roboto, sans-serif';
+                ctx.textAlign = 'left';
+                ctx.fillText('軌道周長展開圖', panelX + 18, panelY + 24);
+
+                ctx.fillStyle = '#a5b4fc';
+                ctx.fillText('s = 0', x0 - 8, panelY + panelH - 16);
+                ctx.fillText('s = 2πr', x1 - 52, panelY + panelH - 16);
+
+                ctx.fillStyle = '#facc15';
+                ctx.beginPath();
+                ctx.arc(x0, yStart, 4.2, 0, 2 * Math.PI);
+                ctx.fill();
+
+                ctx.fillStyle = '#22d3ee';
+                ctx.beginPath();
+                ctx.arc(x1, yEnd, 4.2, 0, 2 * Math.PI);
+                ctx.fill();
+
+                ctx.font = '14px Roboto Slab, serif';
+                ctx.textAlign = 'center';
+                ctx.fillStyle = isAllowed ? '#69db7c' : '#ff8787';
+                ctx.fillText(
+                    isAllowed ? '符合駐波條件：首尾同相閉合' : '不符合駐波條件：首尾錯位',
+                    panelX + panelW / 2,
+                    panelY + panelH - 36
+                );
+
+                const mismatchY = Math.abs(yEnd - yStart);
+                ctx.font = '13px Roboto, sans-serif';
+                ctx.fillStyle = '#cbd5e1';
+                ctx.fillText(
+                    '端點高度差 Δy = ' + mismatchY.toFixed(2) + ' px',
+                    panelX + panelW / 2,
+                    panelY + panelH - 16
+                );
+
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            new HydrogenStandingWaveSimulation();
+        });
+    </script>
+
+    <!-- 標準 JS -->
+    <script src="../../js/jquery-1.9.1.min.js"></script>
+    <script src="../../js/bootstrap.min.js"></script>
+    <script src="../../js/main.js"></script>
+</body>
+</html>
