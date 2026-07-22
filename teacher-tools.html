@@ -1,0 +1,585 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="utf-8">
+    <title>教師常用工具 - 李宜閎</title>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <meta content="教師常用工具" name="description">
+    <!--Fav-->
+    <link href="images/fish.png" rel="shortcut icon">
+    <!--styles-->
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <link href="css/responsive.css" rel="stylesheet">
+    <!--fonts google-->
+    <link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Roboto:400,300,500,700' rel='stylesheet' type='text/css'>
+    <style>
+      body {
+        background-color: #f5f5f5;
+        padding-top: 20px;
+      }
+      .back-btn {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        padding: 10px 20px;
+        background-color: #818181;
+        color: white;
+        text-decoration: none;
+        border-radius: 5px;
+        font-size: 14px;
+        transition: all 0.3s ease;
+        z-index: 1000;
+        font-family: '微軟正黑體', 'Microsoft JhengHei', sans-serif;
+      }
+      .back-btn:hover {
+        background-color: #2f2f2f;
+        color: white;
+        text-decoration: none;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+      }
+      .page-header {
+        text-align: center;
+        padding: 40px 0 30px;
+        background: white;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      }
+      .page-title {
+        font-size: 36px;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 10px;
+        font-family: 'Roboto Slab', serif;
+      }
+      .page-subtitle {
+        font-size: 18px;
+        color: #666;
+        font-family: '微軟正黑體', 'Microsoft JhengHei', sans-serif;
+      }
+      .tool-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .tool-card {
+        background: white;
+        border-radius: 8px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      }
+      .form-group label {
+        font-weight: 600;
+        color: #333;
+        font-family: '微軟正黑體', 'Microsoft JhengHei', sans-serif;
+      }
+      .btn-custom {
+        background-color: #818181;
+        color: white;
+        border: none;
+      }
+      .btn-custom:hover {
+        background-color: #2f2f2f;
+      }
+      .seat-grid {
+        display: grid;
+        gap: 12px;
+        margin-top: 20px;
+      }
+      .seat-cell {
+        min-height: 90px;
+        padding: 12px;
+        border: 2px solid #ccc;
+        border-radius: 8px;
+        background: #fafafa;
+        cursor: pointer;
+        position: relative;
+        transition: all 0.25s ease;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+      .seat-cell:hover {
+        border-color: #818181;
+        box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+      }
+      .seat-cell.selected {
+        border-color: #3f51b5;
+        background: #eef0ff;
+      }
+      .seat-number {
+        font-size: 14px;
+        font-weight: 700;
+        color: #555;
+      }
+      .seat-name {
+        font-size: 16px;
+        font-weight: 600;
+        color: #333;
+        margin-top: 8px;
+        word-break: break-word;
+      }
+      .seat-empty {
+        color: #999;
+      }
+      .sidebar-card {
+        background: #fafafa;
+        border: 1px solid #e3e3e3;
+        border-radius: 8px;
+        padding: 20px;
+      }
+      .sidebar-card h5 {
+        font-weight: 700;
+        margin-bottom: 15px;
+      }
+      .preset-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        flex-wrap: wrap;
+        margin-bottom: 10px;
+      }
+      .table tbody tr.selected-row {
+        background: #f0f4ff;
+      }
+      .pdf-note {
+        font-size: 13px;
+        color: #666;
+      }
+      .input-group-addon {
+        background: #f5f5f5;
+        border: 1px solid #ccc;
+        border-left: 0;
+      }
+      @media (max-width: 767px) {
+        .seat-grid {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <a href="index.html" class="back-btn">← 返回首頁</a>
+    <div class="page-header">
+      <div class="container">
+        <h1 class="page-title">教師常用工具</h1>
+        <p class="page-subtitle">第一款工具：座位表設計與輸出</p>
+      </div>
+    </div>
+
+    <div class="tool-container">
+      <div class="tool-card">
+        <div class="row">
+          <div class="col-md-8">
+            <div class="sidebar-card" style="padding: 20px 24px 24px;">
+              <h5>座位表預覽</h5>
+              <div id="seatGrid" class="seat-grid"></div>
+            </div>
+          </div>
+
+          <div class="col-md-4">
+            <div class="sidebar-card" style="margin-bottom: 20px;">
+              <h5>座位設定</h5>
+              <div class="form-group">
+                <label>座位排數</label>
+                <div class="input-group">
+                  <input id="seatRows" type="number" class="form-control" min="1" max="20" value="6" onchange="renderSeatGrid()">
+                  <span class="input-group-addon">✕</span>
+                  <input id="seatCols" type="number" class="form-control" min="1" max="20" value="6" onchange="renderSeatGrid()">
+                </div>
+              </div>
+              <div class="form-group">
+                <label>座位總數</label>
+                <p id="seatCount" class="form-control-static">36</p>
+              </div>
+            </div>
+
+            <div class="sidebar-card" style="margin-bottom: 20px;">
+              <h5>快速操作</h5>
+              <button class="btn btn-custom btn-block" onclick="addStudentRow()">➕ 新增學生資料</button>
+              <button class="btn btn-custom btn-block" style="margin-top: 10px;" onclick="randomizeSeats()">🎲 隨機安排座位</button>
+              <button class="btn btn-default btn-block" style="margin-top: 10px;" onclick="triggerImport()">📤 匯入學生資料</button>
+              <button class="btn btn-default btn-block" style="margin-top: 10px;" onclick="exportStudents()">📥 匯出學生資料</button>
+              <button class="btn btn-primary btn-block" style="margin-top: 10px;" onclick="exportPdf()">🖨️ 匯出 PDF A4</button>
+              <p class="pdf-note" style="margin-top: 10px;">輸出目前座位表為 A4 直式 PDF。</p>
+            </div>
+
+            <div class="sidebar-card">
+              <h5>常用班級幹部</h5>
+              <p>點選幹部職稱可快速建立幹部資料。</p>
+              <div class="preset-badge">
+                <button class="btn btn-default btn-xs" onclick="addOfficer('班長')">班長</button>
+                <button class="btn btn-default btn-xs" onclick="addOfficer('副班長')">副班長</button>
+                <button class="btn btn-default btn-xs" onclick="addOfficer('學藝股長')">學藝股長</button>
+                <button class="btn btn-default btn-xs" onclick="addOfficer('紀律股長')">紀律股長</button>
+                <button class="btn btn-default btn-xs" onclick="addOfficer('福利股長')">福利股長</button>
+              </div>
+              <button class="btn btn-default btn-block" onclick="loadCommonOfficers()">🔧 載入常用幹部範本</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="tool-card">
+        <h4>學生資料清單</h4>
+        <p>可匯入或匯出 XLSX 檔案，資料欄位為：班級、座號、位置編號、學號、姓名。</p>
+        <div class="table-responsive">
+          <table class="table table-bordered table-hover" id="studentTable">
+            <thead>
+              <tr>
+                <th>班級</th>
+                <th style="width:95px;">座號</th>
+                <th style="width:95px;">位置編號</th>
+                <th>學號</th>
+                <th>姓名</th>
+                <th>幹部</th>
+                <th>小老師</th>
+                <th style="width:100px;">操作</th>
+              </tr>
+            </thead>
+            <tbody id="studentTableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <input id="importFile" type="file" accept=".xlsx,.xls" style="display:none" onchange="handleImport(event)">
+
+    <div id="pdfBoard" style="display:none; width:210mm; padding: 12mm; box-sizing:border-box; background:#fff;">
+      <h2 style="font-size:22px; margin-bottom:12px;">座位表</h2>
+      <div id="pdfPreview"></div>
+    </div>
+
+    <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+      let students = [];
+      let selectedStudentIndex = null;
+      let selectedSeat = null;
+      const officerPreset = ['班長', '副班長', '學藝股長', '紀律股長', '福利股長'];
+
+      function init() {
+        updateSeatCount();
+        renderSeatGrid();
+        addStudentRow();
+      }
+
+      function updateSeatCount() {
+        const rows = Number(document.getElementById('seatRows').value) || 6;
+        const cols = Number(document.getElementById('seatCols').value) || 6;
+        document.getElementById('seatCount').textContent = rows * cols;
+      }
+
+      function renderSeatGrid() {
+        updateSeatCount();
+        const seatGrid = document.getElementById('seatGrid');
+        const rows = Number(document.getElementById('seatRows').value) || 6;
+        const cols = Number(document.getElementById('seatCols').value) || 6;
+        const total = rows * cols;
+        seatGrid.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
+        seatGrid.innerHTML = '';
+
+        for (let i = 1; i <= total; i++) {
+          const assigned = students.find(s => Number(s.position) === i);
+          const seatCell = document.createElement('div');
+          seatCell.className = 'seat-cell' + (selectedSeat === i ? ' selected' : '');
+          seatCell.dataset.seat = i;
+          seatCell.innerHTML = `
+            <div class="seat-name">${assigned ? `${assigned.seat} ${assigned.name}` : '<span class="seat-empty">空位</span>'}</div>
+          `;
+          seatCell.addEventListener('click', () => selectSeatButton(i));
+          seatGrid.appendChild(seatCell);
+        }
+      }
+
+      function addStudentRow(record = { class: '', seat: '', position: '', studentId: '', name: '', officer: '', assistant: '' }) {
+        students.push({ ...record });
+        renderStudentTable();
+      }
+
+      function renderStudentTable() {
+        const tbody = document.getElementById('studentTableBody');
+        tbody.innerHTML = '';
+        const indexedStudents = students.map((student, index) => ({ student, index }));
+        indexedStudents.sort((a, b) => {
+          const aSeat = String(a.student.seat || '').trim();
+          const bSeat = String(b.student.seat || '').trim();
+          const aEmpty = aSeat === '';
+          const bEmpty = bSeat === '';
+          if (aEmpty && bEmpty) return 0;
+          if (aEmpty) return 1;
+          if (bEmpty) return -1;
+          const aNum = Number(aSeat);
+          const bNum = Number(bSeat);
+          if (!isNaN(aNum) && !isNaN(bNum)) {
+            return aNum - bNum;
+          }
+          return aSeat.localeCompare(bSeat, undefined, { numeric: true });
+        });
+        indexedStudents.forEach(({ student, index }) => {
+          const tr = document.createElement('tr');
+          if (selectedStudentIndex === index) tr.classList.add('selected-row');
+          tr.innerHTML = `
+            <td><input class="form-control input-sm" value="${student.class || ''}" onchange="updateStudentField(${index}, 'class', this.value)"></td>
+            <td><input class="form-control input-sm" value="${student.seat || ''}" onchange="updateStudentField(${index}, 'seat', this.value)"></td>
+            <td><input class="form-control input-sm" value="${student.position || ''}" onchange="updateStudentField(${index}, 'position', this.value)"></td>
+            <td><input class="form-control input-sm" value="${student.studentId || ''}" onchange="updateStudentField(${index}, 'studentId', this.value)"></td>
+            <td><input class="form-control input-sm" value="${student.name || ''}" onchange="updateStudentField(${index}, 'name', this.value)"></td>
+            <td><input class="form-control input-sm" value="${student.officer || ''}" onchange="updateStudentField(${index}, 'officer', this.value)"></td>
+            <td><input class="form-control input-sm" value="${student.assistant || ''}" onchange="updateStudentField(${index}, 'assistant', this.value)"></td>
+            <td>
+              <button class="btn btn-xs btn-default" onclick="selectStudentRow(${index})">選取</button>
+              <button class="btn btn-xs btn-danger" onclick="removeStudentRow(${index})">刪除</button>
+            </td>
+          `;
+          tbody.appendChild(tr);
+        });
+        renderSeatGrid();
+      }
+
+      function updateStudentField(index, field, value) {
+        if (!students[index]) return;
+        if (field === 'seat') {
+          students[index][field] = value ? String(value).trim() : '';
+        } else {
+          students[index][field] = value;
+        }
+        renderSeatGrid();
+      }
+
+      function selectStudentRow(index) {
+        selectedStudentIndex = index;
+        renderStudentTable();
+      }
+
+      function selectSeatButton(seat) {
+        selectedSeat = seat;
+        if (selectedStudentIndex !== null && students[selectedStudentIndex]) {
+          students[selectedStudentIndex].position = seat;
+          renderStudentTable();
+          return;
+        }
+        renderSeatGrid();
+      }
+
+      function removeStudentRow(index) {
+        if (selectedStudentIndex === index) selectedStudentIndex = null;
+        students.splice(index, 1);
+        renderStudentTable();
+      }
+
+      function randomizeSeats() {
+        const rows = Number(document.getElementById('seatRows').value) || 6;
+        const cols = Number(document.getElementById('seatCols').value) || 6;
+        const total = rows * cols;
+        const seats = Array.from({ length: total }, (_, i) => i + 1);
+        for (let i = seats.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [seats[i], seats[j]] = [seats[j], seats[i]];
+        }
+        students.forEach((student, index) => {
+          student.position = seats[index] || '';
+        });
+        renderStudentTable();
+      }
+
+      function triggerImport() {
+        document.getElementById('importFile').value = '';
+        document.getElementById('importFile').click();
+      }
+
+      function handleImport(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          try {
+            const data = new Uint8Array(e.target.result);
+            const workbook = XLSX.read(data, { type: 'array' });
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+            const json = XLSX.utils.sheet_to_json(worksheet, { header: 1, defval: '' });
+            importXlsxData(json);
+          } catch (err) {
+            alert('無法讀取 XLSX 檔案，請確認格式正確。');
+          }
+        };
+        reader.readAsArrayBuffer(file);
+      }
+
+      function importXlsxData(rows) {
+        if (!rows.length) return;
+        const headers = rows[0].map(h => String(h).trim().toLowerCase());
+        const headerMap = {};
+        headers.forEach((header, index) => {
+          if (header.includes('班')) headerMap.class = index;
+          if (header.includes('座') && !header.includes('位置')) headerMap.seat = index;
+          if (header.includes('位置') || header.includes('position')) headerMap.position = index;
+          if (header.includes('學號') || header.includes('student')) headerMap.studentId = index;
+          if (header.includes('名') || header.includes('name')) headerMap.name = index;
+          if (header.includes('幹') || header.includes('officer')) headerMap.officer = index;
+          if (header.includes('小') || header.includes('assistant') || header.includes('helper')) headerMap.assistant = index;
+        });
+        if (!('class' in headerMap) || !('seat' in headerMap) || !('studentId' in headerMap) || !('name' in headerMap)) {
+          alert('XLSX 標頭必須包含 班級、座號、學號、姓名。可選擇新增 幹部、 小老師。');
+          return;
+        }
+        students = rows.slice(1).map(cols => {
+          const seatValue = cols[headerMap.seat];
+          let positionValue = '';
+          if (headerMap.position !== undefined) {
+            const raw = cols[headerMap.position];
+            positionValue = raw === '' || raw === undefined || raw === null ? '' : String(raw).trim();
+          }
+          const seatLabel = seatValue === '' || seatValue === undefined || seatValue === null ? '' : String(seatValue).trim();
+          if (positionValue === '' && seatLabel !== '') {
+            const numeric = Number(seatLabel);
+            positionValue = !isNaN(numeric) ? String(numeric) : '';
+          }
+          return {
+            class: cols[headerMap.class] || '',
+            seat: seatLabel,
+            position: positionValue,
+            studentId: cols[headerMap.studentId] || '',
+            name: cols[headerMap.name] || '',
+            officer: headerMap.officer !== undefined ? cols[headerMap.officer] || '' : '',
+            assistant: headerMap.assistant !== undefined ? cols[headerMap.assistant] || '' : ''
+          };
+        });
+        selectedStudentIndex = null;
+        renderStudentTable();
+      }
+
+      function exportStudents() {
+        if (!students.length) {
+          alert('目前沒有學生資料。');
+          return;
+        }
+        const rows = [['班級', '座號', '位置編號', '學號', '姓名', '幹部', '小老師']];
+        students.forEach(student => {
+          rows.push([student.class || '', student.seat || '', student.position || '', student.studentId || '', student.name || '', student.officer || '', student.assistant || '']);
+        });
+        const worksheet = XLSX.utils.aoa_to_sheet(rows);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, '座位表');
+        const wbout = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+        const blob = new Blob([wbout], { type: 'application/octet-stream' });
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = `座位表_${new Date().toISOString().slice(0,10)}.xlsx`;
+        link.click();
+      }
+
+      function addOfficer(role) {
+        students.push({ class: '', seat: '', position: '', studentId: '', name: role });
+        renderStudentTable();
+      }
+
+      function loadCommonOfficers() {
+        const existingNames = students.map(s => s.name);
+        officerPreset.forEach(role => {
+          if (!existingNames.includes(role)) {
+            students.push({ class: '', seat: '', studentId: '', name: role });
+          }
+        });
+        renderStudentTable();
+      }
+
+      function buildPdfPreview() {
+        const rows = Number(document.getElementById('seatRows').value) || 6;
+        const cols = Number(document.getElementById('seatCols').value) || 6;
+        const total = rows * cols;
+        const preview = document.getElementById('pdfPreview');
+        preview.innerHTML = '';
+        const grid = document.createElement('div');
+        grid.style.display = 'grid';
+        grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+        grid.style.gap = '8px';
+        grid.style.width = '100%';
+
+        for (let i = 1; i <= total; i++) {
+          const assigned = students.find(s => Number(s.position) === i);
+          const cell = document.createElement('div');
+          cell.style.minHeight = '64px';
+          cell.style.border = '1px solid #333';
+          cell.style.padding = '10px';
+          cell.style.borderRadius = '4px';
+          cell.style.background = '#fff';
+          const nameLabel = document.createElement('div');
+          nameLabel.style.marginTop = '6px';
+          nameLabel.style.fontSize = '14px';
+          nameLabel.style.color = '#000';
+          nameLabel.style.fontWeight = '600';
+          nameLabel.textContent = assigned ? `${assigned.seat} ${assigned.name}` : '空位';
+          const detail = document.createElement('div');
+          detail.style.fontSize = '11px';
+          detail.style.color = '#444';
+          detail.textContent = assigned ? `${assigned.class} ${assigned.studentId}` : '';
+          cell.appendChild(nameLabel);
+          if (assigned) cell.appendChild(detail);
+          grid.appendChild(cell);
+        }
+
+        preview.appendChild(grid);
+      }
+
+      function exportPdf() {
+        if (!students.length) {
+          alert('請先新增或匯入學生資料。');
+          return;
+        }
+        const source = document.getElementById('seatGrid');
+        const wrapper = document.createElement('div');
+        wrapper.style.position = 'absolute';
+        wrapper.style.left = '-9999px';
+        wrapper.style.top = '0';
+        wrapper.style.width = '210mm';
+        wrapper.style.padding = '10mm';
+        wrapper.style.boxSizing = 'border-box';
+        wrapper.style.background = '#fff';
+        wrapper.style.zIndex = '9999';
+        wrapper.style.pointerEvents = 'none';
+
+        const title = document.createElement('div');
+        title.textContent = '座位表';
+        title.style.fontSize = '22px';
+        title.style.fontWeight = '700';
+        title.style.marginBottom = '12px';
+        wrapper.appendChild(title);
+
+        const clone = source.cloneNode(true);
+        clone.style.width = '100%';
+        clone.id = '';
+        wrapper.appendChild(clone);
+        document.body.appendChild(wrapper);
+
+        html2canvas(wrapper, { scale: 2, useCORS: true, backgroundColor: '#ffffff' })
+          .then(canvas => {
+            const imgData = canvas.toDataURL('image/jpeg', 1.0);
+            const JsPDFClass = window.jspdf?.jsPDF || window.jsPDF;
+            if (!JsPDFClass) {
+              throw new Error('jsPDF 未載入');
+            }
+            const pdf = new JsPDFClass('p', 'mm', 'a4');
+            const pdfWidth = 210 - 20;
+            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+            pdf.addImage(imgData, 'JPEG', 10, 10, pdfWidth, pdfHeight);
+            pdf.save(`座位表_${new Date().toISOString().slice(0,10)}.pdf`);
+          })
+          .catch(() => {
+            alert('PDF 匯出失敗，請稍後再試。');
+          })
+          .finally(() => {
+            document.body.removeChild(wrapper);
+          });
+      }
+
+      document.addEventListener('DOMContentLoaded', init);
+    </script>
+  </body>
+</html>
