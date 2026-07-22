@@ -18,7 +18,7 @@
     <style>
       body {
         background-color: #f5f5f5;
-        padding-top: 20px;
+        padding-top: 2cm;
       }
       .back-btn {
         position: fixed;
@@ -43,7 +43,7 @@
       }
       .page-header {
         text-align: center;
-        padding: 40px 0 30px;
+        padding: 0 0 30px;
         background: white;
         margin-bottom: 30px;
         box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -90,11 +90,34 @@
         gap: 12px;
         margin-top: 20px;
       }
+      .seat-layout {
+        display: flex;
+        flex-direction: column;
+      }
+      .podium-bar {
+        height: 28px;
+        border: 2px solid #c8c8c8;
+        background: linear-gradient(180deg, #f8f8f8 0%, #eaeaea 100%);
+        border-radius: 1pt;
+        color: #555;
+        font-size: 13px;
+        font-weight: 600;
+        display: none;
+        align-items: center;
+        justify-content: center;
+        letter-spacing: 2px;
+      }
+      .podium-top {
+        margin-bottom: 12px;
+      }
+      .podium-bottom {
+        margin-top: 12px;
+      }
       .seat-cell {
         min-height: 90px;
         padding: 12px;
         border: 2px solid #ccc;
-        border-radius: 8px;
+        border-radius: 1pt;
         background: #fafafa;
         cursor: pointer;
         position: relative;
@@ -111,6 +134,10 @@
         border-color: #3f51b5;
         background: #eef0ff;
       }
+      .seat-cell.swap-pending {
+        border-color: #f0ad4e;
+        background: #fff6e8;
+      }
       .seat-number {
         font-size: 14px;
         font-weight: 700;
@@ -121,6 +148,13 @@
         font-weight: 600;
         color: #333;
         margin-top: 8px;
+        word-break: break-word;
+      }
+      .seat-role,
+      .seat-assistant {
+        font-size: 12px;
+        color: #666;
+        margin-top: 4px;
         word-break: break-word;
       }
       .seat-empty {
@@ -136,19 +170,47 @@
         font-weight: 700;
         margin-bottom: 15px;
       }
-      .preset-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        flex-wrap: wrap;
-        margin-bottom: 10px;
-      }
       .table tbody tr.selected-row {
         background: #f0f4ff;
       }
       .pdf-note {
         font-size: 13px;
         color: #666;
+      }
+      .export-dirty-note {
+        font-size: 13px;
+        font-weight: 600;
+        color: #d9534f;
+        margin-top: 8px;
+      }
+      .officer-chip-wrap {
+        margin-top: 8px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .officer-chip {
+        display: inline-flex;
+        align-items: center;
+        background: #f2f2f2;
+        border: 1px solid #ddd;
+        border-radius: 999px;
+        padding: 2px 8px;
+        font-size: 12px;
+      }
+      .officer-chip button {
+        border: 0;
+        background: transparent;
+        color: #999;
+        margin-left: 6px;
+        padding: 0;
+        line-height: 1;
+      }
+      .preset-editor {
+        resize: vertical;
+      }
+      .pdf-layout-select {
+        margin-top: 10px;
       }
       .input-group-addon {
         background: #f5f5f5;
@@ -177,7 +239,11 @@
           <div class="col-md-8">
             <div class="sidebar-card" style="padding: 20px 24px 24px;">
               <h5>座位表預覽</h5>
-              <div id="seatGrid" class="seat-grid"></div>
+              <div id="seatLayout" class="seat-layout">
+                <div id="podiumTop" class="podium-bar podium-top">講台</div>
+                <div id="seatGrid" class="seat-grid"></div>
+                <div id="podiumBottom" class="podium-bar podium-bottom">講台</div>
+              </div>
             </div>
           </div>
 
@@ -187,14 +253,21 @@
               <div class="form-group">
                 <label>座位排數</label>
                 <div class="input-group">
-                  <input id="seatRows" type="number" class="form-control" min="1" max="20" value="6" onchange="renderSeatGrid()">
+                  <input id="seatRows" type="number" class="form-control" min="1" max="20" value="6" onchange="onLayoutConfigChange()">
                   <span class="input-group-addon">✕</span>
-                  <input id="seatCols" type="number" class="form-control" min="1" max="20" value="6" onchange="renderSeatGrid()">
+                  <input id="seatCols" type="number" class="form-control" min="1" max="20" value="6" onchange="onLayoutConfigChange()">
                 </div>
               </div>
               <div class="form-group">
                 <label>座位總數</label>
                 <p id="seatCount" class="form-control-static">36</p>
+              </div>
+              <div class="form-group">
+                <label>講台位置</label>
+                <select id="podiumPosition" class="form-control" onchange="onLayoutConfigChange()">
+                  <option value="bottom" selected>講台在下</option>
+                  <option value="top">講台在上</option>
+                </select>
               </div>
             </div>
 
@@ -202,43 +275,45 @@
               <h5>快速操作</h5>
               <button class="btn btn-custom btn-block" onclick="addStudentRow()">➕ 新增學生資料</button>
               <button class="btn btn-custom btn-block" style="margin-top: 10px;" onclick="randomizeSeats()">🎲 隨機安排座位</button>
+              <button id="swapModeBtn" class="btn btn-default btn-block" style="margin-top: 10px;" onclick="toggleSwapMode()">🔄 開啟交換座位模式</button>
+              <p id="swapModeHint" class="pdf-note" style="margin-top: 8px; margin-bottom: 0;">交換模式未啟用。</p>
               <button class="btn btn-default btn-block" style="margin-top: 10px;" onclick="triggerImport()">📤 匯入學生資料</button>
               <button class="btn btn-default btn-block" style="margin-top: 10px;" onclick="exportStudents()">📥 匯出學生資料</button>
+              <select id="pdfOrientation" class="form-control pdf-layout-select" onchange="markExportDirty()">
+                <option value="portrait" selected>PDF 版面：直式</option>
+                <option value="landscape">PDF 版面：橫式</option>
+              </select>
               <button class="btn btn-primary btn-block" style="margin-top: 10px;" onclick="exportPdf()">🖨️ 匯出 PDF A4</button>
-              <p class="pdf-note" style="margin-top: 10px;">輸出目前座位表為 A4 直式 PDF。</p>
+              <p class="pdf-note" style="margin-top: 10px;">輸出兩頁：講台在上、講台在下（180 度旋轉），且包含名條清單。</p>
+              <p id="exportDirtyHint" class="export-dirty-note">目前資料已有變動，請重新匯出座位表。</p>
             </div>
 
             <div class="sidebar-card">
-              <h5>常用班級幹部</h5>
-              <p>點選幹部職稱可快速建立幹部資料。</p>
-              <div class="preset-badge">
-                <button class="btn btn-default btn-xs" onclick="addOfficer('班長')">班長</button>
-                <button class="btn btn-default btn-xs" onclick="addOfficer('副班長')">副班長</button>
-                <button class="btn btn-default btn-xs" onclick="addOfficer('學藝股長')">學藝股長</button>
-                <button class="btn btn-default btn-xs" onclick="addOfficer('紀律股長')">紀律股長</button>
-                <button class="btn btn-default btn-xs" onclick="addOfficer('福利股長')">福利股長</button>
-              </div>
-              <button class="btn btn-default btn-block" onclick="loadCommonOfficers()">🔧 載入常用幹部範本</button>
+              <h5>幹部下拉選單設定</h5>
+              <p class="pdf-note">每行一個幹部名稱，更新後會套用到所有操作欄下拉選單。</p>
+              <textarea id="officerPresetEditor" class="form-control preset-editor" rows="7"></textarea>
+              <button class="btn btn-default btn-block" style="margin-top: 10px;" onclick="applyOfficerPresetEditor()">更新幹部下拉選單</button>
             </div>
+
           </div>
         </div>
       </div>
 
       <div class="tool-card">
         <h4>學生資料清單</h4>
-        <p>可匯入或匯出 XLSX 檔案，資料欄位為：班級、座號、位置編號、學號、姓名。</p>
+        <p>可匯入或匯出 XLSX 檔案，資料欄位為：班級、座號、學號、姓名、幹部、小老師、位置座標。</p>
         <div class="table-responsive">
           <table class="table table-bordered table-hover" id="studentTable">
             <thead>
               <tr>
                 <th>班級</th>
                 <th style="width:95px;">座號</th>
-                <th style="width:95px;">位置編號</th>
                 <th>學號</th>
                 <th>姓名</th>
                 <th>幹部</th>
                 <th>小老師</th>
-                <th style="width:100px;">操作</th>
+                <th style="width:120px;">位置座標</th>
+                <th style="width:180px;">操作</th>
               </tr>
             </thead>
             <tbody id="studentTableBody"></tbody>
@@ -261,12 +336,120 @@
       let students = [];
       let selectedStudentIndex = null;
       let selectedSeat = null;
-      const officerPreset = ['班長', '副班長', '學藝股長', '紀律股長', '福利股長'];
+      let isSwapMode = false;
+      let firstSwapSeat = null;
+      let isExportDirty = true;
+      let officerPreset = ['班長', '副班長', '學藝股長', '學藝幹事', '衛生股長', '衛生幹事', '環保股長', '設備股長', '輔導股長'];
 
       function init() {
         updateSeatCount();
         renderSeatGrid();
+        updateSwapModeUi();
+        updateExportDirtyUi();
+        syncOfficerPresetEditor();
         addStudentRow();
+      }
+
+      function normalizeOfficerList(rawValue) {
+        if (Array.isArray(rawValue)) {
+          return Array.from(new Set(rawValue.map(item => String(item || '').trim()).filter(Boolean)));
+        }
+        const text = String(rawValue || '').trim();
+        if (!text) return [];
+        return Array.from(new Set(text.split(/[、,，;；|\/]+/).map(item => item.trim()).filter(Boolean)));
+      }
+
+      function getOfficerDisplay(student) {
+        const list = normalizeOfficerList(student?.officers ?? student?.officer ?? '');
+        return list.join('、');
+      }
+
+      function ensureStudentShape(record = {}) {
+        return {
+          class: '',
+          seat: '',
+          position: '',
+          studentId: '',
+          name: '',
+          officer: '',
+          officers: [],
+          assistant: '',
+          ...record,
+          officers: normalizeOfficerList(record.officers ?? record.officer ?? '')
+        };
+      }
+
+      function syncOfficerPresetEditor() {
+        const editor = document.getElementById('officerPresetEditor');
+        if (!editor) return;
+        editor.value = officerPreset.join('\n');
+      }
+
+      function applyOfficerPresetEditor() {
+        const editor = document.getElementById('officerPresetEditor');
+        if (!editor) return;
+        const nextPreset = Array.from(new Set(
+          editor.value
+            .split(/\r?\n/)
+            .map(item => item.trim())
+            .filter(Boolean)
+        ));
+        if (!nextPreset.length) {
+          alert('幹部下拉選單至少需要一個項目。');
+          return;
+        }
+        officerPreset = nextPreset;
+        syncOfficerPresetEditor();
+        renderStudentTable();
+      }
+
+      function updateExportDirtyUi() {
+        const hint = document.getElementById('exportDirtyHint');
+        if (!hint) return;
+        hint.style.display = isExportDirty ? 'block' : 'none';
+      }
+
+      function markExportDirty() {
+        isExportDirty = true;
+        updateExportDirtyUi();
+      }
+
+      function markExportClean() {
+        isExportDirty = false;
+        updateExportDirtyUi();
+      }
+
+      function onLayoutConfigChange() {
+        renderSeatGrid();
+        markExportDirty();
+      }
+
+      function updateSwapModeUi(message) {
+        const btn = document.getElementById('swapModeBtn');
+        const hint = document.getElementById('swapModeHint');
+        if (!btn || !hint) return;
+        if (isSwapMode) {
+          btn.textContent = '🔄 關閉交換座位模式';
+          btn.className = 'btn btn-warning btn-block';
+          hint.textContent = message || '交換模式啟用中：請依序點擊兩個位置進行對調。';
+          return;
+        }
+        btn.textContent = '🔄 開啟交換座位模式';
+        btn.className = 'btn btn-default btn-block';
+        hint.textContent = message || '交換模式未啟用。';
+      }
+
+      function toggleSwapMode() {
+        isSwapMode = !isSwapMode;
+        firstSwapSeat = null;
+        selectedSeat = null;
+        if (isSwapMode) {
+          selectedStudentIndex = null;
+          updateSwapModeUi('交換模式啟用中：請先點第一個位置。');
+        } else {
+          updateSwapModeUi('交換模式已關閉。');
+        }
+        renderStudentTable();
       }
 
       function updateSeatCount() {
@@ -275,8 +458,42 @@
         document.getElementById('seatCount').textContent = rows * cols;
       }
 
+      function getSeatCoordinateFromIndex(index, cols) {
+        const row = Math.floor((index - 1) / cols) + 1;
+        const col = ((index - 1) % cols) + 1;
+        return { row, col, label: `${row},${col}` };
+      }
+
+      function renderPodium() {
+        const podiumPosition = document.getElementById('podiumPosition')?.value || 'bottom';
+        const topBar = document.getElementById('podiumTop');
+        const bottomBar = document.getElementById('podiumBottom');
+        if (!topBar || !bottomBar) return;
+        topBar.style.display = podiumPosition === 'top' ? 'flex' : 'none';
+        bottomBar.style.display = podiumPosition === 'bottom' ? 'flex' : 'none';
+      }
+
+      function parsePositionCoordinate(value) {
+        const raw = String(value || '').trim();
+        if (!raw) return null;
+        const match = raw.match(/^(\d+)\s*[,\-xX]\s*(\d+)$/);
+        if (!match) return null;
+        const row = Number(match[1]);
+        const col = Number(match[2]);
+        if (!row || !col) return null;
+        return { row, col, label: `${row},${col}` };
+      }
+
+      function getStudentBySeatCoordinate(row, col) {
+        return students.find(student => {
+          const position = parsePositionCoordinate(student.position);
+          return position && position.row === row && position.col === col;
+        });
+      }
+
       function renderSeatGrid() {
         updateSeatCount();
+        renderPodium();
         const seatGrid = document.getElementById('seatGrid');
         const rows = Number(document.getElementById('seatRows').value) || 6;
         const cols = Number(document.getElementById('seatCols').value) || 6;
@@ -285,12 +502,19 @@
         seatGrid.innerHTML = '';
 
         for (let i = 1; i <= total; i++) {
-          const assigned = students.find(s => Number(s.position) === i);
+          const coordinate = getSeatCoordinateFromIndex(i, cols);
+          const assigned = getStudentBySeatCoordinate(coordinate.row, coordinate.col);
           const seatCell = document.createElement('div');
           seatCell.className = 'seat-cell' + (selectedSeat === i ? ' selected' : '');
+          if (isSwapMode && firstSwapSeat === i) {
+            seatCell.className += ' swap-pending';
+          }
           seatCell.dataset.seat = i;
+          const officerText = assigned ? getOfficerDisplay(assigned) : '';
           seatCell.innerHTML = `
             <div class="seat-name">${assigned ? `${assigned.seat} ${assigned.name}` : '<span class="seat-empty">空位</span>'}</div>
+            <div class="seat-role">${officerText || '&nbsp;'}</div>
+            <div class="seat-assistant">${assigned && assigned.assistant ? assigned.assistant : '&nbsp;'}</div>
           `;
           seatCell.addEventListener('click', () => selectSeatButton(i));
           seatGrid.appendChild(seatCell);
@@ -298,8 +522,27 @@
       }
 
       function addStudentRow(record = { class: '', seat: '', position: '', studentId: '', name: '', officer: '', assistant: '' }) {
-        students.push({ ...record });
+        students.push(ensureStudentShape(record));
         renderStudentTable();
+        markExportDirty();
+      }
+
+      function getOfficerSelectHtml(index) {
+        const options = ['<option value="">未指定</option>'];
+        officerPreset.forEach(role => {
+          options.push(`<option value="${role}">${role}</option>`);
+        });
+        return `<select id="officerSelect-${index}" class="form-control input-sm">${options.join('')}</select>`;
+      }
+
+      function getOfficerChipHtml(index, student) {
+        const officers = normalizeOfficerList(student.officers ?? student.officer ?? '');
+        if (!officers.length) return '';
+        const chips = officers.map(role => {
+          const encoded = encodeURIComponent(role);
+          return `<span class="officer-chip">${role}<button type="button" onclick="removeOfficerFromStudent(${index}, '${encoded}')">×</button></span>`;
+        });
+        return `<div class="officer-chip-wrap">${chips.join('')}</div>`;
       }
 
       function renderStudentTable() {
@@ -327,12 +570,15 @@
           tr.innerHTML = `
             <td><input class="form-control input-sm" value="${student.class || ''}" onchange="updateStudentField(${index}, 'class', this.value)"></td>
             <td><input class="form-control input-sm" value="${student.seat || ''}" onchange="updateStudentField(${index}, 'seat', this.value)"></td>
-            <td><input class="form-control input-sm" value="${student.position || ''}" onchange="updateStudentField(${index}, 'position', this.value)"></td>
             <td><input class="form-control input-sm" value="${student.studentId || ''}" onchange="updateStudentField(${index}, 'studentId', this.value)"></td>
             <td><input class="form-control input-sm" value="${student.name || ''}" onchange="updateStudentField(${index}, 'name', this.value)"></td>
-            <td><input class="form-control input-sm" value="${student.officer || ''}" onchange="updateStudentField(${index}, 'officer', this.value)"></td>
+            <td>${getOfficerDisplay(student) || '-'}</td>
             <td><input class="form-control input-sm" value="${student.assistant || ''}" onchange="updateStudentField(${index}, 'assistant', this.value)"></td>
+            <td><input class="form-control input-sm" placeholder="例如 2,3" value="${student.position || ''}" onchange="updateStudentField(${index}, 'position', this.value)"></td>
             <td>
+              ${getOfficerSelectHtml(index)}
+              <button class="btn btn-xs btn-default" style="margin-top:6px;" onclick="addOfficerToStudent(${index})">新增幹部</button>
+              ${getOfficerChipHtml(index, student)}
               <button class="btn btn-xs btn-default" onclick="selectStudentRow(${index})">選取</button>
               <button class="btn btn-xs btn-danger" onclick="removeStudentRow(${index})">刪除</button>
             </td>
@@ -346,10 +592,39 @@
         if (!students[index]) return;
         if (field === 'seat') {
           students[index][field] = value ? String(value).trim() : '';
+        } else if (field === 'position') {
+          const parsed = parsePositionCoordinate(value);
+          students[index][field] = parsed ? parsed.label : (value ? String(value).trim() : '');
         } else {
           students[index][field] = value;
         }
         renderSeatGrid();
+        markExportDirty();
+      }
+
+      function addOfficerToStudent(index) {
+        if (!students[index]) return;
+        const select = document.getElementById(`officerSelect-${index}`);
+        const value = select ? String(select.value || '').trim() : '';
+        if (!value) return;
+        const officers = normalizeOfficerList(students[index].officers ?? students[index].officer ?? '');
+        if (!officers.includes(value)) {
+          officers.push(value);
+          students[index].officers = officers;
+        }
+        students[index].officer = '';
+        renderStudentTable();
+        markExportDirty();
+      }
+
+      function removeOfficerFromStudent(index, encodedOfficer) {
+        if (!students[index]) return;
+        const value = decodeURIComponent(encodedOfficer || '');
+        const officers = normalizeOfficerList(students[index].officers ?? students[index].officer ?? '');
+        students[index].officers = officers.filter(role => role !== value);
+        students[index].officer = '';
+        renderStudentTable();
+        markExportDirty();
       }
 
       function selectStudentRow(index) {
@@ -359,33 +634,92 @@
 
       function selectSeatButton(seat) {
         selectedSeat = seat;
+        if (isSwapMode) {
+          handleSwapSeatClick(seat);
+          return;
+        }
         if (selectedStudentIndex !== null && students[selectedStudentIndex]) {
-          students[selectedStudentIndex].position = seat;
+          const cols = Number(document.getElementById('seatCols').value) || 6;
+          const coordinate = getSeatCoordinateFromIndex(seat, cols);
+          students[selectedStudentIndex].position = coordinate.label;
           renderStudentTable();
+          markExportDirty();
           return;
         }
         renderSeatGrid();
+      }
+
+      function getStudentIndexByCoordinateLabel(label) {
+        return students.findIndex(student => {
+          const parsed = parsePositionCoordinate(student.position);
+          return parsed && parsed.label === label;
+        });
+      }
+
+      function swapSeatAssignments(firstSeat, secondSeat) {
+        const cols = Number(document.getElementById('seatCols').value) || 6;
+        const firstCoordinate = getSeatCoordinateFromIndex(firstSeat, cols).label;
+        const secondCoordinate = getSeatCoordinateFromIndex(secondSeat, cols).label;
+        const firstStudentIndex = getStudentIndexByCoordinateLabel(firstCoordinate);
+        const secondStudentIndex = getStudentIndexByCoordinateLabel(secondCoordinate);
+
+        if (firstStudentIndex === -1 && secondStudentIndex === -1) {
+          updateSwapModeUi('兩個位置皆為空位，未進行對調。');
+          return;
+        }
+        if (firstStudentIndex !== -1) {
+          students[firstStudentIndex].position = secondCoordinate;
+        }
+        if (secondStudentIndex !== -1) {
+          students[secondStudentIndex].position = firstCoordinate;
+        }
+        updateSwapModeUi(`已對調 ${firstCoordinate} 與 ${secondCoordinate}。`);
+        markExportDirty();
+      }
+
+      function handleSwapSeatClick(seat) {
+        if (firstSwapSeat === null) {
+          firstSwapSeat = seat;
+          const cols = Number(document.getElementById('seatCols').value) || 6;
+          const firstCoordinate = getSeatCoordinateFromIndex(seat, cols).label;
+          updateSwapModeUi(`第一個位置：${firstCoordinate}，請再點第二個位置。`);
+          renderSeatGrid();
+          return;
+        }
+
+        if (firstSwapSeat === seat) {
+          firstSwapSeat = null;
+          updateSwapModeUi('已取消第一個位置，請重新點選。');
+          renderSeatGrid();
+          return;
+        }
+
+        swapSeatAssignments(firstSwapSeat, seat);
+        firstSwapSeat = null;
+        renderStudentTable();
       }
 
       function removeStudentRow(index) {
         if (selectedStudentIndex === index) selectedStudentIndex = null;
         students.splice(index, 1);
         renderStudentTable();
+        markExportDirty();
       }
 
       function randomizeSeats() {
         const rows = Number(document.getElementById('seatRows').value) || 6;
         const cols = Number(document.getElementById('seatCols').value) || 6;
         const total = rows * cols;
-        const seats = Array.from({ length: total }, (_, i) => i + 1);
-        for (let i = seats.length - 1; i > 0; i--) {
+        const coordinates = Array.from({ length: total }, (_, i) => getSeatCoordinateFromIndex(i + 1, cols).label);
+        for (let i = coordinates.length - 1; i > 0; i--) {
           const j = Math.floor(Math.random() * (i + 1));
-          [seats[i], seats[j]] = [seats[j], seats[i]];
+          [coordinates[i], coordinates[j]] = [coordinates[j], coordinates[i]];
         }
         students.forEach((student, index) => {
-          student.position = seats[index] || '';
+          student.position = coordinates[index] || '';
         });
         renderStudentTable();
+        markExportDirty();
       }
 
       function triggerImport() {
@@ -418,41 +752,37 @@
         const headerMap = {};
         headers.forEach((header, index) => {
           if (header.includes('班')) headerMap.class = index;
-          if (header.includes('座') && !header.includes('位置')) headerMap.seat = index;
-          if (header.includes('位置') || header.includes('position')) headerMap.position = index;
+          if (header.includes('座號')) headerMap.seat = index;
+          if (header.includes('位置') || header.includes('position') || header.includes('座標')) headerMap.position = index;
           if (header.includes('學號') || header.includes('student')) headerMap.studentId = index;
           if (header.includes('名') || header.includes('name')) headerMap.name = index;
           if (header.includes('幹') || header.includes('officer')) headerMap.officer = index;
           if (header.includes('小') || header.includes('assistant') || header.includes('helper')) headerMap.assistant = index;
         });
-        if (!('class' in headerMap) || !('seat' in headerMap) || !('studentId' in headerMap) || !('name' in headerMap)) {
-          alert('XLSX 標頭必須包含 班級、座號、學號、姓名。可選擇新增 幹部、 小老師。');
+        if (!('class' in headerMap) || !('seat' in headerMap) || !('studentId' in headerMap) || !('name' in headerMap) || !('position' in headerMap)) {
+          alert('XLSX 標頭必須包含 班級、座號、學號、姓名、位置座標。可選擇新增 幹部、小老師。');
           return;
         }
         students = rows.slice(1).map(cols => {
           const seatValue = cols[headerMap.seat];
-          let positionValue = '';
-          if (headerMap.position !== undefined) {
-            const raw = cols[headerMap.position];
-            positionValue = raw === '' || raw === undefined || raw === null ? '' : String(raw).trim();
-          }
+          const rawPosition = cols[headerMap.position];
+          const parsedPosition = parsePositionCoordinate(rawPosition);
+          const positionValue = parsedPosition ? parsedPosition.label : (rawPosition === '' || rawPosition === undefined || rawPosition === null ? '' : String(rawPosition).trim());
           const seatLabel = seatValue === '' || seatValue === undefined || seatValue === null ? '' : String(seatValue).trim();
-          if (positionValue === '' && seatLabel !== '') {
-            const numeric = Number(seatLabel);
-            positionValue = !isNaN(numeric) ? String(numeric) : '';
-          }
           return {
             class: cols[headerMap.class] || '',
             seat: seatLabel,
             position: positionValue,
             studentId: cols[headerMap.studentId] || '',
             name: cols[headerMap.name] || '',
-            officer: headerMap.officer !== undefined ? cols[headerMap.officer] || '' : '',
+            officers: headerMap.officer !== undefined ? normalizeOfficerList(cols[headerMap.officer] || '') : [],
+            officer: '',
             assistant: headerMap.assistant !== undefined ? cols[headerMap.assistant] || '' : ''
           };
         });
         selectedStudentIndex = null;
         renderStudentTable();
+        markExportDirty();
       }
 
       function exportStudents() {
@@ -460,9 +790,9 @@
           alert('目前沒有學生資料。');
           return;
         }
-        const rows = [['班級', '座號', '位置編號', '學號', '姓名', '幹部', '小老師']];
+        const rows = [['班級', '座號', '學號', '姓名', '幹部', '小老師', '位置座標']];
         students.forEach(student => {
-          rows.push([student.class || '', student.seat || '', student.position || '', student.studentId || '', student.name || '', student.officer || '', student.assistant || '']);
+          rows.push([student.class || '', student.seat || '', student.studentId || '', student.name || '', getOfficerDisplay(student), student.assistant || '', student.position || '']);
         });
         const worksheet = XLSX.utils.aoa_to_sheet(rows);
         const workbook = XLSX.utils.book_new();
@@ -473,59 +803,362 @@
         link.href = URL.createObjectURL(blob);
         link.download = `座位表_${new Date().toISOString().slice(0,10)}.xlsx`;
         link.click();
-      }
-
-      function addOfficer(role) {
-        students.push({ class: '', seat: '', position: '', studentId: '', name: role });
-        renderStudentTable();
-      }
-
-      function loadCommonOfficers() {
-        const existingNames = students.map(s => s.name);
-        officerPreset.forEach(role => {
-          if (!existingNames.includes(role)) {
-            students.push({ class: '', seat: '', studentId: '', name: role });
-          }
-        });
-        renderStudentTable();
+        markExportClean();
       }
 
       function buildPdfPreview() {
-        const rows = Number(document.getElementById('seatRows').value) || 6;
-        const cols = Number(document.getElementById('seatCols').value) || 6;
-        const total = rows * cols;
-        const preview = document.getElementById('pdfPreview');
-        preview.innerHTML = '';
-        const grid = document.createElement('div');
-        grid.style.display = 'grid';
-        grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
-        grid.style.gap = '8px';
-        grid.style.width = '100%';
+        // Legacy preview container is unused; keep function for compatibility.
+        return;
+      }
 
-        for (let i = 1; i <= total; i++) {
-          const assigned = students.find(s => Number(s.position) === i);
-          const cell = document.createElement('div');
-          cell.style.minHeight = '64px';
-          cell.style.border = '1px solid #333';
-          cell.style.padding = '10px';
-          cell.style.borderRadius = '4px';
-          cell.style.background = '#fff';
-          const nameLabel = document.createElement('div');
-          nameLabel.style.marginTop = '6px';
-          nameLabel.style.fontSize = '14px';
-          nameLabel.style.color = '#000';
-          nameLabel.style.fontWeight = '600';
-          nameLabel.textContent = assigned ? `${assigned.seat} ${assigned.name}` : '空位';
-          const detail = document.createElement('div');
-          detail.style.fontSize = '11px';
-          detail.style.color = '#444';
-          detail.textContent = assigned ? `${assigned.class} ${assigned.studentId}` : '';
-          cell.appendChild(nameLabel);
-          if (assigned) cell.appendChild(detail);
-          grid.appendChild(cell);
+        function getStudentsSortedBySeat() {
+          return [...students].sort((a, b) => {
+            const aSeat = String(a.seat || '').trim();
+            const bSeat = String(b.seat || '').trim();
+            const aEmpty = aSeat === '';
+            const bEmpty = bSeat === '';
+            if (aEmpty && bEmpty) return 0;
+            if (aEmpty) return 1;
+            if (bEmpty) return -1;
+            const aNum = Number(aSeat);
+            const bNum = Number(bSeat);
+            if (!isNaN(aNum) && !isNaN(bNum)) return aNum - bNum;
+            return aSeat.localeCompare(bSeat, undefined, { numeric: true });
+          });
         }
 
-        preview.appendChild(grid);
+        function getPdfTitle() {
+          const className = students.find(s => String(s.class || '').trim())?.class || '';
+          const normalized = String(className).trim();
+          return normalized ? `${normalized}座位表` : '座位表';
+        }
+
+        function getPdfListTypography(orientation, studentCount) {
+          if (orientation === 'landscape') {
+            if (studentCount <= 40) {
+              return { title: '15px', table: '12px', lineHeight: '1.25', cellPadding: '3px 5px' };
+            }
+            return { title: '14px', table: '11px', lineHeight: '1.2', cellPadding: '3px 4px' };
+          }
+          if (studentCount <= 40) {
+            return { title: '14px', table: '11px', lineHeight: '1.2', cellPadding: '3px 4px' };
+          }
+          return { title: '13px', table: '10px', lineHeight: '1.15', cellPadding: '2px 4px' };
+        }
+
+        function createNameListElement(orientation) {
+          const listWrap = document.createElement('div');
+          listWrap.style.display = 'flex';
+          listWrap.style.flexDirection = 'column';
+          listWrap.style.justifyContent = 'flex-start';
+          listWrap.style.alignItems = 'stretch';
+          listWrap.style.marginTop = '0';
+
+          const sortedStudents = getStudentsSortedBySeat();
+          const typo = getPdfListTypography(orientation, sortedStudents.length);
+          const nameFontSize = `${parseInt(typo.table, 10) + 4}px`;
+
+          const title = document.createElement('div');
+          title.textContent = '名條（座號 / 姓名）';
+          title.style.fontSize = typo.title;
+          title.style.fontWeight = '700';
+          title.style.marginBottom = '5px';
+          listWrap.appendChild(title);
+
+          if (orientation === 'portrait') {
+            const groupSize = 10;
+            const groups = [];
+            for (let i = 0; i < sortedStudents.length; i += groupSize) {
+              groups.push(sortedStudents.slice(i, i + groupSize));
+            }
+
+            const table = document.createElement('table');
+            table.style.width = '100%';
+            table.style.borderCollapse = 'collapse';
+            table.style.tableLayout = 'auto';
+            table.style.fontSize = typo.table;
+            table.style.lineHeight = typo.lineHeight;
+
+            const headerRow = document.createElement('tr');
+            groups.forEach(() => {
+              ['座號', '姓名'].forEach((text, colIndex) => {
+                const th = document.createElement('th');
+                th.textContent = text;
+                th.style.border = '1px solid #999';
+                th.style.padding = typo.cellPadding;
+                th.style.background = '#f3f3f3';
+                th.style.textAlign = 'left';
+                if (colIndex === 0) {
+                  th.style.width = '5ch';
+                  th.style.minWidth = '5ch';
+                  th.style.maxWidth = '5ch';
+                  th.style.whiteSpace = 'nowrap';
+                } else {
+                  th.style.fontSize = nameFontSize;
+                }
+                headerRow.appendChild(th);
+              });
+            });
+            table.appendChild(headerRow);
+
+            for (let rowIndex = 0; rowIndex < groupSize; rowIndex++) {
+              const tr = document.createElement('tr');
+              groups.forEach(group => {
+                const student = group[rowIndex];
+                const seatTd = document.createElement('td');
+                seatTd.textContent = student ? String(student.seat || '') : '';
+                seatTd.style.border = '1px solid #bbb';
+                seatTd.style.padding = typo.cellPadding;
+                seatTd.style.width = '5ch';
+                seatTd.style.minWidth = '5ch';
+                seatTd.style.maxWidth = '5ch';
+                seatTd.style.whiteSpace = 'nowrap';
+                const nameTd = document.createElement('td');
+                nameTd.textContent = student ? String(student.name || '') : '';
+                nameTd.style.border = '1px solid #bbb';
+                nameTd.style.padding = typo.cellPadding;
+                nameTd.style.fontSize = nameFontSize;
+                tr.appendChild(seatTd);
+                tr.appendChild(nameTd);
+              });
+              table.appendChild(tr);
+            }
+
+            listWrap.appendChild(table);
+            return listWrap;
+          }
+
+          const groupSize = 20;
+          const groups = [];
+          for (let i = 0; i < sortedStudents.length; i += groupSize) {
+            groups.push(sortedStudents.slice(i, i + groupSize));
+          }
+
+          const table = document.createElement('table');
+          table.style.width = '100%';
+          table.style.borderCollapse = 'collapse';
+          table.style.tableLayout = 'auto';
+          table.style.fontSize = typo.table;
+          table.style.lineHeight = typo.lineHeight;
+
+          const headerRow = document.createElement('tr');
+          groups.forEach(() => {
+            ['座號', '姓名'].forEach((text, colIndex) => {
+              const th = document.createElement('th');
+              th.textContent = text;
+              th.style.border = '1px solid #999';
+              th.style.padding = typo.cellPadding;
+              th.style.background = '#f3f3f3';
+              th.style.textAlign = 'left';
+              if (colIndex === 0) {
+                th.style.width = '5ch';
+                th.style.minWidth = '5ch';
+                th.style.maxWidth = '5ch';
+                th.style.whiteSpace = 'nowrap';
+              } else {
+                th.style.fontSize = nameFontSize;
+              }
+              headerRow.appendChild(th);
+            });
+          });
+          table.appendChild(headerRow);
+
+          for (let rowIndex = 0; rowIndex < groupSize; rowIndex++) {
+            const tr = document.createElement('tr');
+            groups.forEach(group => {
+              const student = group[rowIndex];
+              const seatTd = document.createElement('td');
+              seatTd.textContent = student ? String(student.seat || '') : '';
+              seatTd.style.border = '1px solid #bbb';
+              seatTd.style.padding = typo.cellPadding;
+              seatTd.style.width = '5ch';
+              seatTd.style.minWidth = '5ch';
+              seatTd.style.maxWidth = '5ch';
+              seatTd.style.whiteSpace = 'nowrap';
+              const nameTd = document.createElement('td');
+              nameTd.textContent = student ? String(student.name || '') : '';
+              nameTd.style.border = '1px solid #bbb';
+              nameTd.style.padding = typo.cellPadding;
+              nameTd.style.fontSize = nameFontSize;
+              tr.appendChild(seatTd);
+              tr.appendChild(nameTd);
+            });
+            table.appendChild(tr);
+          }
+
+          listWrap.appendChild(table);
+          return listWrap;
+        }
+
+        function getPdfSeatTypography(orientation, seatCount) {
+          if (seatCount <= 30) {
+            return { name: '16px', role: '13px', assistant: '13px', cellPadding: '8px', minHeight: '74px', gap: '8px' };
+          }
+          if (seatCount <= 40) {
+            return { name: orientation === 'landscape' ? '16px' : '14px', role: orientation === 'landscape' ? '13px' : '12px', assistant: orientation === 'landscape' ? '13px' : '12px', cellPadding: orientation === 'landscape' ? '8px' : '7px', minHeight: orientation === 'landscape' ? '70px' : '66px', gap: '7px' };
+          }
+          return { name: '13px', role: '11px', assistant: '11px', cellPadding: '6px', minHeight: '56px', gap: '6px' };
+        }
+
+        function createSeatPanelElement(podiumPosition, flipGrid, orientation) {
+          const rows = Number(document.getElementById('seatRows').value) || 6;
+          const cols = Number(document.getElementById('seatCols').value) || 6;
+          const total = rows * cols;
+          const typo = getPdfSeatTypography(orientation, total);
+          const panel = document.createElement('div');
+          panel.style.display = 'flex';
+          panel.style.flexDirection = 'column';
+          panel.style.height = '100%';
+
+          const createPodiumBar = () => {
+            const bar = document.createElement('div');
+            bar.textContent = '講台';
+            bar.style.height = orientation === 'landscape' ? '26px' : '24px';
+            bar.style.border = '2px solid #c8c8c8';
+            bar.style.background = 'linear-gradient(180deg, #f8f8f8 0%, #eaeaea 100%)';
+            bar.style.borderRadius = '1pt';
+            bar.style.color = '#555';
+            bar.style.fontSize = '14px';
+            bar.style.fontWeight = '600';
+            bar.style.display = 'flex';
+            bar.style.alignItems = 'center';
+            bar.style.justifyContent = 'center';
+            bar.style.letterSpacing = '2px';
+            return bar;
+          };
+
+          const topBar = createPodiumBar();
+          const bottomBar = createPodiumBar();
+          topBar.style.marginBottom = '8px';
+          bottomBar.style.marginTop = '8px';
+
+          const grid = document.createElement('div');
+          grid.style.display = 'grid';
+          grid.style.gridTemplateColumns = `repeat(${cols}, minmax(0, 1fr))`;
+          grid.style.gridTemplateRows = `repeat(${rows}, minmax(0, 1fr))`;
+          grid.style.gap = typo.gap;
+          grid.style.width = '100%';
+          grid.style.flex = '1';
+
+          for (let i = 1; i <= total; i++) {
+            const sourceIndex = flipGrid ? (total - i + 1) : i;
+            const coordinate = getSeatCoordinateFromIndex(sourceIndex, cols);
+            const assigned = getStudentBySeatCoordinate(coordinate.row, coordinate.col);
+            const cell = document.createElement('div');
+            cell.style.minHeight = typo.minHeight;
+            cell.style.border = '1px solid #333';
+            cell.style.padding = typo.cellPadding;
+            cell.style.borderRadius = '1pt';
+            cell.style.background = '#fff';
+
+            const nameLabel = document.createElement('div');
+            nameLabel.style.marginTop = '3px';
+            nameLabel.style.fontSize = typo.name;
+            nameLabel.style.color = '#000';
+            nameLabel.style.fontWeight = '600';
+            nameLabel.textContent = assigned ? `${assigned.seat} ${assigned.name}` : '空位';
+
+            const officerDetail = document.createElement('div');
+            officerDetail.style.fontSize = typo.role;
+            officerDetail.style.color = '#444';
+            officerDetail.style.marginTop = '3px';
+            officerDetail.textContent = assigned ? getOfficerDisplay(assigned) : '';
+
+            const assistantDetail = document.createElement('div');
+            assistantDetail.style.fontSize = typo.assistant;
+            assistantDetail.style.color = '#444';
+            assistantDetail.style.marginTop = '2px';
+            assistantDetail.textContent = assigned && assigned.assistant ? assigned.assistant : '';
+
+            cell.appendChild(nameLabel);
+            if (assigned && getOfficerDisplay(assigned)) cell.appendChild(officerDetail);
+            if (assigned && assigned.assistant) cell.appendChild(assistantDetail);
+            grid.appendChild(cell);
+          }
+
+          if (podiumPosition === 'top') {
+            panel.appendChild(topBar);
+            panel.appendChild(grid);
+          } else {
+            panel.appendChild(grid);
+            panel.appendChild(bottomBar);
+          }
+          return panel;
+        }
+
+      function createPdfSeatLayout(podiumPosition, flipGrid) {
+        const orientation = document.getElementById('pdfOrientation')?.value || 'portrait';
+        const layout = document.createElement('div');
+        layout.style.display = 'flex';
+        layout.style.gap = '12px';
+        layout.style.alignItems = 'flex-start';
+
+        const seatPanel = createSeatPanelElement(podiumPosition, flipGrid, orientation);
+        const nameListPanel = createNameListElement(orientation);
+
+        if (orientation === 'landscape') {
+          layout.style.flexDirection = 'row';
+          layout.style.height = '100%';
+          seatPanel.style.width = '70%';
+          nameListPanel.style.width = '30%';
+          nameListPanel.style.marginTop = '0';
+          nameListPanel.style.maxHeight = 'none';
+          nameListPanel.style.overflow = 'visible';
+        } else {
+          layout.style.flexDirection = 'column';
+          layout.style.height = '100%';
+          seatPanel.style.width = '100%';
+          nameListPanel.style.width = '100%';
+          seatPanel.style.flex = '0 0 63%';
+          nameListPanel.style.flex = '0 0 37%';
+          nameListPanel.style.maxHeight = 'none';
+          nameListPanel.style.overflow = 'visible';
+        }
+
+        layout.appendChild(seatPanel);
+        layout.appendChild(nameListPanel);
+        return layout;
+      }
+
+      function renderLayoutToCanvas(layoutElement, pageTitle) {
+        const orientation = document.getElementById('pdfOrientation')?.value || 'portrait';
+        const wrapper = document.createElement('div');
+        wrapper.style.position = 'absolute';
+        wrapper.style.left = '-9999px';
+        wrapper.style.top = '0';
+        wrapper.style.width = orientation === 'landscape' ? '297mm' : '210mm';
+        wrapper.style.height = orientation === 'landscape' ? '210mm' : '297mm';
+        wrapper.style.padding = '4mm';
+        wrapper.style.boxSizing = 'border-box';
+        wrapper.style.background = '#fff';
+        wrapper.style.zIndex = '9999';
+        wrapper.style.pointerEvents = 'none';
+        wrapper.style.display = 'flex';
+        wrapper.style.flexDirection = 'column';
+
+        const title = document.createElement('div');
+        title.textContent = pageTitle;
+        title.style.fontSize = '22px';
+        title.style.fontWeight = '700';
+        title.style.marginBottom = '6px';
+        if (orientation === 'landscape') {
+          title.style.width = '70%';
+          title.style.textAlign = 'center';
+          title.style.alignSelf = 'flex-start';
+        } else {
+          title.style.width = '100%';
+          title.style.textAlign = 'center';
+        }
+        wrapper.appendChild(title);
+        layoutElement.style.flex = '1';
+        layoutElement.style.minHeight = '0';
+        wrapper.appendChild(layoutElement);
+        document.body.appendChild(wrapper);
+
+        return html2canvas(wrapper, { scale: 2, useCORS: true, backgroundColor: '#ffffff' })
+          .finally(() => {
+            document.body.removeChild(wrapper);
+          });
       }
 
       function exportPdf() {
@@ -533,49 +1166,44 @@
           alert('請先新增或匯入學生資料。');
           return;
         }
-        const source = document.getElementById('seatGrid');
-        const wrapper = document.createElement('div');
-        wrapper.style.position = 'absolute';
-        wrapper.style.left = '-9999px';
-        wrapper.style.top = '0';
-        wrapper.style.width = '210mm';
-        wrapper.style.padding = '10mm';
-        wrapper.style.boxSizing = 'border-box';
-        wrapper.style.background = '#fff';
-        wrapper.style.zIndex = '9999';
-        wrapper.style.pointerEvents = 'none';
+        const topLayout = createPdfSeatLayout('top', false);
+        const bottomLayout = createPdfSeatLayout('bottom', true);
+        const pdfTitle = getPdfTitle();
 
-        const title = document.createElement('div');
-        title.textContent = '座位表';
-        title.style.fontSize = '22px';
-        title.style.fontWeight = '700';
-        title.style.marginBottom = '12px';
-        wrapper.appendChild(title);
-
-        const clone = source.cloneNode(true);
-        clone.style.width = '100%';
-        clone.id = '';
-        wrapper.appendChild(clone);
-        document.body.appendChild(wrapper);
-
-        html2canvas(wrapper, { scale: 2, useCORS: true, backgroundColor: '#ffffff' })
-          .then(canvas => {
-            const imgData = canvas.toDataURL('image/jpeg', 1.0);
+        Promise.all([
+          renderLayoutToCanvas(topLayout, pdfTitle),
+          renderLayoutToCanvas(bottomLayout, pdfTitle)
+        ])
+          .then(([topCanvas, bottomCanvas]) => {
+            const orientation = document.getElementById('pdfOrientation')?.value || 'portrait';
             const JsPDFClass = window.jspdf?.jsPDF || window.jsPDF;
             if (!JsPDFClass) {
               throw new Error('jsPDF 未載入');
             }
-            const pdf = new JsPDFClass('p', 'mm', 'a4');
-            const pdfWidth = 210 - 20;
-            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-            pdf.addImage(imgData, 'JPEG', 10, 10, pdfWidth, pdfHeight);
+
+            const pdf = new JsPDFClass(orientation === 'landscape' ? 'l' : 'p', 'mm', 'a4');
+            const margin = 2;
+
+            const addCanvasToPage = (canvas) => {
+              const imgData = canvas.toDataURL('image/jpeg', 1.0);
+              const pageWidth = pdf.internal.pageSize.getWidth() - margin * 2;
+              const pageHeight = pdf.internal.pageSize.getHeight() - margin * 2;
+              const ratio = Math.min(pageWidth / canvas.width, pageHeight / canvas.height);
+              const renderWidth = canvas.width * ratio;
+              const renderHeight = canvas.height * ratio;
+              const offsetX = margin + (pageWidth - renderWidth) / 2;
+              const offsetY = margin + (pageHeight - renderHeight) / 2;
+              pdf.addImage(imgData, 'JPEG', offsetX, offsetY, renderWidth, renderHeight);
+            };
+
+            addCanvasToPage(topCanvas);
+            pdf.addPage();
+            addCanvasToPage(bottomCanvas);
             pdf.save(`座位表_${new Date().toISOString().slice(0,10)}.pdf`);
+            markExportClean();
           })
           .catch(() => {
             alert('PDF 匯出失敗，請稍後再試。');
-          })
-          .finally(() => {
-            document.body.removeChild(wrapper);
           });
       }
 
