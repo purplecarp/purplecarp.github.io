@@ -174,7 +174,7 @@
             <div class="sim-layout-right">
                 <div class="simulation-section">
                     <div class="canvas-wrapper">
-                        <canvas id="simCanvas" width="900" height="480"></canvas>
+                        <canvas id="simCanvas" width="900" height="600"></canvas>
                     </div>
                     
                     <!-- x-t, v-t, a-t 圖 -->
@@ -407,18 +407,34 @@
             // 上方：圓周運動（圓心在 eqX 正上方）
             // 下方：水平彈簧 SHM
             // 兩者共用相同的水平座標
-            const springY = H * 0.72;
+            const springY = H * 0.80;
             const wallX = W * 0.08;
             const eqX = W * 0.45; // 平衡位置
-            const scale = Math.min((eqX - wallX - 40) / 5, 50); // px per meter
-
-            const circR = Math.min(this.A * scale, H * 0.22, 100);
+            const maxCircR = (springY - 125) / 2; // 確保圓在畫布頂端以上有足夠空間
+            const scale = Math.min(maxCircR / this.A, 50); // px per meter, 隨振幅自動縮放
+            const circR = this.A * scale;
             const circCenterX = eqX; // 圓心在平衡點正上方
             const circCenterY = springY - 90 - circR; // 圓在彈簧上方
 
             const curX = this.getX(this.time);
             const curV = this.getV(this.time);
             const curA = this.getAcc(this.time);
+
+            // ---- 統一箭頭縮放比例：F、a（彈簧圖）與 ac、v（圓周圖）全部共用，
+            //      確保圓周運動箭頭的水平投影與木塊上的箭頭完全一致，
+            //      並且每一幀都依據當下的 k、m、A 重新計算 ----
+            const curF = -this.k * curX;                    // F = -kx，隨 k、x 變化
+            const arrowFactor = scale * 0.1;                 // px per (N, m/s² 或 m/s)
+            const fRawPx = Math.abs(curF) * arrowFactor;
+            const aRawPx = Math.abs(curA) * arrowFactor;
+            const arrowRef = circR;                          // 最大允許箭頭長，隨振幅 A 自動調整
+            const arrowC = Math.min(arrowRef / Math.max(fRawPx, aRawPx, 1), 1); // F、a 共用縮放係數
+
+            const vMagPhys = this.A * this.omega;            // 速度最大量值（物理，隨 k、m、A 變化）
+            const vRawPx = vMagPhys * arrowFactor;
+            const vC = Math.min(arrowRef / Math.max(vRawPx, 1), 1); // v 專用縮放係數（圓周與彈簧共用）
+
+            const acMagPhys = this.A * this.omega * this.omega; // 向心加速度「量值」固定不隨角度變化，但隨 k、m、A 重新計算
 
             // 物體位置（像素）
             const objPx = eqX + curX * scale;
@@ -507,11 +523,10 @@
             ctx.stroke();
 
             // ---- 圓周運動速度箭頭（切線方向）----
-            // 大小取 Aω * scale * 0.5，使水平分量 = 彈簧速度箭頭長度
-            const vMag = this.A * this.omega;
+            // 水平投影 = vtx * vArrowScale，與彈簧圖 v 箭頭 (curV * arrowFactor * vC) 完全相等
             const vtx = -Math.sin(theta);  // 切線 x 分量
             const vty = -Math.cos(theta);  // 切線 y 分量 (canvas y 反轉)
-            const vArrowScale = Math.min(vMag * scale * 0.5, 80);
+            const vArrowScale = vRawPx * vC;
             if (vArrowScale > 2) {
                 const vex = circPx + vtx * vArrowScale;
                 const vey = circPy + vty * vArrowScale;
@@ -536,13 +551,12 @@
                 ctx.fillText('v', vex + vtx * 10, vey + vty * 10);
             }
 
-            // ---- 向心加速度箭頭（指向圓心）----
-            // 大小取 Aω² * scale * 0.15，使水平分量 = 彈簧加速度箭頭長度
-            const acMag = this.A * this.omega * this.omega;
+            // ---- 向心加速度箭頭（指向圓心，量值固定 = Aω²）----
+            // 水平投影 = acux * acArrowScale，與彈簧圖 a 箭頭 (curA * arrowFactor * arrowC) 完全相等
             const acx = circCenterX - circPx;
             const acy = circCenterY - circPy;
             const acLen = Math.sqrt(acx * acx + acy * acy);
-            const acArrowScale = Math.min(acMag * scale * 0.15, 60);
+            const acArrowScale = acMagPhys * arrowFactor * arrowC;
             if (acArrowScale > 2 && acLen > 0) {
                 const acux = acx / acLen;
                 const acuy = acy / acLen;
@@ -666,10 +680,9 @@
             ctx.textBaseline = 'middle';
             ctx.fillText('m', objPx, springY);
 
-            // ---- 彈力箭頭 F = -kx ----
-            const curF = -this.k * curX;
+            // ---- 彈力箭頭 F = -kx（arrowC 已於上方統一計算，隨 k、A 即時更新）----
             if (Math.abs(curF) > 0.05) {
-                const fLen = Math.min(Math.abs(curF) * scale * 0.12, 70) * Math.sign(curF);
+                const fLen = fRawPx * arrowC * Math.sign(curF);
                 const fY = springY;
                 const fStartX = objPx + (Math.sign(curF) < 0 ? -blockW / 2 : blockW / 2);
                 ctx.strokeStyle = '#9b59b6';
@@ -692,9 +705,9 @@
                 ctx.fillText('F', fStartX + fLen / 2, fY - 6);
             }
 
-            // ---- 速度箭頭 ----
+            // ---- 速度箭頭（與圓周圖 v 箭頭共用 vC，確保水平投影一致）----
             if (Math.abs(curV) > 0.05) {
-                const arrowLen = Math.min(Math.abs(curV) * scale * 0.5, 80) * Math.sign(curV);
+                const arrowLen = curV * arrowFactor * vC;
                 const arrowY = springY - blockH / 2 - 14;
                 ctx.strokeStyle = '#e74c3c';
                 ctx.lineWidth = 3;
@@ -715,9 +728,9 @@
                 ctx.fillText('v', objPx + arrowLen / 2, arrowY - 5);
             }
 
-            // ---- 加速度箭頭 ----
+            // ---- 加速度箭頭 a = -kx/m（與圓周圖 ac 箭頭共用 arrowC，確保水平投影一致，且 F_len/a_len = m 恆成立）----
             if (Math.abs(curA) > 0.05) {
-                const aLen = Math.min(Math.abs(curA) * scale * 0.15, 60) * Math.sign(curA);
+                const aLen = aRawPx * arrowC * Math.sign(curA);
                 const aY = springY + blockH / 2 + 18;
                 ctx.strokeStyle = '#f39c12';
                 ctx.lineWidth = 2;
@@ -1030,3 +1043,4 @@
     <script src="../../js/main.js"></script>
 </body>
 </html>
+ 
