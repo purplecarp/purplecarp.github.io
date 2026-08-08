@@ -239,12 +239,18 @@
                             <span class="value-display" id="ampValue">42</span>
                         </div>
 
-                        <div class="control-row">
+                        <div class="control-row boundary-choice-row">
                             <label>右端邊界</label>
-                            <select id="boundarySelect">
-                                <option value="closed">封閉</option>
-                                <option value="open">開放</option>
-                            </select>
+                            <div class="choice-group">
+                                <label class="choice-option">
+                                    <input type="radio" name="boundarySelect" value="closed" checked>
+                                    <span>封閉</span>
+                                </label>
+                                <label class="choice-option">
+                                    <input type="radio" name="boundarySelect" value="open">
+                                    <span>開放</span>
+                                </label>
+                            </div>
                         </div>
 
                         <div class="stat-grid">
@@ -341,10 +347,12 @@
                     this.draw();
                 });
 
-                document.getElementById('boundarySelect').addEventListener('change', (e) => {
-                    this.rightBoundary = e.target.value;
-                    this.updateInfo();
-                    this.draw();
+                document.querySelectorAll('input[name="boundarySelect"]').forEach((radio) => {
+                    radio.addEventListener('change', (e) => {
+                        this.rightBoundary = e.target.value;
+                        this.updateInfo();
+                        this.draw();
+                    });
                 });
 
                 document.getElementById('startBtn').addEventListener('click', () => this.start());

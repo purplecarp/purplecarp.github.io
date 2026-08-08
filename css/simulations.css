@@ -135,8 +135,8 @@ body {
 }
 
 .tablet-controls {
-    width: 330px;
-    min-width: 330px;
+    width: 360px;
+    min-width: 360px;
     display: flex;
     flex-direction: column;
     gap: 12px;
@@ -232,8 +232,9 @@ body {
 .control-row {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     margin: 20px 0;
-    gap: 20px;
+    gap: 12px;
     padding: 12px;
     background: #f8f9fa;
     border-radius: 6px;
@@ -245,20 +246,24 @@ body {
 }
 
 .control-row label {
-    min-width: 150px;
+    flex: 0 0 120px;
     font-weight: 600;
     color: #34495e;
     font-size: 15px;
 }
 
 .control-row input[type="range"] {
-    flex: 1;
+    flex: 1 1 180px;
+    min-width: 0;
+    width: 100%;
     height: 8px;
     border-radius: 4px;
     background: #ddd;
     outline: none;
     -webkit-appearance: none;
+    appearance: none;
     cursor: pointer;
+    touch-action: manipulation;
 }
 
 .control-row input[type="range"]::-webkit-slider-thumb {
@@ -296,12 +301,14 @@ body {
 }
 
 .control-row select {
-    padding: 8px 12px;
+    flex: 1 1 120px;
+    max-width: 140px;
+    padding: 6px 10px;
     border: 2px solid #ddd;
     border-radius: 5px;
     background: white;
     color: #34495e;
-    font-size: 14px;
+    font-size: 13px;
     font-weight: 500;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -311,6 +318,34 @@ body {
     border-color: #3498db;
 }
 
+.boundary-choice-row {
+    align-items: center;
+}
+
+.choice-group {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.choice-option {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: #f8f9fa;
+    border: 1px solid #dfe6e9;
+    cursor: pointer;
+    font-size: 13px;
+    color: #2c3e50;
+}
+
+.choice-option input[type="radio"] {
+    margin: 0;
+    accent-color: #3498db;
+}
+
 .control-row input[type="checkbox"] {
     width: 20px;
     height: 20px;
@@ -318,7 +353,7 @@ body {
 }
 
 .value-display {
-    min-width: 100px;
+    flex: 0 0 56px;
     text-align: right;
     font-weight: bold;
     color: #3498db;
@@ -548,13 +583,20 @@ body {
 }
 
 .sim-layout-left .control-row label {
+    flex: 0 0 auto;
     min-width: auto;
     font-size: 12px;
+}
+
+.sim-layout-left .control-row input[type="range"] {
+    width: 100%;
+    flex: 1 1 auto;
 }
 
 .sim-layout-left .value-display {
     text-align: center;
     font-size: 12px;
+    flex: 0 0 auto;
 }
 
 .sim-layout-left .wave-info {
