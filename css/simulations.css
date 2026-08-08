@@ -114,6 +114,54 @@ body {
     box-shadow: 0 2px 10px rgba(0,0,0,0.05);
 }
 
+.tablet-layout {
+    display: flex;
+    gap: 20px;
+    align-items: stretch;
+    margin-bottom: 30px;
+}
+
+.tablet-visual {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.tablet-visual .simulation-section {
+    height: 100%;
+    margin-bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tablet-controls {
+    width: 330px;
+    min-width: 330px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.tablet-controls .controls,
+.tablet-controls .button-group {
+    margin: 0;
+}
+
+.tablet-controls .controls {
+    flex: 1;
+}
+
+@media (max-width: 992px) {
+    .tablet-layout {
+        flex-direction: column;
+    }
+
+    .tablet-controls {
+        width: 100%;
+        min-width: 0;
+    }
+}
+
 .canvas-wrapper {
     display: flex;
     flex-direction: column;

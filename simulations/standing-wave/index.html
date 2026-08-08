@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8">
+    <title>駐波模擬 - 物理模擬</title>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <link href="../../images/fish.png" rel="shortcut icon">
+
+    <link href="../../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../../css/normalize.css" rel="stylesheet">
+    <link href="../../css/style.css" rel="stylesheet">
+    <link href="../../css/responsive.css" rel="stylesheet">
+    <link href="../../css/simulations.css" rel="stylesheet">
+
+    <link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Roboto:400,300,500,700' rel='stylesheet' type='text/css'>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+
+    <style>
+        #simCanvas {
+            width: 100%;
+            border-radius: 8px;
+            background: #0d1117;
+        }
+
+        .control-row input[type="checkbox"] {
+            transform: scale(1.05);
+        }
+
+        .stat-grid {
+            display: grid;
+            gap: 8px;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            margin-top: 8px;
+        }
+
+        .stat-card {
+            background: #f8f9fa;
+            border-radius: 6px;
+            padding: 8px 10px;
+            border: 1px solid #e9ecef;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            color: #7f8c8d;
+            margin-bottom: 4px;
+        }
+
+        .stat-value {
+            font-size: 13px;
+            color: #2c3e50;
+            font-weight: 700;
+            font-family: 'Roboto Mono', monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+      <div class="for-sticky">
+        <div class="col-md-2 col-xs-6 logo">
+          <a href="../../index.html"><img alt="logo" class="logo-nav" src="../../images/fish.png"></a>
+        </div>
+      </div>
+      <div class="menu-wrap">
+        <nav class="menu">
+          <div class="menu-list">
+            <a href="../../index.html#home"><span>首頁</span></a>
+            <a href="../../index.html#about"><span>關於我</span></a>
+            <a href="../../index.html#experience"><span>教學經驗</span></a>
+            <a href="../../teaching-gallery.html"><span>查看教學剪影</span></a>
+            <a href="../../physics-simulations.html" class="active"><span>高中物理內容</span></a>
+            <a href="../../index.html#skills"><span>專業技能</span></a>
+            <a href="../../index.html#achievements"><span>成果展示</span></a>
+            <a href="../../index.html#philosophy"><span>教育理念</span></a>
+            <a href="../../index.html#contact"><span>聯絡方式</span></a>
+          </div>
+        </nav>
+        <button class="close-button" id="close-button">Close Menu</button>
+      </div>
+      <button class="menu-button" id="open-button">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+
+    <div class="top-nav">
+        <div class="container">
+            <a href="../../index.html" class="nav-brand">
+                <img src="../../images/fish.png" alt="Logo">
+                <h2>物鯉魚教學模擬</h2>
+            </a>
+            <a href="../../physics-simulations.html" class="btn-back">← 返回列表</a>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="page-header">
+            <h1>🌊 駐波模擬</h1>
+            <p class="subtitle">觀察弦線在兩端固定時形成的駐波與節點、腹點分布 | 選修物理 III - 波動</p>
+        </div>
+
+        <div class="info-box physics-principle">
+            <h4>📚 物理原理與公式</h4>
+            <p>
+                • <strong>駐波條件：</strong>兩端固定的弦，只有在長度 $L$ 恰好為半波長的整數倍時才能形成駐波，即 $L = n\dfrac{\lambda}{2}$，其中 $n=1,2,3,\dots$<br>
+                • <strong>波長：</strong>$\lambda = \dfrac{2L}{n}$<br>
+                • <strong>頻率：</strong>$f_n = \dfrac{nv}{2L}$，其中 $v$ 是波速<br>
+                • <strong>位移函數：</strong>$y(x,t) = A\sin(kx)\cos(\omega t)$，$k = \dfrac{2\pi}{\lambda}$，$C9 = 2\pi f$<br>
+                • <strong>節點與腹點：</strong>節點出現在 $\sin(kx)=0$ 的位置，腹點則出現在 $|\sin(kx)|=1$ 的位置
+            </p>
+        </div>
+
+        <div class="info-box physics-principle">
+            <h4>第一部分：固定端反射</h4>
+            <p>
+                • <strong>由左端發波：</strong>先從左端產生週期波，向右傳播<br>
+                • <strong>碰到右端固定端：</strong>波會發生反射，並在固定端形成倒相<br>
+                • <strong>觀察重點：</strong>看波在端點處的反射與相位變化
+            </p>
+        </div>
+
+        <div class="tablet-layout">
+            <div class="tablet-visual">
+                <div class="simulation-section">
+                    <div class="canvas-wrapper">
+                        <canvas id="fixedEndCanvas" width="900" height="440"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="tablet-controls">
+                <div class="controls" style="margin-bottom:0; padding:20px;">
+                    <div class="control-section">
+                        <h3>⚙️ 固定端反射演示</h3>
+                        <div class="control-row">
+                            <label>振幅 $A$</label>
+                            <input type="range" id="fixedAmpSlider" min="20" max="70" step="1" value="42">
+                            <span class="value-display" id="fixedAmpValue">42</span>
+                        </div>
+                        <div class="control-row">
+                            <label>頻率 $f$</label>
+                            <input type="range" id="fixedFreqSlider" min="0.4" max="1.8" step="0.1" value="0.9">
+                            <span class="value-display" id="fixedFreqValue">0.9</span>
+                        </div>
+                        <div class="control-row">
+                            <label>播放速度</label>
+                            <input type="range" id="fixedSpeedSlider" min="0.2" max="1.5" step="0.1" value="0.35">
+                            <span class="value-display" id="fixedSpeedValue">0.35</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-start" id="fixedStartBtn">▶ 開始</button>
+                    <button class="btn btn-pause" id="fixedPauseBtn">⏸ 暫停</button>
+                    <button class="btn btn-reset" id="fixedResetBtn">🔄 重置</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-box physics-principle">
+            <h4>第二部分：入射波、反射波與疊加</h4>
+            <p>
+                • <strong>入射波：</strong>由左端向右傳播的波<br>
+                • <strong>反射波：</strong>碰到右端固定端後向左返傳<br>
+                • <strong>疊加結果：</strong>兩波在同一弦上重疊，形成駐波雛形
+            </p>
+        </div>
+
+        <div class="tablet-layout">
+            <div class="tablet-visual">
+                <div class="simulation-section">
+                    <div class="canvas-wrapper">
+                        <canvas id="superpositionCanvas" width="900" height="460"></canvas>
+                    </div>
+                </div>
+            </div>
+            <div class="tablet-controls">
+                <div class="controls" style="margin-bottom:0; padding:20px;">
+                    <div class="control-section">
+                        <h3>⚙️ 反射波與疊加演示</h3>
+                        <div class="control-row">
+                            <label>振幅 $A$</label>
+                            <input type="range" id="reflectAmpSlider" min="20" max="70" step="1" value="42">
+                            <span class="value-display" id="reflectAmpValue">42</span>
+                        </div>
+                        <div class="control-row">
+                            <label>頻率 $f$</label>
+                            <input type="range" id="reflectFreqSlider" min="0.4" max="1.8" step="0.1" value="0.9">
+                            <span class="value-display" id="reflectFreqValue">0.9</span>
+                        </div>
+                        <div class="control-row">
+                            <label>顯示反射波</label>
+                            <input type="checkbox" id="showReflectedToggle" checked>
+                        </div>
+                        <div class="control-row">
+                            <label>顯示合成波</label>
+                            <input type="checkbox" id="showSuperposedToggle" checked>
+                        </div>
+                    </div>
+                </div>
+                <div class="button-group">
+                    <button class="btn btn-start" id="reflectStartBtn">▶ 開始</button>
+                    <button class="btn btn-pause" id="reflectPauseBtn">⏸ 暫停</button>
+                    <button class="btn btn-reset" id="reflectResetBtn">🔄 重置</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-box physics-principle">
+            <h4>第三部分：不同 $n$ 模式的駐波</h4>
+            <p>
+                • <strong>模式 $n$：</strong>改變駐波模式，觀察節點與腹點的數量變化<br>
+                • <strong>封閉端與開放端：</strong>比較兩種不同邊界條件下的駐波形態<br>
+                • <strong>關鍵觀察：</strong>不同模式對應不同波長與頻率
+            </p>
+        </div>
+
+        <div class="sim-layout">
+            <div class="sim-layout-left">
+                <div class="controls">
+                    <div class="control-section">
+                        <h3>⚙️ 參數控制</h3>
+
+                        <div class="control-row">
+                            <label>模式 $n$</label>
+                            <input type="range" id="modeSlider" min="1" max="6" step="1" value="3">
+                            <span class="value-display" id="modeValue">3</span>
+                        </div>
+
+                        <div class="control-row">
+                            <label>振幅 $A$</label>
+                            <input type="range" id="ampSlider" min="10" max="70" step="1" value="42">
+                            <span class="value-display" id="ampValue">42</span>
+                        </div>
+
+                        <div class="control-row">
+                            <label>右端邊界</label>
+                            <select id="boundarySelect">
+                                <option value="closed">封閉</option>
+                                <option value="open">開放</option>
+                            </select>
+                        </div>
+
+                        <div class="stat-grid">
+                            <div class="stat-card">
+                                <div class="stat-label">波長 $\lambda$</div>
+                                <div class="stat-value" id="lambdaDisplay">1.33 m</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-label">頻率 $f_n$</div>
+                                <div class="stat-value" id="freqDisplay">27.0 Hz</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-start" id="startBtn">▶ 開始模擬</button>
+                    <button class="btn btn-pause" id="pauseBtn">⏸ 暫停</button>
+                    <button class="btn btn-reset" id="resetBtn">🔄 重置</button>
+                </div>
+            </div>
+
+            <div class="sim-layout-right">
+                <div class="simulation-section">
+                    <div class="canvas-wrapper">
+                        <canvas id="simCanvas" width="900" height="480"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-box teaching-note">
+            <h4>💡 教學使用指引</h4>
+            <p>
+                • <strong>觀察節點：</strong>當你調整模式 $n$ 時，節點數會增加；每增加一個模式，弦上會多出一個節點對<br>
+                • <strong>比較不同模式：</strong>$n=1$ 是基音，$n=2$、$n=3$ 代表倍頻；每一個模式都滿足 $L = n\lambda/2$<br>
+                • <strong>連結到聲音：</strong>弦樂器上的基音與泛音，其實就是駐波的不同模式<br>
+                • <strong>注意現象：</strong>若固定端條件不成立，波會無法穩定形成整齊的駐波，圖形會變得混亂
+            </p>
+        </div>
+    </div>
+
+    <script>
+        class StandingWaveSimulation {
+            constructor() {
+                this.simCanvas = document.getElementById('simCanvas');
+                this.simCtx = this.simCanvas.getContext('2d');
+                this.dpr = window.devicePixelRatio || 1;
+                this.scaleCanvas(this.simCanvas, this.simCtx);
+
+                this.mode = 3;
+                this.amplitude = 42;
+                this.waveSpeed = 18;
+                this.length = 2.0;
+                this.rightBoundary = 'closed';
+                this.playbackSpeed = 0.35;
+
+                this.isRunning = false;
+                this.time = 0;
+                this.animationId = null;
+                this.lastTimestamp = null;
+
+                this.init();
+            }
+
+            scaleCanvas(canvas, ctx) {
+                const dpr = this.dpr;
+                const cssW = canvas.width;
+                const cssH = canvas.height;
+                canvas.width = Math.round(cssW * dpr);
+                canvas.height = Math.round(cssH * dpr);
+                canvas.style.width = cssW + 'px';
+                canvas.style.height = cssH + 'px';
+                ctx.scale(dpr, dpr);
+            }
+
+            init() {
+                this.bindControls();
+                this.updateInfo();
+                this.draw();
+            }
+
+            bindControls() {
+                document.getElementById('modeSlider').addEventListener('input', (e) => {
+                    this.mode = parseInt(e.target.value, 10);
+                    document.getElementById('modeValue').textContent = this.mode;
+                    this.updateInfo();
+                    this.reset();
+                });
+
+                document.getElementById('ampSlider').addEventListener('input', (e) => {
+                    this.amplitude = parseFloat(e.target.value);
+                    document.getElementById('ampValue').textContent = this.amplitude.toFixed(0);
+                    this.draw();
+                });
+
+                document.getElementById('boundarySelect').addEventListener('change', (e) => {
+                    this.rightBoundary = e.target.value;
+                    this.updateInfo();
+                    this.draw();
+                });
+
+                document.getElementById('startBtn').addEventListener('click', () => this.start());
+                document.getElementById('pauseBtn').addEventListener('click', () => this.pause());
+                document.getElementById('resetBtn').addEventListener('click', () => this.reset());
+            }
+
+            updateInfo() {
+                let wavelength;
+                let frequency;
+
+                if (this.rightBoundary === 'open') {
+                    wavelength = (4 * this.length) / (2 * this.mode - 1);
+                    frequency = ((2 * this.mode - 1) * this.waveSpeed) / (4 * this.length);
+                } else {
+                    wavelength = (2 * this.length) / this.mode;
+                    frequency = (this.mode * this.waveSpeed) / (2 * this.length);
+                }
+
+                document.getElementById('lambdaDisplay').textContent = wavelength.toFixed(2) + ' m';
+                document.getElementById('freqDisplay').textContent = frequency.toFixed(1) + ' Hz';
+            }
+
+            start() {
+                if (this.isRunning) return;
+                this.isRunning = true;
+                this.lastTimestamp = null;
+                this.animationId = requestAnimationFrame((ts) => this.loop(ts));
+            }
+
+            pause() {
+                this.isRunning = false;
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                    this.animationId = null;
+                }
+            }
+
+            reset() {
+                this.pause();
+                this.time = 0;
+                this.draw();
+            }
+
+            loop(timestamp) {
+                if (!this.isRunning) return;
+                if (this.lastTimestamp !== null) {
+                    const dt = Math.min((timestamp - this.lastTimestamp) / 1000, 0.05);
+                    this.time += dt * this.playbackSpeed;
+                }
+                this.lastTimestamp = timestamp;
+                this.draw();
+                this.animationId = requestAnimationFrame((ts) => this.loop(ts));
+            }
+
+            draw() {
+                const W = this.simCanvas.width / this.dpr;
+                const H = this.simCanvas.height / this.dpr;
+                const ctx = this.simCtx;
+                ctx.clearRect(0, 0, W, H);
+
+                ctx.fillStyle = '#0d1117';
+                ctx.fillRect(0, 0, W, H);
+
+                const left = 70;
+                const right = W - 70;
+                const top = 70;
+                const bottom = H - 70;
+                const centerY = (top + bottom) / 2;
+                const lineWidth = right - left;
+
+                ctx.strokeStyle = '#1a2a3a';
+                ctx.lineWidth = 1;
+                for (let y = 80; y < H - 40; y += 30) {
+                    ctx.beginPath();
+                    ctx.moveTo(left, y);
+                    ctx.lineTo(right, y);
+                    ctx.stroke();
+                }
+
+                ctx.strokeStyle = '#ecf0f1';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(left, centerY);
+                ctx.lineTo(right, centerY);
+                ctx.stroke();
+
+                ctx.strokeStyle = '#4c6ef5';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(left, top + 20);
+                ctx.lineTo(left, bottom - 20);
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.moveTo(right, top + 20);
+                ctx.lineTo(right, bottom - 20);
+                ctx.stroke();
+
+                ctx.save();
+                ctx.translate(left, centerY);
+                const scaleX = (right - left) / this.length;
+                let wavelength;
+                let angularFrequency;
+
+                if (this.rightBoundary === 'open') {
+                    wavelength = (4 * this.length) / (2 * this.mode - 1);
+                    angularFrequency = (2 * Math.PI * this.waveSpeed) / wavelength;
+                } else {
+                    wavelength = (2 * this.length) / this.mode;
+                    angularFrequency = (2 * Math.PI * this.waveSpeed) / wavelength;
+                }
+
+                const phase = angularFrequency * this.time;
+
+                ctx.beginPath();
+                ctx.moveTo(0, 0);
+                for (let i = 0; i <= 100; i++) {
+                    const x = (this.length * i) / 100;
+                    let k;
+                    if (this.rightBoundary === 'open') {
+                        k = (2 * this.mode - 1) * Math.PI / (2 * this.length);
+                    } else {
+                        k = this.mode * Math.PI / this.length;
+                    }
+                    const shape = Math.sin(k * x);
+                    const y = this.amplitude * shape * Math.cos(phase);
+                    ctx.lineTo(x * scaleX, -y * 0.6);
+                }
+                ctx.strokeStyle = '#74c0fc';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+
+                ctx.strokeStyle = '#ff8787';
+                ctx.lineWidth = 2;
+                if (this.rightBoundary === 'open') {
+                    for (let n = 0; n < this.mode; n++) {
+                        const x = (2 * this.length * n) / (2 * this.mode - 1);
+                        const px = x * scaleX;
+                        ctx.beginPath();
+                        ctx.moveTo(px, -this.amplitude * 0.6 - 18);
+                        ctx.lineTo(px, this.amplitude * 0.6 + 18);
+                        ctx.stroke();
+                    }
+                } else {
+                    for (let n = 0; n <= this.mode; n++) {
+                        const x = (this.length * n) / this.mode;
+                        const px = x * scaleX;
+                        ctx.beginPath();
+                        ctx.moveTo(px, -this.amplitude * 0.6 - 18);
+                        ctx.lineTo(px, this.amplitude * 0.6 + 18);
+                        ctx.stroke();
+                    }
+                }
+
+                ctx.restore();
+
+                ctx.fillStyle = '#ecf0f1';
+                ctx.font = '16px Roboto';
+                ctx.fillText(this.rightBoundary === 'open' ? '左端固定、右端開放' : '左端固定、右端封閉', 30, 30);
+                ctx.fillStyle = '#8bd3ff';
+
+            }
+        }
+
+        class FixedEndReflectionSimulation {
+            constructor() {
+                this.fixedCanvas = document.getElementById('fixedEndCanvas');
+                this.fixedCtx = this.fixedCanvas.getContext('2d');
+                this.dpr = window.devicePixelRatio || 1;
+                this.scaleCanvas(this.fixedCanvas, this.fixedCtx);
+
+                this.amplitude = 42;
+                this.frequency = 0.9;
+                this.playbackSpeed = 0.35;
+                this.length = 2.4;
+                this.N = 140;
+                this.dx = 1.0;
+                this.waveSpeed = 24;
+                this.simStep = 0.012;
+
+                this.u_prev = new Float64Array(this.N);
+                this.u_curr = new Float64Array(this.N);
+                this.u_next = new Float64Array(this.N);
+
+                this.isRunning = false;
+                this.time = 0;
+                this.animationId = null;
+                this.lastTimestamp = null;
+
+                this.init();
+            }
+
+            scaleCanvas(canvas, ctx) {
+                const dpr = this.dpr;
+                const cssW = canvas.width;
+                const cssH = canvas.height;
+                canvas.width = Math.round(cssW * dpr);
+                canvas.height = Math.round(cssH * dpr);
+                canvas.style.width = cssW + 'px';
+                canvas.style.height = cssH + 'px';
+                ctx.scale(dpr, dpr);
+            }
+
+            init() {
+                this.bindControls();
+                this.reset();
+            }
+
+            bindControls() {
+                document.getElementById('fixedAmpSlider').addEventListener('input', (e) => {
+                    this.amplitude = parseFloat(e.target.value);
+                    document.getElementById('fixedAmpValue').textContent = this.amplitude.toFixed(0);
+                    this.draw();
+                });
+
+                document.getElementById('fixedFreqSlider').addEventListener('input', (e) => {
+                    this.frequency = parseFloat(e.target.value);
+                    document.getElementById('fixedFreqValue').textContent = this.frequency.toFixed(1);
+                    this.reset();
+                });
+
+                document.getElementById('fixedSpeedSlider').addEventListener('input', (e) => {
+                    this.playbackSpeed = parseFloat(e.target.value);
+                    document.getElementById('fixedSpeedValue').textContent = this.playbackSpeed.toFixed(2);
+                });
+
+                document.getElementById('fixedStartBtn').addEventListener('click', () => this.start());
+                document.getElementById('fixedPauseBtn').addEventListener('click', () => this.pause());
+                document.getElementById('fixedResetBtn').addEventListener('click', () => this.reset());
+            }
+
+            start() {
+                if (this.isRunning) return;
+                this.isRunning = true;
+                this.lastTimestamp = null;
+                this.animationId = requestAnimationFrame((ts) => this.loop(ts));
+            }
+
+            pause() {
+                this.isRunning = false;
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                    this.animationId = null;
+                }
+            }
+
+            reset() {
+                this.pause();
+                this.time = 0;
+                this.u_prev.fill(0);
+                this.u_curr.fill(0);
+                this.u_next.fill(0);
+                this.draw();
+            }
+
+            step(dt) {
+                const c = (this.waveSpeed * dt) / this.dx;
+                const c2 = c * c;
+                const source = this.amplitude * 0.0032 * Math.sin(2 * Math.PI * this.frequency * this.time);
+
+                this.u_next.fill(0);
+                this.u_next[0] = source;
+                this.u_next[1] = this.u_curr[1] + 0.5 * c2 * (this.u_curr[2] - 2 * this.u_curr[1] + this.u_next[0]);
+                this.u_next[this.N - 1] = 0;
+
+                for (let i = 2; i < this.N - 1; i++) {
+                    this.u_next[i] = 2 * this.u_curr[i] - this.u_prev[i] + c2 * (this.u_curr[i + 1] - 2 * this.u_curr[i] + this.u_curr[i - 1]);
+                }
+
+                this.u_curr[0] = this.u_next[0];
+                this.u_curr[this.N - 1] = 0;
+
+                const tmp = this.u_prev;
+                this.u_prev = this.u_curr;
+                this.u_curr = this.u_next;
+                this.u_next = tmp;
+            }
+
+            loop(timestamp) {
+                if (!this.isRunning) return;
+                if (this.lastTimestamp !== null) {
+                    const dtReal = Math.min((timestamp - this.lastTimestamp) / 1000, 0.05);
+                    const dtSim = dtReal * this.playbackSpeed * 1.8;
+                    const steps = Math.max(1, Math.ceil(dtSim / this.simStep));
+                    const dtStep = dtSim / steps;
+
+                    for (let i = 0; i < steps; i++) {
+                        this.time += dtStep;
+                        this.step(dtStep);
+                    }
+                }
+                this.lastTimestamp = timestamp;
+                this.draw();
+                this.animationId = requestAnimationFrame((ts) => this.loop(ts));
+            }
+
+            draw() {
+                const W = this.fixedCanvas.width / this.dpr;
+                const H = this.fixedCanvas.height / this.dpr;
+                const ctx = this.fixedCtx;
+                ctx.clearRect(0, 0, W, H);
+                ctx.fillStyle = '#0d1117';
+                ctx.fillRect(0, 0, W, H);
+
+                const left = 70;
+                const right = W - 90;
+                const top = 70;
+                const bottom = H - 70;
+                const centerY = (top + bottom) / 2;
+                const ropeX0 = left;
+                const ropeX1 = right;
+                const ropeW = ropeX1 - ropeX0;
+
+                ctx.strokeStyle = '#1a2a3a';
+                ctx.lineWidth = 1;
+                for (let y = 80; y < H - 40; y += 26) {
+                    ctx.beginPath();
+                    ctx.moveTo(left, y);
+                    ctx.lineTo(right, y);
+                    ctx.stroke();
+                }
+
+                ctx.strokeStyle = '#2b3d52';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([6, 6]);
+                ctx.beginPath();
+                ctx.moveTo(ropeX0, centerY);
+                ctx.lineTo(ropeX1, centerY);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                ctx.fillStyle = '#555';
+                ctx.fillRect(ropeX1 + 10, centerY - 24, 10, 48);
+                ctx.strokeStyle = '#888';
+                ctx.lineWidth = 1;
+                for (let i = 0; i < 6; i++) {
+                    ctx.beginPath();
+                    ctx.moveTo(ropeX1 + 20, centerY - 24 + i * 8);
+                    ctx.lineTo(ropeX1 + 28, centerY - 24 + i * 8 + 8);
+                    ctx.stroke();
+                }
+
+                ctx.fillStyle = '#ffd43b';
+                ctx.beginPath();
+                ctx.arc(ropeX0, centerY, 6, 0, 2 * Math.PI);
+                ctx.fill();
+                ctx.fillStyle = '#ffd43b';
+                ctx.font = 'bold 14px Roboto';
+                ctx.textAlign = 'right';
+                ctx.fillText('〜', ropeX0 - 8, centerY + 5);
+
+                ctx.save();
+                ctx.translate(ropeX0, centerY);
+                ctx.beginPath();
+                for (let i = 0; i < this.N; i++) {
+                    const px = (i / (this.N - 1)) * ropeW;
+                    const py = -this.u_curr[i] * 200;
+                    i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+                }
+                ctx.strokeStyle = '#69db7c';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+                ctx.restore();
+
+                ctx.fillStyle = '#ecf0f1';
+                ctx.font = '15px Roboto';
+                ctx.textAlign = 'left';
+                ctx.fillText('由左端驅動波，右端固定端反射', 30, 30);
+                ctx.fillStyle = '#8bd3ff';
+            }
+        }
+
+        class ReflectionStandingWaveSimulation {
+            constructor() {
+                this.reflectionCanvas = document.getElementById('superpositionCanvas');
+                this.reflectionCtx = this.reflectionCanvas.getContext('2d');
+                this.dpr = window.devicePixelRatio || 1;
+                this.scaleCanvas(this.reflectionCanvas, this.reflectionCtx);
+
+                this.amplitude = 42;
+                this.frequency = 0.9;
+                this.showReflected = true;
+                this.showSuperposed = true;
+                this.playbackSpeed = 0.35;
+                this.length = 2.4;
+
+                this.isRunning = false;
+                this.time = 0;
+                this.animationId = null;
+                this.lastTimestamp = null;
+
+                this.init();
+            }
+
+            scaleCanvas(canvas, ctx) {
+                const dpr = this.dpr;
+                const cssW = canvas.width;
+                const cssH = canvas.height;
+                canvas.width = Math.round(cssW * dpr);
+                canvas.height = Math.round(cssH * dpr);
+                canvas.style.width = cssW + 'px';
+                canvas.style.height = cssH + 'px';
+                ctx.scale(dpr, dpr);
+            }
+
+            init() {
+                this.bindControls();
+                this.draw();
+            }
+
+            bindControls() {
+                document.getElementById('reflectAmpSlider').addEventListener('input', (e) => {
+                    this.amplitude = parseFloat(e.target.value);
+                    document.getElementById('reflectAmpValue').textContent = this.amplitude.toFixed(0);
+                    this.draw();
+                });
+
+                document.getElementById('reflectFreqSlider').addEventListener('input', (e) => {
+                    this.frequency = parseFloat(e.target.value);
+                    document.getElementById('reflectFreqValue').textContent = this.frequency.toFixed(1);
+                    this.draw();
+                });
+
+                document.getElementById('showReflectedToggle').addEventListener('change', (e) => {
+                    this.showReflected = e.target.checked;
+                    this.draw();
+                });
+
+                document.getElementById('showSuperposedToggle').addEventListener('change', (e) => {
+                    this.showSuperposed = e.target.checked;
+                    this.draw();
+                });
+
+                document.getElementById('reflectStartBtn').addEventListener('click', () => this.start());
+                document.getElementById('reflectPauseBtn').addEventListener('click', () => this.pause());
+                document.getElementById('reflectResetBtn').addEventListener('click', () => this.reset());
+            }
+
+            start() {
+                if (this.isRunning) return;
+                this.isRunning = true;
+                this.lastTimestamp = null;
+                this.animationId = requestAnimationFrame((ts) => this.loop(ts));
+            }
+
+            pause() {
+                this.isRunning = false;
+                if (this.animationId) {
+                    cancelAnimationFrame(this.animationId);
+                    this.animationId = null;
+                }
+            }
+
+            reset() {
+                this.pause();
+                this.time = 0;
+                this.draw();
+            }
+
+            loop(timestamp) {
+                if (!this.isRunning) return;
+                if (this.lastTimestamp !== null) {
+                    const dt = Math.min((timestamp - this.lastTimestamp) / 1000, 0.05);
+                    this.time += dt * this.playbackSpeed;
+                }
+                this.lastTimestamp = timestamp;
+                this.draw();
+                this.animationId = requestAnimationFrame((ts) => this.loop(ts));
+            }
+
+            draw() {
+                const W = this.reflectionCanvas.width / this.dpr;
+                const H = this.reflectionCanvas.height / this.dpr;
+                const ctx = this.reflectionCtx;
+                ctx.clearRect(0, 0, W, H);
+                ctx.fillStyle = '#0d1117';
+                ctx.fillRect(0, 0, W, H);
+
+                const left = 70;
+                const right = W - 70;
+                const top = 70;
+                const bottom = H - 70;
+                const centerY = (top + bottom) / 2;
+                const scaleX = (right - left) / this.length;
+                const wavelength = 0.9;
+                const k = 2 * Math.PI / wavelength;
+                const omega = 2 * Math.PI * this.frequency;
+                const phase = omega * this.time;
+
+                ctx.strokeStyle = '#1a2a3a';
+                ctx.lineWidth = 1;
+                for (let y = 80; y < H - 40; y += 28) {
+                    ctx.beginPath();
+                    ctx.moveTo(left, y);
+                    ctx.lineTo(right, y);
+                    ctx.stroke();
+                }
+
+                ctx.strokeStyle = '#ecf0f1';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(left, centerY);
+                ctx.lineTo(right, centerY);
+                ctx.stroke();
+
+                ctx.strokeStyle = '#4c6ef5';
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                ctx.moveTo(left, top + 18);
+                ctx.lineTo(left, bottom - 18);
+                ctx.stroke();
+
+                ctx.strokeStyle = '#ff8787';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(right, top + 18);
+                ctx.lineTo(right, bottom - 18);
+                ctx.stroke();
+
+                ctx.save();
+                ctx.translate(left, centerY);
+
+                const drawWave = (waveFn, color, width, dash) => {
+                    ctx.beginPath();
+                    for (let i = 0; i <= 120; i++) {
+                        const x = (this.length * i) / 120;
+                        const y = waveFn(x);
+                        ctx.lineTo(x * scaleX, -y * 0.45);
+                    }
+                    ctx.strokeStyle = color;
+                    ctx.lineWidth = width;
+                    if (dash) {
+                        ctx.setLineDash([6, 6]);
+                    } else {
+                        ctx.setLineDash([]);
+                    }
+                    ctx.stroke();
+                };
+
+                if (this.showReflected) {
+                    drawWave((x) => {
+                        const incident = this.amplitude * Math.sin(k * x - phase);
+                        const reflected = -this.amplitude * Math.sin(k * (2 * this.length - x) - phase);
+                        return reflected;
+                    }, '#f39c12', 2.5, false);
+                }
+
+                drawWave((x) => this.amplitude * Math.sin(k * x - phase), '#74c0fc', 3, false);
+
+                if (this.showSuperposed) {
+                    drawWave((x) => {
+                        const incident = this.amplitude * Math.sin(k * x - phase);
+                        const reflected = -this.amplitude * Math.sin(k * (2 * this.length - x) - phase);
+                        return incident + reflected;
+                    }, '#69db7c', 3.2, false);
+                }
+
+                ctx.restore();
+
+                ctx.fillStyle = '#ecf0f1';
+                ctx.font = '15px Roboto';
+                ctx.fillText('入射波與反射波在同一弦上疊加', 30, 30);
+                ctx.fillStyle = '#8bd3ff';
+                ctx.fillText('藍色：入射波，橘色：反射波，綠色：疊加結果', 30, 50);
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            new FixedEndReflectionSimulation();
+            new ReflectionStandingWaveSimulation();
+            new StandingWaveSimulation();
+        });
+    </script>
+</body>
+</html>

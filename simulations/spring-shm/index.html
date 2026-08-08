@@ -131,7 +131,7 @@
                         
                         <div class="control-row">
                             <label>彈簧力常數 k (N/m)</label>
-                            <input type="range" id="kSlider" min="1" max="50" step="1" value="10">
+                            <input type="range" id="kSlider" min="1" max="10" step="1" value="10">
                             <span class="value-display" id="kValue">10</span>
                         </div>
                         
@@ -157,6 +157,7 @@
                             <label>顯示運動軌跡</label>
                             <input type="checkbox" id="trailToggle" checked>
                         </div>
+
                     </div>
 
 
@@ -247,6 +248,7 @@
             this.trailInterval = 0.05; // 軌跡記錄間隔（秒）
             this.lastTrailTime = -1;
             this.showTrail = true;
+            this.vectorLineWidth = 3.0; // 位置向量線段粗細
             this.maxGraphTime = 10; // 圖表顯示的最大時間範圍
 
             this.init();
@@ -531,12 +533,12 @@
                 const vex = circPx + vtx * vArrowScale;
                 const vey = circPy + vty * vArrowScale;
                 ctx.strokeStyle = '#e74c3c';
-                ctx.lineWidth = 2.5;
+                ctx.lineWidth = this.vectorLineWidth;
                 ctx.beginPath();
                 ctx.moveTo(circPx, circPy);
                 ctx.lineTo(vex, vey);
                 ctx.stroke();
-                const ahl = 7;
+                const ahl = 7 + this.vectorLineWidth * 0.8;
                 const vAngle = Math.atan2(vty, vtx);
                 ctx.fillStyle = '#e74c3c';
                 ctx.beginPath();
@@ -563,7 +565,7 @@
                 const acex = circPx + acux * acArrowScale;
                 const acey = circPy + acuy * acArrowScale;
                 ctx.strokeStyle = '#f39c12';
-                ctx.lineWidth = 2;
+                ctx.lineWidth = this.vectorLineWidth;
                 ctx.setLineDash([4, 3]);
                 ctx.beginPath();
                 ctx.moveTo(circPx, circPy);
@@ -571,7 +573,7 @@
                 ctx.stroke();
                 ctx.setLineDash([]);
                 // 箭頭
-                const ahl = 6;
+                const ahl = 6 + this.vectorLineWidth * 0.8;
                 const acAngle = Math.atan2(acuy, acux);
                 ctx.fillStyle = '#f39c12';
                 ctx.beginPath();
@@ -680,18 +682,42 @@
             ctx.textBaseline = 'middle';
             ctx.fillText('m', objPx, springY);
 
+            // ---- 位置向量 r：由平衡點指向木塊 ----
+            const vecStartX = eqX;
+            const vecEndX = objPx;
+            const vecY = springY - blockH / 2 - 20;
+            ctx.strokeStyle = '#1abc9c';
+            ctx.lineWidth = this.vectorLineWidth;
+            ctx.beginPath();
+            ctx.moveTo(vecStartX, vecY);
+            ctx.lineTo(vecEndX, vecY);
+            ctx.stroke();
+            const arrowDir = Math.sign(vecEndX - vecStartX);
+            const arrowHead = 8 + this.vectorLineWidth * 0.8;
+            ctx.fillStyle = '#1abc9c';
+            ctx.beginPath();
+            ctx.moveTo(vecEndX, vecY);
+            ctx.lineTo(vecEndX - arrowHead * arrowDir, vecY - 5);
+            ctx.lineTo(vecEndX - arrowHead * arrowDir, vecY + 5);
+            ctx.closePath();
+            ctx.fill();
+            ctx.font = 'bold 12px Roboto, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'bottom';
+            ctx.fillText('r', (vecStartX + vecEndX) / 2, vecY - 6);
+
             // ---- 彈力箭頭 F = -kx（arrowC 已於上方統一計算，隨 k、A 即時更新）----
             if (Math.abs(curF) > 0.05) {
                 const fLen = fRawPx * arrowC * Math.sign(curF);
                 const fY = springY;
                 const fStartX = objPx + (Math.sign(curF) < 0 ? -blockW / 2 : blockW / 2);
                 ctx.strokeStyle = '#9b59b6';
-                ctx.lineWidth = 3;
+                ctx.lineWidth = this.vectorLineWidth;
                 ctx.beginPath();
                 ctx.moveTo(fStartX, fY);
                 ctx.lineTo(fStartX + fLen, fY);
                 ctx.stroke();
-                const hl = 8, dirF = Math.sign(fLen);
+                const hl = 8 + this.vectorLineWidth * 0.8, dirF = Math.sign(fLen);
                 ctx.fillStyle = '#9b59b6';
                 ctx.beginPath();
                 ctx.moveTo(fStartX + fLen, fY);
@@ -710,12 +736,12 @@
                 const arrowLen = curV * arrowFactor * vC;
                 const arrowY = springY - blockH / 2 - 14;
                 ctx.strokeStyle = '#e74c3c';
-                ctx.lineWidth = 3;
+                ctx.lineWidth = this.vectorLineWidth;
                 ctx.beginPath();
                 ctx.moveTo(objPx, arrowY);
                 ctx.lineTo(objPx + arrowLen, arrowY);
                 ctx.stroke();
-                const hl = 8, dir = Math.sign(arrowLen);
+                const hl = 8 + this.vectorLineWidth * 0.8, dir = Math.sign(arrowLen);
                 ctx.fillStyle = '#e74c3c';
                 ctx.beginPath();
                 ctx.moveTo(objPx + arrowLen, arrowY);
@@ -733,14 +759,14 @@
                 const aLen = aRawPx * arrowC * Math.sign(curA);
                 const aY = springY + blockH / 2 + 18;
                 ctx.strokeStyle = '#f39c12';
-                ctx.lineWidth = 2;
+                ctx.lineWidth = this.vectorLineWidth;
                 ctx.setLineDash([4, 3]);
                 ctx.beginPath();
                 ctx.moveTo(objPx, aY);
                 ctx.lineTo(objPx + aLen, aY);
                 ctx.stroke();
                 ctx.setLineDash([]);
-                const hl = 6, dir = Math.sign(aLen);
+                const hl = 6 + this.vectorLineWidth * 0.8, dir = Math.sign(aLen);
                 ctx.fillStyle = '#f39c12';
                 ctx.beginPath();
                 ctx.moveTo(objPx + aLen, aY);
