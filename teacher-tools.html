@@ -789,7 +789,7 @@
           students[nextIndex].position = coordinateLabel;
           lockedEmptySeats.delete(selectedSeat);
         }
-        selectedStudentIndex = studentIndex === '' ? null : Number(studentIndex);
+        selectedStudentIndex = null;
         renderStudentTable();
         markExportDirty();
       }
@@ -923,6 +923,9 @@
       }
 
       function selectSeatButton(seat) {
+        if (selectedSeat !== null && selectedSeat !== seat) {
+          commitSelectedSeatAssignment();
+        }
         selectedSeat = seat;
         if (isEmptySeatLockMode) {
           const cols = Number(document.getElementById('seatCols').value) || 6;
@@ -955,6 +958,17 @@
           return;
         }
         renderSeatGrid();
+      }
+
+      function commitSelectedSeatAssignment() {
+        const select = document.getElementById('seatAssignmentSelect');
+        if (!selectedSeat || !select || select.disabled) return;
+        const cols = Number(document.getElementById('seatCols').value) || 6;
+        const coordinate = getSeatCoordinateFromIndex(selectedSeat, cols);
+        const currentIndex = getStudentIndexByCoordinateLabel(coordinate.label);
+        const nextValue = select.value;
+        const alreadyCommitted = nextValue === '' ? currentIndex === -1 : String(currentIndex) === nextValue;
+        if (!alreadyCommitted) assignSelectedSeat(nextValue);
       }
 
       function getStudentIndexByCoordinateLabel(label) {
