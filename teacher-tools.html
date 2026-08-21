@@ -20,6 +20,23 @@
         background-color: #f5f5f5;
         padding-top: 2cm;
       }
+      html.layout-mode .home-panel,
+      html.layout-mode .tool-container > .tool-card:nth-child(2) {
+        display: none;
+      }
+      html:not(.layout-mode) .tool-container,
+      html:not(.layout-mode) #importFile,
+      html:not(.layout-mode) #pdfBoard {
+        display: none;
+      }
+      .home-panel {
+        max-width: 900px;
+        margin: 0 auto 30px;
+        padding: 30px;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,.1);
+      }
       .back-btn {
         position: fixed;
         top: 20px;
@@ -217,20 +234,132 @@
         border: 1px solid #ccc;
         border-left: 0;
       }
+      .placard-input {
+        min-height: 170px;
+        resize: vertical;
+        font-family: Consolas, 'Courier New', monospace;
+      }
+      .placard-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        align-items: center;
+        margin-top: 15px;
+      }
+      .placard-count {
+        color: #666;
+        font-size: 13px;
+      }
+      .placard-preview {
+        display: none !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+        margin-top: 20px;
+        padding: 18px;
+        background: #f0f0f0;
+        border: 1px solid #ddd;
+      }
+      .placard-sheet {
+        aspect-ratio: 210 / 297;
+        padding: 8px;
+        background: #fff;
+        border: 1px solid #aaa;
+        display: flex;
+        flex-direction: column;
+        page-break-inside: avoid;
+      }
+      .placard-row {
+        flex: 1;
+        min-height: 0;
+        border-top: 2px solid #333;
+        border-bottom: 2px solid #333;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+      }
+      .placard-row.rotated {
+        transform: rotate(180deg);
+      }
+      .placard-row.blank {
+        border-bottom: 2px solid #333;
+      }
+      .placard-content {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 18px;
+        white-space: nowrap;
+      }
+      .placard-seat {
+        font-size: 140px;
+        font-weight: 700;
+        line-height: 1.1;
+        color: #555;
+      }
+      .placard-name {
+        max-width: 100%;
+        font-size: 150px;
+        font-weight: 700;
+        line-height: 1.25;
+        word-break: break-all;
+      }
+      .placard-empty {
+        grid-column: 1 / -1;
+        margin: 0;
+        color: #888;
+        text-align: center;
+      }
       @media (max-width: 767px) {
         .seat-grid {
           grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+        .placard-preview {
+          grid-template-columns: 1fr;
+          padding: 10px;
+        }
+        .placard-seat { font-size: 140px; }
+        .placard-name { font-size: 150px; }
+      }
+      @media print {
+        @page { size: A4; margin: 0; }
+        body { padding-top: 0; background: #fff; }
+        body > *:not(#placardPrintBoard) { display: none !important; }
+        #placardPrintBoard {
+          display: block !important;
+          padding: 0;
+          background: #fff;
+        }
+        #placardPrintBoard .placard-sheet {
+          width: 210mm;
+          height: 297mm;
+          padding: 8mm;
+          border: 0;
+          page-break-after: always;
         }
       }
     </style>
   </head>
   <body>
+    <script>
+      if (new URLSearchParams(window.location.search).has('layout')) {
+        document.documentElement.classList.add('layout-mode');
+      }
+    </script>
     <a href="index.html" class="back-btn">← 返回首頁</a>
     <div class="page-header">
       <div class="container">
         <h1 class="page-title">教師常用工具</h1>
-        <p class="page-subtitle">第一款工具：座位表設計與輸出</p>
+        <p class="page-subtitle">請選擇要使用的教師工具</p>
       </div>
+    </div>
+
+    <div class="home-panel">
+      <h3>教師常用工具</h3>
+      <p>選擇工具進入獨立頁面使用。</p>
+      <p><a class="btn btn-primary" href="seat-layout.html">開啟座位表設計</a></p>
+      <p><a class="btn btn-default" href="seat-placards.html">開啟座位立牌設計</a></p>
     </div>
 
     <div class="tool-container">
@@ -274,6 +403,8 @@
             <div class="sidebar-card" style="margin-bottom: 20px;">
               <h5>快速操作</h5>
               <button class="btn btn-custom btn-block" onclick="addStudentRow()">➕ 新增學生資料</button>
+              <button class="btn btn-custom btn-block" style="margin-top: 10px;" onclick="quickArrangeSeats1()">↙️ 快速排列 1：左下往上、向右</button>
+              <button class="btn btn-custom btn-block" style="margin-top: 10px;" onclick="quickArrangeSeats2()">↘️ 快速排列 2：右下往上、向左</button>
               <button class="btn btn-custom btn-block" style="margin-top: 10px;" onclick="randomizeSeats()">🎲 隨機安排座位</button>
               <button id="swapModeBtn" class="btn btn-default btn-block" style="margin-top: 10px;" onclick="toggleSwapMode()">🔄 開啟交換座位模式</button>
               <p id="swapModeHint" class="pdf-note" style="margin-top: 8px; margin-bottom: 0;">交換模式未啟用。</p>
@@ -297,6 +428,12 @@
 
           </div>
         </div>
+      </div>
+
+      <div class="tool-card">
+        <h3>第二款工具：座位立牌設計</h3>
+        <p>座位立牌設計已獨立存放，請前往專用頁面使用。</p>
+        <a class="btn btn-primary" href="seat-placards.html">開啟座位立牌設計</a>
       </div>
 
       <div class="tool-card">
@@ -339,9 +476,17 @@
       let isSwapMode = false;
       let firstSwapSeat = null;
       let isExportDirty = true;
+      let placards = [];
       let officerPreset = ['班長', '副班長', '學藝股長', '學藝幹事', '衛生股長', '衛生幹事', '環保股長', '設備股長', '輔導股長'];
 
       function init() {
+        if (document.documentElement.classList.contains('layout-mode')) {
+          document.title = '座位表設計 - 李宜閎';
+          document.querySelector('.back-btn').textContent = '← 返回教師工具';
+          document.querySelector('.back-btn').href = 'teacher-tools.html';
+          document.querySelector('.page-title').textContent = '座位表設計';
+          document.querySelector('.page-subtitle').textContent = '座位表設計與 PDF 輸出';
+        }
         updateSeatCount();
         renderSeatGrid();
         updateSwapModeUi();
@@ -722,6 +867,33 @@
         markExportDirty();
       }
 
+      function arrangeSeatsByVerticalDirection(columnStart, columnStep) {
+        const rows = Number(document.getElementById('seatRows').value) || 6;
+        const cols = Number(document.getElementById('seatCols').value) || 6;
+        const coordinates = [];
+        for (let col = columnStart; col >= 1 && col <= cols; col += columnStep) {
+          for (let row = rows; row >= 1; row--) {
+            coordinates.push(`${row},${col}`);
+          }
+        }
+        students.forEach(student => {
+          student.position = '';
+        });
+        getStudentsSortedBySeat().forEach((student, index) => {
+          student.position = coordinates[index] || '';
+        });
+        renderStudentTable();
+        markExportDirty();
+      }
+
+      function quickArrangeSeats1() {
+        arrangeSeatsByVerticalDirection(1, 1);
+      }
+
+      function quickArrangeSeats2() {
+        arrangeSeatsByVerticalDirection(Number(document.getElementById('seatCols').value) || 6, -1);
+      }
+
       function triggerImport() {
         document.getElementById('importFile').value = '';
         document.getElementById('importFile').click();
@@ -806,6 +978,117 @@
         markExportClean();
       }
 
+      function parsePlacardInput() {
+        const input = document.getElementById('placardInput');
+        if (!input) return [];
+        return input.value
+          .split(/\r?\n/)
+          .map(line => line.trim())
+          .filter(Boolean)
+          .map(line => {
+            const columns = line.split(/\t|,|，/).map(value => value.trim());
+            return { seat: columns[0] || '', name: columns.slice(1).join(' ') };
+          })
+          .filter((item, index) => {
+            const header = `${item.seat}${item.name}`.toLowerCase();
+            return index !== 0 || !/(座號|座位|seat|姓名|name)/.test(header);
+          });
+      }
+
+      function createPlacardRow(placard, rotated, blank) {
+        const element = document.createElement('div');
+        element.className = 'placard-row' + (rotated ? ' rotated' : '') + (blank ? ' blank' : '');
+        if (blank) return element;
+        const content = document.createElement('div');
+        content.className = 'placard-content';
+        const seat = document.createElement('div');
+        seat.className = 'placard-seat';
+        seat.textContent = placard.seat;
+        const name = document.createElement('div');
+        name.className = 'placard-name';
+        name.textContent = placard.name;
+        content.appendChild(seat);
+        content.appendChild(name);
+        element.appendChild(content);
+        return element;
+      }
+
+      function createPlacardSheet(placard) {
+        const sheet = document.createElement('div');
+        sheet.className = 'placard-sheet';
+        sheet.appendChild(createPlacardRow(placard, false, false));
+        sheet.appendChild(createPlacardRow(placard, true, false));
+        sheet.appendChild(createPlacardRow(placard, false, true));
+        return sheet;
+      }
+
+      function renderPlacards() {
+        const preview = document.getElementById('placardPreview');
+        const count = document.getElementById('placardCount');
+        const printBoard = document.getElementById('placardPrintBoard');
+        if (!preview || !count || !printBoard) return;
+        preview.innerHTML = '';
+        printBoard.innerHTML = '';
+        if (!placards.length) {
+          preview.innerHTML = '<p class="placard-empty">找不到有效資料，請確認每列包含座號與姓名。</p>';
+          count.textContent = '尚未生成立牌';
+          return;
+        }
+        placards.forEach(placard => {
+          preview.appendChild(createPlacardSheet(placard));
+          printBoard.appendChild(createPlacardSheet(placard));
+        });
+        count.textContent = `已生成 ${placards.length} 張 A4 立牌`;
+      }
+
+      function generatePlacards() {
+        placards = parsePlacardInput();
+        renderPlacards();
+      }
+
+      async function downloadPlacardsPdf() {
+        generatePlacards();
+        if (!placards.length) {
+          alert('請先貼上座號與姓名資料。');
+          return;
+        }
+        const JsPDFClass = window.jspdf?.jsPDF || window.jsPDF;
+        if (!JsPDFClass) {
+          alert('PDF 元件尚未載入，請確認網路連線後重試。');
+          return;
+        }
+        const pdf = new JsPDFClass('p', 'mm', 'a4');
+        const pages = [];
+        placards.forEach(placard => {
+          const page = document.createElement('div');
+          page.style.cssText = 'position:absolute;left:-9999px;top:0;width:210mm;height:297mm;background:#fff;';
+          page.appendChild(createPlacardSheet(placard));
+          document.body.appendChild(page);
+          pages.push(page);
+        });
+        try {
+          for (let index = 0; index < pages.length; index++) {
+            const canvas = await html2canvas(pages[index], { scale: 2, backgroundColor: '#ffffff' });
+            if (index > 0) pdf.addPage();
+            pdf.addImage(canvas.toDataURL('image/jpeg', 1), 'JPEG', 0, 0, 210, 297);
+          }
+          pdf.save(`座位立牌_${new Date().toISOString().slice(0, 10)}.pdf`);
+        } catch (error) {
+          alert('PDF 匯出失敗，請稍後再試。');
+        } finally {
+          pages.forEach(page => page.remove());
+        }
+      }
+
+      function printPlacards() {
+        generatePlacards();
+        if (!placards.length) {
+          alert('請先貼上座號與姓名資料。');
+          return;
+        }
+        window.print();
+      }
+
       function buildPdfPreview() {
         // Legacy preview container is unused; keep function for compatibility.
         return;
@@ -836,14 +1119,14 @@
         function getPdfListTypography(orientation, studentCount) {
           if (orientation === 'landscape') {
             if (studentCount <= 40) {
-              return { title: '15px', table: '12px', lineHeight: '1.25', cellPadding: '3px 5px' };
+              return { title: '22.5px', table: '18px', lineHeight: '1.25', cellPadding: '3px 5px' };
             }
-            return { title: '14px', table: '11px', lineHeight: '1.2', cellPadding: '3px 4px' };
+            return { title: '21px', table: '16.5px', lineHeight: '1.2', cellPadding: '3px 4px' };
           }
           if (studentCount <= 40) {
-            return { title: '14px', table: '11px', lineHeight: '1.2', cellPadding: '3px 4px' };
+            return { title: '21px', table: '16.5px', lineHeight: '1.2', cellPadding: '3px 4px' };
           }
-          return { title: '13px', table: '10px', lineHeight: '1.15', cellPadding: '2px 4px' };
+          return { title: '19.5px', table: '15px', lineHeight: '1.15', cellPadding: '2px 4px' };
         }
 
         function createNameListElement(orientation) {
@@ -856,7 +1139,7 @@
 
           const sortedStudents = getStudentsSortedBySeat();
           const typo = getPdfListTypography(orientation, sortedStudents.length);
-          const nameFontSize = `${parseInt(typo.table, 10) + 4}px`;
+          const nameFontSize = `${parseFloat(typo.table) + 6}px`;
 
           const title = document.createElement('div');
           title.textContent = '名條（座號 / 姓名）';
@@ -992,12 +1275,12 @@
 
         function getPdfSeatTypography(orientation, seatCount) {
           if (seatCount <= 30) {
-            return { name: '16px', role: '13px', assistant: '13px', cellPadding: '8px', minHeight: '74px', gap: '8px' };
+            return { name: '24px', role: '19.5px', assistant: '19.5px', cellPadding: '8px', minHeight: '74px', gap: '8px' };
           }
           if (seatCount <= 40) {
-            return { name: orientation === 'landscape' ? '16px' : '14px', role: orientation === 'landscape' ? '13px' : '12px', assistant: orientation === 'landscape' ? '13px' : '12px', cellPadding: orientation === 'landscape' ? '8px' : '7px', minHeight: orientation === 'landscape' ? '70px' : '66px', gap: '7px' };
+            return { name: orientation === 'landscape' ? '24px' : '21px', role: orientation === 'landscape' ? '19.5px' : '18px', assistant: orientation === 'landscape' ? '19.5px' : '18px', cellPadding: orientation === 'landscape' ? '8px' : '7px', minHeight: orientation === 'landscape' ? '70px' : '66px', gap: '7px' };
           }
-          return { name: '13px', role: '11px', assistant: '11px', cellPadding: '6px', minHeight: '56px', gap: '6px' };
+          return { name: '19.5px', role: '16.5px', assistant: '16.5px', cellPadding: '6px', minHeight: '56px', gap: '6px' };
         }
 
         function createSeatPanelElement(podiumPosition, flipGrid, orientation) {
@@ -1018,7 +1301,7 @@
             bar.style.background = 'linear-gradient(180deg, #f8f8f8 0%, #eaeaea 100%)';
             bar.style.borderRadius = '1pt';
             bar.style.color = '#555';
-            bar.style.fontSize = '14px';
+            bar.style.fontSize = '21px';
             bar.style.fontWeight = '600';
             bar.style.display = 'flex';
             bar.style.alignItems = 'center';
@@ -1138,7 +1421,7 @@
 
         const title = document.createElement('div');
         title.textContent = pageTitle;
-        title.style.fontSize = '22px';
+        title.style.fontSize = '33px';
         title.style.fontWeight = '700';
         title.style.marginBottom = '6px';
         if (orientation === 'landscape') {
@@ -1166,13 +1449,15 @@
           alert('請先新增或匯入學生資料。');
           return;
         }
-        const topLayout = createPdfSeatLayout('top', false);
-        const bottomLayout = createPdfSeatLayout('bottom', true);
+        const selectedPodiumPosition = document.getElementById('podiumPosition')?.value || 'bottom';
+        const oppositePodiumPosition = selectedPodiumPosition === 'top' ? 'bottom' : 'top';
+        const firstLayout = createPdfSeatLayout(selectedPodiumPosition, false);
+        const secondLayout = createPdfSeatLayout(oppositePodiumPosition, true);
         const pdfTitle = getPdfTitle();
 
         Promise.all([
-          renderLayoutToCanvas(topLayout, pdfTitle),
-          renderLayoutToCanvas(bottomLayout, pdfTitle)
+          renderLayoutToCanvas(firstLayout, pdfTitle),
+          renderLayoutToCanvas(secondLayout, pdfTitle)
         ])
           .then(([topCanvas, bottomCanvas]) => {
             const orientation = document.getElementById('pdfOrientation')?.value || 'portrait';

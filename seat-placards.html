@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+  <head>
+    <meta charset="utf-8">
+    <title>座位立牌設計 - 李宜閎</title>
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <meta content="座位立牌設計工具" name="description">
+    <link href="images/fish.png" rel="shortcut icon">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/style.css" rel="stylesheet">
+    <link href="css/responsive.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,500,700" rel="stylesheet" type="text/css">
+    <style>
+      body {
+        background: #f5f5f5;
+        padding-top: 2cm;
+        font-family: '微軟正黑體', 'Microsoft JhengHei', sans-serif;
+      }
+      .back-btn {
+        position: fixed;
+        top: 20px;
+        left: 20px;
+        padding: 10px 20px;
+        background: #818181;
+        color: #fff;
+        border-radius: 5px;
+        z-index: 1000;
+      }
+      .back-btn:hover {
+        background: #2f2f2f;
+        color: #fff;
+      }
+      .page-header {
+        text-align: center;
+        padding-bottom: 30px;
+        background: #fff;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 4px rgba(0,0,0,.1);
+      }
+      .page-title {
+        margin-bottom: 10px;
+        font-family: 'Roboto Slab', serif;
+        font-size: 36px;
+        font-weight: 700;
+      }
+      .page-subtitle {
+        color: #666;
+        font-size: 18px;
+      }
+      .tool-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      .tool-card {
+        padding: 30px;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,.1);
+      }
+      .placard-input {
+        min-height: 220px;
+        resize: vertical;
+        font-family: Consolas, 'Courier New', monospace;
+      }
+      .placard-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 10px;
+        margin-top: 15px;
+      }
+      .placard-count {
+        color: #666;
+        font-size: 13px;
+      }
+      .placard-sheet {
+        width: 210mm;
+        height: 297mm;
+        padding: 8mm;
+        box-sizing: border-box;
+        background: #fff;
+        display: flex;
+        flex-direction: column;
+      }
+      .placard-row {
+        flex: 1;
+        min-height: 0;
+        border-top: 2px solid #333;
+        border-bottom: 2px solid #333;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+      }
+      .placard-row.rotated {
+        transform: rotate(180deg);
+      }
+      .placard-content {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 18px;
+        white-space: nowrap;
+      }
+      .placard-seat {
+        color: #555;
+        font-size: 140px;
+        font-weight: 700;
+        line-height: 1.1;
+      }
+      .placard-name {
+        max-width: 100%;
+        font-size: 150px;
+        font-weight: 700;
+        line-height: 1.25;
+        word-break: break-all;
+      }
+      @media (max-width: 767px) {
+        .tool-container { padding: 10px; }
+        .tool-card { padding: 20px; }
+        .page-title { font-size: 30px; }
+      }
+      @media print {
+        @page { size: A4; margin: 0; }
+      }
+    </style>
+  </head>
+  <body>
+    <a href="teacher-tools.html" class="back-btn">← 返回教師工具</a>
+    <div class="page-header">
+      <div class="container">
+        <h1 class="page-title">座位立牌設計</h1>
+        <p class="page-subtitle">每位學生一張 A4，三段式座位立牌</p>
+      </div>
+    </div>
+
+    <div class="tool-container">
+      <div class="tool-card">
+        <h3>從 Excel 貼上座號與姓名</h3>
+        <p>複製 Excel 的兩欄資料後貼上，第一欄為座號，第二欄為姓名。</p>
+        <textarea id="placardInput" class="form-control placard-input" oninput="updateCount()" placeholder="座號&#9;姓名&#10;1&#9;王小明&#10;2&#9;李小華"></textarea>
+        <div class="placard-toolbar">
+          <button class="btn btn-primary" onclick="downloadPlacardsPdf()">📄 下載 PDF</button>
+          <span id="placardCount" class="placard-count">尚未輸入資料</span>
+        </div>
+      </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script>
+      function parsePlacards() {
+        const input = document.getElementById('placardInput');
+        return input.value
+          .split(/\r?\n/)
+          .map(line => line.trim())
+          .filter(Boolean)
+          .map(line => {
+            const columns = line.split(/\t|,|，/).map(value => value.trim());
+            return { seat: columns[0] || '', name: columns.slice(1).join(' ') };
+          })
+          .filter((item, index) => {
+            const text = `${item.seat}${item.name}`.toLowerCase();
+            return index !== 0 || !/(座號|座位|seat|姓名|name)/.test(text);
+          });
+      }
+
+      function updateCount() {
+        const count = parsePlacards().length;
+        document.getElementById('placardCount').textContent = count ? `已輸入 ${count} 筆資料` : '尚未輸入資料';
+      }
+
+      function createPlacardRow(placard, rotated, blank) {
+        const row = document.createElement('div');
+        row.className = 'placard-row' + (rotated ? ' rotated' : '');
+        if (blank) return row;
+        const content = document.createElement('div');
+        content.className = 'placard-content';
+        const seat = document.createElement('div');
+        seat.className = 'placard-seat';
+        seat.textContent = placard.seat;
+        const name = document.createElement('div');
+        name.className = 'placard-name';
+        name.textContent = placard.name;
+        content.appendChild(seat);
+        content.appendChild(name);
+        row.appendChild(content);
+        return row;
+      }
+
+      function createPlacardSheet(placard) {
+        const sheet = document.createElement('div');
+        sheet.className = 'placard-sheet';
+        sheet.appendChild(createPlacardRow(placard, true, false));
+        sheet.appendChild(createPlacardRow(placard, false, false));
+        sheet.appendChild(createPlacardRow(placard, false, true));
+        return sheet;
+      }
+
+      async function downloadPlacardsPdf() {
+        const placards = parsePlacards();
+        if (!placards.length) {
+          alert('請先貼上座號與姓名資料。');
+          return;
+        }
+        const JsPDFClass = window.jspdf?.jsPDF || window.jsPDF;
+        if (!JsPDFClass) {
+          alert('PDF 元件尚未載入，請確認網路連線後重試。');
+          return;
+        }
+        const pdf = new JsPDFClass('p', 'mm', 'a4');
+        const pages = [];
+        placards.forEach(placard => {
+          const page = document.createElement('div');
+          page.style.cssText = 'position:absolute;left:-9999px;top:0;width:210mm;height:297mm;background:#fff;';
+          page.appendChild(createPlacardSheet(placard));
+          document.body.appendChild(page);
+          pages.push(page);
+        });
+        try {
+          for (let index = 0; index < pages.length; index++) {
+            const canvas = await html2canvas(pages[index], { scale: 2, backgroundColor: '#fff' });
+            if (index > 0) pdf.addPage();
+            pdf.addImage(canvas.toDataURL('image/jpeg', 1), 'JPEG', 0, 0, 210, 297);
+          }
+          pdf.save(`座位立牌_${new Date().toISOString().slice(0, 10)}.pdf`);
+        } catch (error) {
+          alert('PDF 匯出失敗，請稍後再試。');
+        } finally {
+          pages.forEach(page => page.remove());
+        }
+      }
+
+      updateCount();
+    </script>
+  </body>
+</html>

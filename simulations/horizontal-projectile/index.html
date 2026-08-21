@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8">
+    <title>二維運動：水平拋射 - 物理模擬</title>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <link href="../../images/fish.png" rel="shortcut icon">
+
+    <link href="../../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../../css/normalize.css" rel="stylesheet">
+    <link href="../../css/style.css" rel="stylesheet">
+    <link href="../../css/responsive.css" rel="stylesheet">
+    <link href="../../css/simulations.css" rel="stylesheet">
+
+    <link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700' rel='stylesheet' type='text/css'>
+    <link href='https://fonts.googleapis.com/css?family=Roboto:400,300,500,700' rel='stylesheet' type='text/css'>
+
+    <style>
+        #simCanvas {
+            width: 100%;
+            border-radius: 6px;
+            background: #0d1117;
+        }
+        .legend-pill {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 999px;
+            margin-right: 6px;
+            margin-bottom: 6px;
+            color: #fff;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .legend-projectile { background: #3498db; }
+        .legend-xref { background: #e67e22; }
+        .legend-yref { background: #2ecc71; }
+        .legend-v { background: #e74c3c; }
+        .legend-a { background: #f39c12; }
+    </style>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+</head>
+<body>
+    <div class="header">
+      <div class="for-sticky">
+        <div class="col-md-2 col-xs-6 logo">
+          <a href="../../index.html"><img alt="logo" class="logo-nav" src="../../images/fish.png"></a>
+        </div>
+      </div>
+      <div class="menu-wrap">
+        <nav class="menu">
+          <div class="menu-list">
+            <a href="../../index.html#home"><span>首頁</span></a>
+            <a href="../../index.html#about"><span>關於我</span></a>
+            <a href="../../index.html#experience"><span>教學經驗</span></a>
+            <a href="../../teaching-gallery.html"><span>查看教學剪影</span></a>
+            <a href="../../physics-simulations.html" class="active"><span>高中物理內容</span></a>
+            <a href="../../index.html#skills"><span>專業技能</span></a>
+            <a href="../../index.html#achievements"><span>成果展示</span></a>
+            <a href="../../index.html#philosophy"><span>教育理念</span></a>
+            <a href="../../index.html#contact"><span>聯絡方式</span></a>
+          </div>
+        </nav>
+        <button class="close-button" id="close-button">Close Menu</button>
+      </div>
+      <button class="menu-button" id="open-button">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+
+    <div class="top-nav">
+        <div class="container">
+            <a href="../../index.html" class="nav-brand">
+                <img src="../../images/fish.png" alt="Logo">
+                <h2>物鯉魚教學模擬</h2>
+            </a>
+            <a href="../../physics-simulations.html" class="btn-back">← 返回列表</a>
+        </div>
+    </div>
+
+    <div class="main-container">
+        <div class="page-header">
+            <h1>🛰️ 二維運動：水平拋射</h1>
+            <p class="subtitle">探討水平初速、拋射高度、重力加速度對拋物線軌跡的影響 | 選修物理 I - 力學</p>
+        </div>
+
+        <div class="info-box physics-principle">
+            <h4>📚 物理原理與公式</h4>
+            <p>
+                • <strong>水平拋射：</strong>水平方向等速，鉛直方向等加速度（自由落體）<br>
+                • <strong>水平位移：</strong>$x(t) = v_{0x}t$，其中 $v_{0x}$ 為水平初速<br>
+                • <strong>鉛直位移（以上方為正）：</strong>$y(t) = h - \dfrac{1}{2}gt^2$<br>
+                • <strong>速度分量：</strong>$v_x = v_{0x}$、$v_y = -gt$，故 $|\vec{v}| = \sqrt{v_x^2 + v_y^2}$<br>
+                • <strong>加速度向量：</strong>$\vec{a} = (0, -g)$，方向恆向下
+            </p>
+        </div>
+
+        <div class="sim-layout">
+            <div class="sim-layout-left">
+                <div class="controls">
+                    <div class="control-section">
+                        <h3>⚙️ 參數控制</h3>
+
+                        <div class="control-row">
+                            <label>水平初速 v₀x (m/s)</label>
+                            <input type="range" id="v0Slider" min="2" max="30" step="0.5" value="12">
+                            <span class="value-display" id="v0Value">12.0</span>
+                        </div>
+
+                        <div class="control-row">
+                            <label>拋射高度 h (m)</label>
+                            <input type="range" id="hSlider" min="2" max="35" step="0.5" value="18">
+                            <span class="value-display" id="hValue">18.0</span>
+                        </div>
+
+                        <div class="control-row">
+                            <label>重力加速度 g (m/s²)</label>
+                            <input type="range" id="gSlider" min="1.0" max="20.0" step="0.1" value="9.8">
+                            <span class="value-display" id="gValue">9.8</span>
+                        </div>
+
+                        <div class="control-row">
+                            <label>播放速度</label>
+                            <input type="range" id="speedSlider" min="0.25" max="2.5" step="0.25" value="1.0">
+                            <span class="value-display" id="speedValue">1.00x</span>
+                        </div>
+
+                        <div class="control-row">
+                            <label>顯示點狀軌跡</label>
+                            <input type="checkbox" id="trailToggle" checked>
+                        </div>
+
+                        <div class="wave-info wave-info-row-3" style="margin-top: 10px;">
+                            <div class="wave-info-item">
+                                <div class="wave-info-label">時間 t</div>
+                                <div class="wave-info-value" id="tInfo">0.00 s</div>
+                            </div>
+                            <div class="wave-info-item">
+                                <div class="wave-info-label">水平位移 x</div>
+                                <div class="wave-info-value" id="xInfo">0.00 m</div>
+                            </div>
+                            <div class="wave-info-item">
+                                <div class="wave-info-label">高度 y</div>
+                                <div class="wave-info-value" id="yInfo">18.00 m</div>
+                            </div>
+                            <div class="wave-info-item">
+                                <div class="wave-info-label">vx</div>
+                                <div class="wave-info-value" id="vxInfo">12.00</div>
+                            </div>
+                            <div class="wave-info-item">
+                                <div class="wave-info-label">vy</div>
+                                <div class="wave-info-value" id="vyInfo">0.00</div>
+                            </div>
+                            <div class="wave-info-item">
+                                <div class="wave-info-label">|v|</div>
+                                <div class="wave-info-value" id="vInfo">12.00</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="button-group">
+                    <button class="btn btn-start" id="startBtn">▶ 開始模擬</button>
+                    <button class="btn btn-pause" id="pauseBtn">⏸ 暫停</button>
+                    <button class="btn btn-reset" id="resetBtn">🔄 重置</button>
+                </div>
+            </div>
+
+            <div class="sim-layout-right">
+                <div class="simulation-section">
+                    <div style="margin-bottom: 10px;">
+                        <span class="legend-pill legend-projectile">水平拋射質點</span>
+                        <span class="legend-pill legend-xref">水平軸等速對照</span>
+                        <span class="legend-pill legend-yref">鉛直軸自由落體對照</span>
+                        <span class="legend-pill legend-v">速度向量 v</span>
+                        <span class="legend-pill legend-a">加速度向量 a</span>
+                    </div>
+                    <div class="canvas-wrapper">
+                        <canvas id="simCanvas" width="940" height="620"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="info-box teaching-note">
+            <h4>💡 教學使用指引</h4>
+            <p>
+                • <strong>觀察重點 1：</strong>調整 $v_{0x}$，比較拋射距離變化，並確認水平對照點與主質點擁有相同 $x(t)$<br>
+                • <strong>觀察重點 2：</strong>調整 $h$ 或 $g$，比較落地時間與拋物線形狀（高處或小 g 會飛更久）<br>
+                • <strong>觀察重點 3：</strong>主質點在任一時刻的高度，應與鉛直軸自由落體對照點完全一致<br>
+                • <strong>向量概念：</strong>速度向量斜率逐漸向下，加速度向量恆定向下且大小固定為 $g$
+            </p>
+        </div>
+    </div>
+
+    <script>
+    class HorizontalProjectileSim {
+        constructor() {
+            this.canvas = document.getElementById('simCanvas');
+            this.ctx = this.canvas.getContext('2d');
+
+            this.dpr = window.devicePixelRatio || 1;
+            this.scaleCanvas(this.canvas, this.ctx);
+
+            this.v0x = 12.0;
+            this.h = 18.0;
+            this.g = 9.8;
+            this.playbackSpeed = 1.0;
+            this.showTrail = true;
+
+            this.isRunning = false;
+            this.time = 0;
+            this.lastTimestamp = null;
+            this.animationId = null;
+
+            this.trailPoints = [];
+            this.trailInterval = 0.04;
+            this.lastTrailTime = -1;
+
+            this.init();
+        }
+
+        scaleCanvas(canvas, ctx) {
+            const cssW = canvas.width;
+            const cssH = canvas.height;
+            canvas.width = Math.round(cssW * this.dpr);
+            canvas.height = Math.round(cssH * this.dpr);
+            canvas.style.width = cssW + 'px';
+            canvas.style.height = cssH + 'px';
+            ctx.scale(this.dpr, this.dpr);
+        }
+
+        get flightTime() {
+            return Math.sqrt((2 * this.h) / this.g);
+        }
+
+        get maxRange() {
+            return this.v0x * this.flightTime;
+        }
+
+        getState(t) {
+            const clampedT = Math.max(0, Math.min(t, this.flightTime));
+            const x = this.v0x * clampedT;
+            const y = Math.max(this.h - 0.5 * this.g * clampedT * clampedT, 0);
+            const vx = this.v0x;
+            const vy = -this.g * clampedT;
+            const v = Math.sqrt(vx * vx + vy * vy);
+            return { t: clampedT, x, y, vx, vy, v, ax: 0, ay: -this.g };
+        }
+
+        init() {
+            this.bindControls();
+            this.updateDataDisplay(this.getState(0));
+            this.draw();
+        }
+
+        bindControls() {
+            const bindResetSlider = (sliderId, valueId, prop, formatter) => {
+                const slider = document.getElementById(sliderId);
+                slider.addEventListener('input', (e) => {
+                    this[prop] = parseFloat(e.target.value);
+                    document.getElementById(valueId).textContent = formatter(this[prop]);
+                    this.reset();
+                });
+            };
+
+            bindResetSlider('v0Slider', 'v0Value', 'v0x', (v) => v.toFixed(1));
+            bindResetSlider('hSlider', 'hValue', 'h', (v) => v.toFixed(1));
+            bindResetSlider('gSlider', 'gValue', 'g', (v) => v.toFixed(1));
+
+            document.getElementById('speedSlider').addEventListener('input', (e) => {
+                this.playbackSpeed = parseFloat(e.target.value);
+                document.getElementById('speedValue').textContent = this.playbackSpeed.toFixed(2) + 'x';
+            });
+
+            document.getElementById('trailToggle').addEventListener('change', (e) => {
+                this.showTrail = e.target.checked;
+                if (!this.isRunning) {
+                    this.draw();
+                }
+            });
+
+            document.getElementById('startBtn').addEventListener('click', () => this.start());
+            document.getElementById('pauseBtn').addEventListener('click', () => this.pause());
+            document.getElementById('resetBtn').addEventListener('click', () => this.reset());
+        }
+
+        start() {
+            if (this.isRunning) return;
+            this.isRunning = true;
+            this.lastTimestamp = null;
+            this.animationId = requestAnimationFrame((ts) => this.animate(ts));
+        }
+
+        pause() {
+            this.isRunning = false;
+            if (this.animationId) {
+                cancelAnimationFrame(this.animationId);
+                this.animationId = null;
+            }
+        }
+
+        reset() {
+            this.pause();
+            this.time = 0;
+            this.trailPoints = [];
+            this.lastTrailTime = -1;
+            const state = this.getState(0);
+            this.updateDataDisplay(state);
+            this.draw();
+        }
+
+        animate(timestamp) {
+            if (!this.isRunning) return;
+            if (this.lastTimestamp === null) {
+                this.lastTimestamp = timestamp;
+            }
+
+            const dt = (timestamp - this.lastTimestamp) / 1000;
+            this.lastTimestamp = timestamp;
+            this.time += dt * this.playbackSpeed;
+
+            const state = this.getState(this.time);
+
+            if (this.time - this.lastTrailTime >= this.trailInterval) {
+                this.trailPoints.push({ x: state.x, y: state.y });
+                this.lastTrailTime = this.time;
+            }
+
+            this.updateDataDisplay(state);
+            this.draw();
+
+            if (state.t >= this.flightTime) {
+                this.pause();
+                return;
+            }
+
+            this.animationId = requestAnimationFrame((ts) => this.animate(ts));
+        }
+
+        updateDataDisplay(state) {
+            document.getElementById('tInfo').textContent = state.t.toFixed(2) + ' s';
+            document.getElementById('xInfo').textContent = state.x.toFixed(2) + ' m';
+            document.getElementById('yInfo').textContent = state.y.toFixed(2) + ' m';
+            document.getElementById('vxInfo').textContent = state.vx.toFixed(2);
+            document.getElementById('vyInfo').textContent = state.vy.toFixed(2);
+            document.getElementById('vInfo').textContent = state.v.toFixed(2);
+        }
+
+        toCanvasX(x, area) {
+            return area.left + (x / area.worldXMax) * area.plotW;
+        }
+
+        toCanvasY(y, area) {
+            return area.bottom - (y / area.worldYMax) * area.plotH;
+        }
+
+        drawArrow(fromX, fromY, toX, toY, color, width, headSize, dashed) {
+            const ctx = this.ctx;
+            ctx.save();
+            ctx.strokeStyle = color;
+            ctx.fillStyle = color;
+            ctx.lineWidth = width;
+            if (dashed) ctx.setLineDash([5, 4]);
+
+            ctx.beginPath();
+            ctx.moveTo(fromX, fromY);
+            ctx.lineTo(toX, toY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            const angle = Math.atan2(toY - fromY, toX - fromX);
+            ctx.beginPath();
+            ctx.moveTo(toX, toY);
+            ctx.lineTo(toX - headSize * Math.cos(angle - 0.45), toY - headSize * Math.sin(angle - 0.45));
+            ctx.lineTo(toX - headSize * Math.cos(angle + 0.45), toY - headSize * Math.sin(angle + 0.45));
+            ctx.closePath();
+            ctx.fill();
+            ctx.restore();
+        }
+
+        draw() {
+            const ctx = this.ctx;
+            const W = this.canvas.width / this.dpr;
+            const H = this.canvas.height / this.dpr;
+            const state = this.getState(this.time);
+
+            const area = {
+                left: 90,
+                right: W - 45,
+                top: 50,
+                bottom: H - 85
+            };
+            area.plotW = area.right - area.left;
+            area.plotH = area.bottom - area.top;
+            area.worldXMax = Math.max(this.maxRange * 1.15, 12);
+            area.worldYMax = Math.max(this.h * 1.2, 8);
+
+            ctx.clearRect(0, 0, W, H);
+            ctx.fillStyle = '#0d1117';
+            ctx.fillRect(0, 0, W, H);
+
+            const gx = this.toCanvasX(0, area);
+            const gy = this.toCanvasY(0, area);
+
+            // 背景網格
+            ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+            ctx.lineWidth = 1;
+            for (let i = 0; i <= 10; i++) {
+                const x = area.left + (area.plotW * i) / 10;
+                ctx.beginPath();
+                ctx.moveTo(x, area.top);
+                ctx.lineTo(x, area.bottom);
+                ctx.stroke();
+            }
+            for (let j = 0; j <= 8; j++) {
+                const y = area.top + (area.plotH * j) / 8;
+                ctx.beginPath();
+                ctx.moveTo(area.left, y);
+                ctx.lineTo(area.right, y);
+                ctx.stroke();
+            }
+
+            // 座標軸
+            ctx.strokeStyle = '#c8d0da';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(area.left, gy);
+            ctx.lineTo(area.right + 10, gy);
+            ctx.moveTo(gx, area.bottom + 8);
+            ctx.lineTo(gx, area.top - 10);
+            ctx.stroke();
+
+            this.drawArrow(area.right, gy, area.right + 10, gy, '#c8d0da', 2, 7, false);
+            this.drawArrow(gx, area.top, gx, area.top - 10, '#c8d0da', 2, 7, false);
+
+            ctx.fillStyle = '#d4dde8';
+            ctx.font = '13px Roboto, sans-serif';
+            ctx.textAlign = 'right';
+            ctx.fillText('x (m)', area.right + 25, gy + 4);
+            ctx.textAlign = 'left';
+            ctx.fillText('y (m)', gx + 7, area.top - 14);
+
+            // 刻度
+            ctx.fillStyle = '#9aa7b8';
+            ctx.font = '11px Roboto, sans-serif';
+            ctx.textAlign = 'center';
+            for (let i = 0; i <= 5; i++) {
+                const wx = (area.worldXMax * i) / 5;
+                const px = this.toCanvasX(wx, area);
+                ctx.beginPath();
+                ctx.moveTo(px, gy - 4);
+                ctx.lineTo(px, gy + 4);
+                ctx.strokeStyle = '#9aa7b8';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+                ctx.fillText(wx.toFixed(1), px, gy + 18);
+            }
+            ctx.textAlign = 'right';
+            for (let j = 0; j <= 5; j++) {
+                const wy = (area.worldYMax * j) / 5;
+                const py = this.toCanvasY(wy, area);
+                ctx.beginPath();
+                ctx.moveTo(gx - 4, py);
+                ctx.lineTo(gx + 4, py);
+                ctx.stroke();
+                ctx.fillText(wy.toFixed(1), gx - 8, py + 4);
+            }
+
+            // 軌跡點（主拋體）
+            if (this.showTrail && this.trailPoints.length > 0) {
+                const maxTrail = 220;
+                const start = Math.max(0, this.trailPoints.length - maxTrail);
+                const count = this.trailPoints.length - start;
+                for (let i = start; i < this.trailPoints.length; i++) {
+                    const p = this.trailPoints[i];
+                    const age = count > 1 ? (i - start) / (count - 1) : 1;
+                    const alpha = 0.12 + age * 0.75;
+                    const px = this.toCanvasX(p.x, area);
+                    const py = this.toCanvasY(p.y, area);
+                    ctx.fillStyle = 'rgba(52, 152, 219, ' + alpha.toFixed(3) + ')';
+                    ctx.beginPath();
+                    ctx.arc(px, py, 2.1, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+
+            const projX = this.toCanvasX(state.x, area);
+            const projY = this.toCanvasY(state.y, area);
+
+            // 對照點：水平等速（放在水平軸）
+            const xRefX = projX;
+            const xRefY = gy;
+            ctx.strokeStyle = 'rgba(230, 126, 34, 0.5)';
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(projX, projY);
+            ctx.lineTo(xRefX, xRefY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.fillStyle = '#e67e22';
+            ctx.beginPath();
+            ctx.arc(xRefX, xRefY, 7, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#fff';
+            ctx.font = 'bold 11px Roboto, sans-serif';
+            ctx.textAlign = 'center';
+            ctx.fillText('x', xRefX, xRefY + 3.5);
+
+            // 對照點：鉛直自由落體（放在鉛直軸）
+            const yRefX = gx;
+            const yRefY = projY;
+            ctx.strokeStyle = 'rgba(46, 204, 113, 0.5)';
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(projX, projY);
+            ctx.lineTo(yRefX, yRefY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            ctx.fillStyle = '#2ecc71';
+            ctx.beginPath();
+            ctx.arc(yRefX, yRefY, 7, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#fff';
+            ctx.fillText('y', yRefX, yRefY + 3.5);
+
+            // 主拋體
+            const glow = ctx.createRadialGradient(projX - 3, projY - 3, 2, projX, projY, 18);
+            glow.addColorStop(0, '#8fd6ff');
+            glow.addColorStop(1, '#2980b9');
+            ctx.fillStyle = glow;
+            ctx.beginPath();
+            ctx.arc(projX, projY, 10, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#1f5f8a';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            // 速度向量與加速度向量
+            const velocityScale = 5.5;
+            const accelScale = 3.0;
+            const vEndX = projX + state.vx * velocityScale;
+            const vEndY = projY - state.vy * velocityScale;
+            const aEndX = projX + state.ax * accelScale;
+            const aEndY = projY - state.ay * accelScale;
+
+            this.drawArrow(projX, projY, vEndX, vEndY, '#e74c3c', 3, 10, false);
+            this.drawArrow(projX, projY, aEndX, aEndY, '#f39c12', 2.5, 9, true);
+
+            ctx.font = 'bold 12px Roboto, sans-serif';
+            ctx.fillStyle = '#e74c3c';
+            ctx.textAlign = 'left';
+            ctx.fillText('v', vEndX + 6, vEndY - 4);
+            ctx.fillStyle = '#f39c12';
+            ctx.fillText('a', aEndX + 6, aEndY - 4);
+
+            // 發射點標記
+            const launchY = this.toCanvasY(this.h, area);
+            ctx.fillStyle = '#aeb8c5';
+            ctx.font = '12px Roboto, sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillText('發射點', gx + 8, launchY - 8);
+            ctx.beginPath();
+            ctx.arc(gx, launchY, 3.2, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 狀態資訊
+            const boxX = 12;
+            const boxY = H - 74;
+            const boxW = W - 24;
+            const boxH = 58;
+            ctx.fillStyle = 'rgba(10, 14, 20, 0.9)';
+            ctx.fillRect(boxX, boxY, boxW, boxH);
+            ctx.strokeStyle = '#2f3d4d';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(boxX, boxY, boxW, boxH);
+
+            const items = [
+                't = ' + state.t.toFixed(2) + ' s',
+                'x = ' + state.x.toFixed(2) + ' m',
+                'y = ' + state.y.toFixed(2) + ' m',
+                'vx = ' + state.vx.toFixed(2) + ' m/s',
+                'vy = ' + state.vy.toFixed(2) + ' m/s',
+                '|v| = ' + state.v.toFixed(2) + ' m/s',
+                'a = (0, -' + this.g.toFixed(1) + ') m/s²',
+                '落地時間 ≈ ' + this.flightTime.toFixed(2) + ' s'
+            ];
+            ctx.font = '12px Roboto, sans-serif';
+            ctx.textAlign = 'left';
+            items.forEach((txt, i) => {
+                const col = i < 4 ? 0 : 1;
+                const row = i % 4;
+                const tx = boxX + 14 + col * (boxW * 0.49);
+                const ty = boxY + 16 + row * 12.5;
+                ctx.fillStyle = '#d7e1ec';
+                ctx.fillText(txt, tx, ty);
+            });
+
+            // 標題
+            ctx.font = 'bold 16px Roboto Slab, serif';
+            ctx.fillStyle = '#ecf0f1';
+            ctx.textAlign = 'left';
+            ctx.fillText('水平拋射 + 軸向對照運動', 16, 28);
+        }
+    }
+
+    const sim = new HorizontalProjectileSim();
+
+    (function() {
+        var openBtn = document.getElementById('open-button');
+        var closeBtn = document.getElementById('close-button');
+        var menuWrap = document.querySelector('.menu-wrap');
+        if (openBtn && closeBtn && menuWrap) {
+            openBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                menuWrap.classList.add('active');
+            });
+            closeBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                menuWrap.classList.remove('active');
+            });
+        }
+    })();
+    </script>
+</body>
+</html>
