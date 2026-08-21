@@ -20,6 +20,8 @@
     
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.15.349/pdf.min.js"></script>
     
     <style>
       body {
@@ -176,6 +178,130 @@
         background-color: #f9f9f9;
         border-radius: 5px;
         border-left: 4px solid #818181;
+      }
+
+      .pdf-merge-list {
+        display: grid;
+        gap: 12px;
+        margin-top: 10px;
+      }
+
+      .pdf-merge-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background: #fff;
+        cursor: grab;
+        transition: box-shadow 0.2s ease, border-color 0.2s ease;
+      }
+
+      .pdf-merge-item:hover {
+        border-color: #818181;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      }
+
+      .pdf-merge-item.dragging {
+        opacity: 0.5;
+      }
+
+      .pdf-merge-item.selected {
+        border-color: #818181;
+        box-shadow: 0 0 0 2px rgba(129, 129, 129, 0.15);
+      }
+
+      .pdf-merge-preview {
+        width: 280px;
+        height: 200px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        overflow: hidden;
+        background: #f5f5f5;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .pdf-merge-preview canvas {
+        width: 100%;
+        height: 100%;
+        display: block;
+        background: white;
+      }
+
+      .pdf-merge-preview-fallback {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #777;
+        font-size: 13px;
+        background: #f1f1f1;
+      }
+
+      .pdf-merge-meta {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .pdf-merge-order {
+        font-size: 12px;
+        font-weight: 700;
+        color: #818181;
+        margin-bottom: 4px;
+      }
+
+      .pdf-merge-name {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 4px;
+        word-break: break-word;
+      }
+
+      .pdf-merge-size {
+        font-size: 12px;
+        color: #666;
+      }
+
+      .delete-pdf-btn {
+        padding: 8px 12px;
+        border: 1px solid #d0d0d0;
+        border-radius: 5px;
+        background: #f4f4f4;
+        color: #333;
+        cursor: pointer;
+      }
+
+      .delete-pdf-btn:hover {
+        background: #e9e9e9;
+      }
+
+      .pdf-item-actions {
+        display: flex;
+        flex-direction: row;
+        flex-wrap: wrap;
+        justify-content: flex-end;
+        align-items: center;
+        gap: 8px;
+        margin-left: auto;
+      }
+
+      .pdf-item-actions button {
+        padding: 8px 12px;
+        border: 1px solid #d0d0d0;
+        border-radius: 5px;
+        background: #f4f4f4;
+        color: #333;
+        cursor: pointer;
+        white-space: nowrap;
+      }
+
+      .pdf-item-actions button:hover {
+        background: #eaeaea;
       }
       
       .result-box h4 {
@@ -451,6 +577,7 @@
           <button class="tab-btn" onclick="switchTab('regression')">回歸直線</button>
           <button class="tab-btn" onclick="switchTab('propagation')">不確定度傳遞</button>
           <button class="tab-btn" onclick="switchTab('equation')">二元一次方程式</button>
+          <button class="tab-btn" onclick="switchTab('pdfMerge')">PDF 合併</button>
         </div>
         
         <!-- 不確定度計算與統計 -->
@@ -781,6 +908,33 @@
             <div id="equationOutput"></div>
           </div>
         </div>
+
+        <!-- PDF 合併 -->
+        <div id="pdfMerge" class="tool-content">
+          <h3>PDF 合併工具</h3>
+          <p style="margin-bottom: 20px; color: #666;">選擇多個 PDF 檔案，拖曳調整合併順序後再輸出一份新 PDF。</p>
+          
+          <div class="input-group">
+            <label>選擇 PDF 檔案（可多選）：</label>
+            <input type="file" id="pdfMergeFiles" accept=".pdf,application/pdf" multiple>
+            <p class="hint-text">可直接拖曳清單中的檔案卡片，調整合併順序。</p>
+          </div>
+
+          <div id="pdfMergeFileList" class="result-box" style="display: none;">
+            <h4>已選擇檔案（可拖曳排序）</h4>
+            <div id="pdfMergeList" class="pdf-merge-list"></div>
+            <div style="margin-top: 12px;">
+              <button type="button" onclick="document.getElementById('pdfMergeAddFiles').click()">＋ 增加</button>
+              <input id="pdfMergeAddFiles" type="file" accept=".pdf,application/pdf" multiple style="display: none;">
+            </div>
+          </div>
+
+          <button class="calculate-btn" id="mergePdfBtn" onclick="mergePdfFiles()">合併 PDF</button>
+          <div id="pdfMergeResult" class="result-box" style="display: none;">
+            <h4>合併結果</h4>
+            <div id="pdfMergeOutput"></div>
+          </div>
+        </div>
         
       </div>
       
@@ -799,6 +953,211 @@
     </div>
     
     <script>
+      const { PDFDocument } = PDFLib;
+      let selectedPdfFiles = [];
+      let draggedPdfIndex = null;
+
+      function renderPdfMergeList() {
+        const fileListContainer = document.getElementById('pdfMergeFileList');
+        const fileList = document.getElementById('pdfMergeList');
+
+        if (!selectedPdfFiles.length) {
+          fileListContainer.style.display = 'none';
+          fileList.innerHTML = '';
+          return;
+        }
+
+        fileList.innerHTML = selectedPdfFiles.map((file, index) => `
+          <div class="pdf-merge-item" draggable="true" data-index="${index}" aria-label="${file.name}">
+            <div class="pdf-merge-preview">
+              <canvas data-pdf-preview="${index}"></canvas>
+            </div>
+            <div class="pdf-merge-meta">
+              <div class="pdf-merge-order">#${index + 1}</div>
+              <div class="pdf-merge-name">${file.name}</div>
+              <div class="pdf-merge-size">${(file.size / 1024 / 1024).toFixed(2)} MB</div>
+            </div>
+            <div class="pdf-item-actions">
+              <button type="button" data-move="up" data-index="${index}">⬆ 上移</button>
+              <button type="button" data-move="down" data-index="${index}">⬇ 下移</button>
+              <button type="button" class="delete-pdf-btn" data-delete-index="${index}">移除</button>
+            </div>
+          </div>
+        `).join('');
+
+        fileListContainer.style.display = 'block';
+
+        selectedPdfFiles.forEach((file, index) => {
+          const canvas = fileList.querySelector(`canvas[data-pdf-preview="${index}"]`);
+          if (!canvas) return;
+          renderPdfThumbnail(file, canvas);
+        });
+
+        fileList.querySelectorAll('.pdf-merge-item').forEach(item => {
+          item.addEventListener('click', () => {
+            const selectedIndex = Number(item.dataset.index);
+            fileList.querySelectorAll('.pdf-merge-item').forEach(node => node.classList.remove('selected'));
+            item.classList.add('selected');
+            item.setAttribute('data-selected-index', String(selectedIndex));
+          });
+
+          item.addEventListener('dragstart', (event) => {
+            draggedPdfIndex = Number(item.dataset.index);
+            item.classList.add('dragging');
+            event.dataTransfer.effectAllowed = 'move';
+          });
+
+          item.addEventListener('dragover', (event) => {
+            event.preventDefault();
+            event.dataTransfer.dropEffect = 'move';
+          });
+
+          item.addEventListener('drop', (event) => {
+            event.preventDefault();
+            const targetIndex = Number(item.dataset.index);
+            if (draggedPdfIndex === null || targetIndex === draggedPdfIndex) return;
+
+            const [moved] = selectedPdfFiles.splice(draggedPdfIndex, 1);
+            selectedPdfFiles.splice(targetIndex, 0, moved);
+            renderPdfMergeList();
+            draggedPdfIndex = null;
+          });
+
+          item.addEventListener('dragend', () => {
+            draggedPdfIndex = null;
+            item.classList.remove('dragging');
+          });
+        });
+
+        const firstItem = fileList.querySelector('.pdf-merge-item');
+        if (firstItem) {
+          firstItem.classList.add('selected');
+          firstItem.setAttribute('data-selected-index', '0');
+        }
+
+        fileList.querySelectorAll('.delete-pdf-btn').forEach(button => {
+          button.addEventListener('click', () => {
+            const deleteIndex = Number(button.dataset.deleteIndex);
+            selectedPdfFiles.splice(deleteIndex, 1);
+            renderPdfMergeList();
+          });
+        });
+
+        fileList.querySelectorAll('[data-move]').forEach(button => {
+          button.addEventListener('click', () => {
+            const moveIndex = Number(button.dataset.index);
+            const direction = button.dataset.move === 'up' ? -1 : 1;
+            const targetIndex = moveIndex + direction;
+            if (targetIndex < 0 || targetIndex >= selectedPdfFiles.length) return;
+
+            const [moved] = selectedPdfFiles.splice(moveIndex, 1);
+            selectedPdfFiles.splice(targetIndex, 0, moved);
+            renderPdfMergeList();
+          });
+        });
+      }
+
+      async function renderPdfThumbnail(file, canvas) {
+        if (!window.pdfjsLib) {
+          canvas.parentElement.innerHTML = '<div class="pdf-merge-preview-fallback">PDF 預覽</div>';
+          return;
+        }
+
+        try {
+          if (window.pdfjsLib && window.pdfjsLib.GlobalWorkerOptions) {
+            window.pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.15.349/pdf.worker.min.js';
+          }
+
+          const buffer = await file.arrayBuffer();
+          const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+          const page = await pdf.getPage(1);
+          const viewport = page.getViewport({ scale: 0.9 });
+          const context = canvas.getContext('2d');
+
+          canvas.width = viewport.width;
+          canvas.height = viewport.height;
+
+          await page.render({ canvasContext: context, viewport }).promise;
+        } catch (error) {
+          canvas.parentElement.innerHTML = '<div class="pdf-merge-preview-fallback">PDF 預覽</div>';
+        }
+      }
+
+      function getSelectedPdfMergeFiles() {
+        const input = document.getElementById('pdfMergeFiles');
+        return Array.from(input?.files || []);
+      }
+
+      function addPdfFiles(newFiles) {
+        const validFiles = newFiles.filter(file => file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf'));
+        if (!validFiles.length) {
+          alert('請選擇有效的 PDF 檔案。');
+          return;
+        }
+
+        selectedPdfFiles = [...selectedPdfFiles, ...validFiles];
+        renderPdfMergeList();
+      }
+
+      document.getElementById('pdfMergeFiles')?.addEventListener('change', function () {
+        const files = getSelectedPdfMergeFiles();
+        const validFiles = files.filter(file => file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf'));
+        selectedPdfFiles = validFiles;
+        renderPdfMergeList();
+      });
+
+      document.getElementById('pdfMergeAddFiles')?.addEventListener('change', function () {
+        addPdfFiles(Array.from(this.files || []));
+        this.value = '';
+      });
+
+      async function mergePdfFiles() {
+        const resultBox = document.getElementById('pdfMergeResult');
+        const output = document.getElementById('pdfMergeOutput');
+
+        if (!selectedPdfFiles.length) {
+          alert('請先選擇至少一個 PDF 檔案。');
+          return;
+        }
+
+        try {
+          const mergedPdf = await PDFDocument.create();
+
+          for (const file of selectedPdfFiles) {
+            const fileBytes = await file.arrayBuffer();
+            const sourcePdf = await PDFDocument.load(fileBytes);
+            const pageCount = sourcePdf.getPageCount();
+            if (pageCount === 0) {
+              throw new Error(`檔案 ${file.name} 不包含任何頁面。`);
+            }
+
+            const copiedPages = await mergedPdf.copyPages(sourcePdf, sourcePdf.getPageIndices());
+            copiedPages.forEach(page => mergedPdf.addPage(page));
+          }
+
+          const mergedBytes = await mergedPdf.save();
+          const blob = new Blob([mergedBytes], { type: 'application/pdf' });
+          const link = document.createElement('a');
+          const fileName = selectedPdfFiles.length > 1 ? 'merged-pdf.pdf' : `${selectedPdfFiles[0].name.replace(/\.pdf$/i, '')}-merged.pdf`;
+
+          link.href = URL.createObjectURL(blob);
+          link.download = fileName;
+          document.body.appendChild(link);
+          link.click();
+          link.remove();
+
+          output.innerHTML = `
+            <div class="result-item"><strong>成功合併 ${selectedPdfFiles.length} 個 PDF 檔案。</strong></div>
+            <div class="result-item">檔案名稱：${fileName}</div>
+            <div class="result-item">已依目前排序完成合併，並自動下載。</div>
+          `;
+          resultBox.style.display = 'block';
+        } catch (error) {
+          output.innerHTML = `<div class="result-item" style="color: #c0392b;"><strong>合併失敗：</strong> ${error.message || '請確認檔案格式正確。'}</div>`;
+          resultBox.style.display = 'block';
+        }
+      }
+
       // 切換功能分頁
       function switchTab(tabName) {
         // 隱藏所有內容
@@ -810,10 +1169,18 @@
         buttons.forEach(btn => btn.classList.remove('active'));
         
         // 顯示選中的內容
-        document.getElementById(tabName).classList.add('active');
+        const target = document.getElementById(tabName);
+        if (target) {
+          target.classList.add('active');
+        }
         
         // 設置按鈕為 active
-        event.target.classList.add('active');
+        const targetBtn = Array.from(buttons).find(btn => btn.textContent.trim() === {
+          pdfMerge: 'PDF 合併'
+        }[tabName] || btn.getAttribute('onclick')?.includes(`'${tabName}'`));
+        if (targetBtn) {
+          targetBtn.classList.add('active');
+        }
       }
       
       // 不確定度計算與統計

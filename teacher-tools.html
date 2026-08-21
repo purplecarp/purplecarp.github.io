@@ -29,6 +29,9 @@
       html:not(.layout-mode) #pdfBoard {
         display: none;
       }
+      html:not(.layout-mode) .usage-guide {
+        display: none;
+      }
       .home-panel {
         max-width: 900px;
         margin: 0 auto 30px;
@@ -36,6 +39,26 @@
         background: #fff;
         border-radius: 8px;
         box-shadow: 0 2px 8px rgba(0,0,0,.1);
+      }
+      .usage-guide {
+        max-width: 1160px;
+        margin: 0 auto 10px;
+        padding: 18px 24px;
+        background: #fff;
+        border-left: 4px solid #818181;
+        border-radius: 4px;
+        box-shadow: 0 2px 8px rgba(0,0,0,.08);
+        color: #444;
+      }
+      .usage-guide h3 {
+        margin: 0 0 10px;
+        color: #333;
+        font-size: 20px;
+      }
+      .usage-guide ol {
+        margin: 0 0 12px 20px;
+        padding: 0;
+        line-height: 1.8;
       }
       .back-btn {
         position: fixed;
@@ -154,6 +177,11 @@
       .seat-cell.swap-pending {
         border-color: #f0ad4e;
         background: #fff6e8;
+      }
+      .seat-cell.locked-empty {
+        border-color: #999;
+        background: #eeeeee;
+        color: #777;
       }
       .seat-number {
         font-size: 14px;
@@ -362,6 +390,17 @@
       <p><a class="btn btn-default" href="seat-placards.html">開啟座位立牌設計</a></p>
     </div>
 
+    <div class="usage-guide">
+      <h3>使用指引</h3>
+      <ol>
+        <li><strong>建議先匯出空白的學生資料</strong>，填寫完成後再匯入系統。</li>
+        <li>設定座位排數、座位列數與講台位置。</li>
+        <li>匯入學生資料後，可輸入座號自動帶入位置，或點擊座位後從右側下拉選單指派學生。</li>
+        <li>確認座位配置後，選擇直式或橫式並匯出 PDF。</li>
+      </ol>
+      <button class="btn btn-default" type="button" onclick="exportStudents()">📥 先匯出空白學生資料</button>
+    </div>
+
     <div class="tool-container">
       <div class="tool-card">
         <div class="row">
@@ -398,21 +437,30 @@
                   <option value="top">講台在上</option>
                 </select>
               </div>
+              <div id="seatAssignmentPanel" class="form-group" style="display: none;">
+                <label id="selectedSeatLabel">指派座位</label>
+                <select id="seatAssignmentSelect" class="form-control" onchange="assignSelectedSeat(this.value)">
+                  <option value="">空位</option>
+                </select>
+                <p class="pdf-note" style="margin: 6px 0 0;">點擊座位後，可從這裡指派學生。</p>
+              </div>
             </div>
 
             <div class="sidebar-card" style="margin-bottom: 20px;">
               <h5>快速操作</h5>
-              <button class="btn btn-custom btn-block" onclick="addStudentRow()">➕ 新增學生資料</button>
               <button class="btn btn-custom btn-block" style="margin-top: 10px;" onclick="quickArrangeSeats1()">↙️ 快速排列 1：左下往上、向右</button>
               <button class="btn btn-custom btn-block" style="margin-top: 10px;" onclick="quickArrangeSeats2()">↘️ 快速排列 2：右下往上、向左</button>
               <button class="btn btn-custom btn-block" style="margin-top: 10px;" onclick="randomizeSeats()">🎲 隨機安排座位</button>
+              <button class="btn btn-default btn-block" style="margin-top: 10px;" onclick="clearAllSeatAssignments()">🧹 清空所有座位</button>
+              <button id="emptySeatLockBtn" class="btn btn-default btn-block" style="margin-top: 10px;" onclick="toggleEmptySeatLockMode()">🔒 鎖定座位為空</button>
+              <p id="emptySeatLockHint" class="pdf-note" style="margin-top: 8px; margin-bottom: 0;">鎖定模式未啟用。</p>
               <button id="swapModeBtn" class="btn btn-default btn-block" style="margin-top: 10px;" onclick="toggleSwapMode()">🔄 開啟交換座位模式</button>
               <p id="swapModeHint" class="pdf-note" style="margin-top: 8px; margin-bottom: 0;">交換模式未啟用。</p>
               <button class="btn btn-default btn-block" style="margin-top: 10px;" onclick="triggerImport()">📤 匯入學生資料</button>
               <button class="btn btn-default btn-block" style="margin-top: 10px;" onclick="exportStudents()">📥 匯出學生資料</button>
               <select id="pdfOrientation" class="form-control pdf-layout-select" onchange="markExportDirty()">
-                <option value="portrait" selected>PDF 版面：直式</option>
-                <option value="landscape">PDF 版面：橫式</option>
+                <option value="portrait">PDF 版面：直式</option>
+                <option value="landscape" selected>PDF 版面：橫式</option>
               </select>
               <button class="btn btn-primary btn-block" style="margin-top: 10px;" onclick="exportPdf()">🖨️ 匯出 PDF A4</button>
               <p class="pdf-note" style="margin-top: 10px;">輸出兩頁：講台在上、講台在下（180 度旋轉），且包含名條清單。</p>
@@ -475,9 +523,11 @@
       let selectedSeat = null;
       let isSwapMode = false;
       let firstSwapSeat = null;
+      let isEmptySeatLockMode = false;
+      const lockedEmptySeats = new Set();
       let isExportDirty = true;
       let placards = [];
-      let officerPreset = ['班長', '副班長', '學藝股長', '學藝幹事', '衛生股長', '衛生幹事', '環保股長', '設備股長', '輔導股長'];
+      let officerPreset = ['班長', '副班長', '學藝股長', '學藝幹事', '環保股長', '衛生股長', '衛生幹事', '風紀股長', '資安股長', '資安幹事', '總務股長', '康樂股長', '輔導股長', '圖書股長', '設備股長'];
 
       function init() {
         if (document.documentElement.classList.contains('layout-mode')) {
@@ -490,6 +540,7 @@
         updateSeatCount();
         renderSeatGrid();
         updateSwapModeUi();
+        updateEmptySeatLockUi();
         updateExportDirtyUi();
         syncOfficerPresetEditor();
         addStudentRow();
@@ -584,6 +635,28 @@
         hint.textContent = message || '交換模式未啟用。';
       }
 
+      function updateEmptySeatLockUi(message) {
+        const btn = document.getElementById('emptySeatLockBtn');
+        const hint = document.getElementById('emptySeatLockHint');
+        if (!btn || !hint) return;
+        if (isEmptySeatLockMode) {
+          btn.textContent = '🔒 關閉鎖定空位模式';
+          btn.className = 'btn btn-warning btn-block';
+          hint.textContent = message || '請點擊空位切換鎖定狀態，快速排列時會跳過鎖定空位。';
+          return;
+        }
+        btn.textContent = '🔒 鎖定座位為空';
+        btn.className = 'btn btn-default btn-block';
+        hint.textContent = message || `目前已鎖定 ${lockedEmptySeats.size} 個空位。`;
+      }
+
+      function toggleEmptySeatLockMode() {
+        isEmptySeatLockMode = !isEmptySeatLockMode;
+        selectedSeat = null;
+        updateEmptySeatLockUi();
+        renderSeatGrid();
+      }
+
       function toggleSwapMode() {
         isSwapMode = !isSwapMode;
         firstSwapSeat = null;
@@ -651,19 +724,74 @@
           const assigned = getStudentBySeatCoordinate(coordinate.row, coordinate.col);
           const seatCell = document.createElement('div');
           seatCell.className = 'seat-cell' + (selectedSeat === i ? ' selected' : '');
+          if (!assigned && lockedEmptySeats.has(i)) seatCell.className += ' locked-empty';
           if (isSwapMode && firstSwapSeat === i) {
             seatCell.className += ' swap-pending';
           }
           seatCell.dataset.seat = i;
           const officerText = assigned ? getOfficerDisplay(assigned) : '';
           seatCell.innerHTML = `
-            <div class="seat-name">${assigned ? `${assigned.seat} ${assigned.name}` : '<span class="seat-empty">空位</span>'}</div>
+            <div class="seat-name">${assigned ? `${assigned.seat} ${assigned.name}` : (lockedEmptySeats.has(i) ? '<span class="seat-empty">鎖定空位</span>' : '<span class="seat-empty">空位</span>')}</div>
             <div class="seat-role">${officerText || '&nbsp;'}</div>
             <div class="seat-assistant">${assigned && assigned.assistant ? assigned.assistant : '&nbsp;'}</div>
           `;
           seatCell.addEventListener('click', () => selectSeatButton(i));
           seatGrid.appendChild(seatCell);
         }
+        updateSeatAssignmentUi();
+      }
+
+      function updateSeatAssignmentUi() {
+        const panel = document.getElementById('seatAssignmentPanel');
+        const label = document.getElementById('selectedSeatLabel');
+        const select = document.getElementById('seatAssignmentSelect');
+        if (!panel || !label || !select) return;
+        if (!selectedSeat) {
+          panel.style.display = 'none';
+          return;
+        }
+
+        const cols = Number(document.getElementById('seatCols').value) || 6;
+        const coordinate = getSeatCoordinateFromIndex(selectedSeat, cols);
+        const assigned = getStudentBySeatCoordinate(coordinate.row, coordinate.col);
+        label.textContent = `座位 ${coordinate.label}：指派給誰`;
+        select.innerHTML = '<option value="">空位</option>';
+        students.forEach((student, index) => {
+          const option = document.createElement('option');
+          option.value = String(index);
+          option.textContent = `${student.seat || '-'} ${student.name || '未命名學生'}`;
+          if (assigned === student) option.selected = true;
+          select.appendChild(option);
+        });
+        select.disabled = lockedEmptySeats.has(selectedSeat) && !assigned;
+        panel.style.display = 'block';
+      }
+
+      function assignSelectedSeat(studentIndex) {
+        if (!selectedSeat) return;
+        const rows = Number(document.getElementById('seatRows').value) || 6;
+        const cols = Number(document.getElementById('seatCols').value) || 6;
+        const coordinate = getSeatCoordinateFromIndex(selectedSeat, cols);
+        const coordinateLabel = coordinate.label;
+        const occupantIndex = getStudentIndexByCoordinateLabel(coordinateLabel);
+        if (lockedEmptySeats.has(selectedSeat) && occupantIndex === -1 && studentIndex !== '') {
+          updateSeatAssignmentUi();
+          return;
+        }
+
+        if (occupantIndex !== -1) students[occupantIndex].position = '';
+        if (studentIndex !== '') {
+          const nextIndex = Number(studentIndex);
+          if (!students[nextIndex]) return;
+          students.forEach((student, index) => {
+            if (index !== nextIndex && student.position === coordinateLabel) student.position = '';
+          });
+          students[nextIndex].position = coordinateLabel;
+          lockedEmptySeats.delete(selectedSeat);
+        }
+        selectedStudentIndex = studentIndex === '' ? null : Number(studentIndex);
+        renderStudentTable();
+        markExportDirty();
       }
 
       function addStudentRow(record = { class: '', seat: '', position: '', studentId: '', name: '', officer: '', assistant: '' }) {
@@ -714,7 +842,7 @@
           if (selectedStudentIndex === index) tr.classList.add('selected-row');
           tr.innerHTML = `
             <td><input class="form-control input-sm" value="${student.class || ''}" onchange="updateStudentField(${index}, 'class', this.value)"></td>
-            <td><input class="form-control input-sm" value="${student.seat || ''}" onchange="updateStudentField(${index}, 'seat', this.value)"></td>
+            <td><input class="form-control input-sm" value="${student.seat || ''}" placeholder="輸入後自動帶入位置" onchange="updateStudentField(${index}, 'seat', this.value)"></td>
             <td><input class="form-control input-sm" value="${student.studentId || ''}" onchange="updateStudentField(${index}, 'studentId', this.value)"></td>
             <td><input class="form-control input-sm" value="${student.name || ''}" onchange="updateStudentField(${index}, 'name', this.value)"></td>
             <td>${getOfficerDisplay(student) || '-'}</td>
@@ -735,15 +863,32 @@
 
       function updateStudentField(index, field, value) {
         if (!students[index]) return;
+        let addedBlankRow = false;
         if (field === 'seat') {
           students[index][field] = value ? String(value).trim() : '';
+          const seatNumber = Number(students[index][field]);
+          const rows = Number(document.getElementById('seatRows').value) || 6;
+          const cols = Number(document.getElementById('seatCols').value) || 6;
+          if (students[index][field] && Number.isInteger(seatNumber) && seatNumber >= 1 && seatNumber <= rows * cols) {
+            students[index].position = getSeatCoordinateFromIndex(seatNumber, cols).label;
+          } else if (!students[index][field]) {
+            students[index].position = '';
+          }
+          if (students[index][field] && index === students.length - 1) {
+            students.push(ensureStudentShape());
+            addedBlankRow = true;
+          }
         } else if (field === 'position') {
           const parsed = parsePositionCoordinate(value);
           students[index][field] = parsed ? parsed.label : (value ? String(value).trim() : '');
         } else {
           students[index][field] = value;
         }
-        renderSeatGrid();
+        if (addedBlankRow) {
+          renderStudentTable();
+        } else {
+          renderSeatGrid();
+        }
         markExportDirty();
       }
 
@@ -779,6 +924,24 @@
 
       function selectSeatButton(seat) {
         selectedSeat = seat;
+        if (isEmptySeatLockMode) {
+          const cols = Number(document.getElementById('seatCols').value) || 6;
+          const coordinate = getSeatCoordinateFromIndex(seat, cols);
+          if (getStudentBySeatCoordinate(coordinate.row, coordinate.col)) {
+            updateEmptySeatLockUi('已有學生的座位不能鎖定為空。');
+            renderSeatGrid();
+            return;
+          }
+          if (lockedEmptySeats.has(seat)) {
+            lockedEmptySeats.delete(seat);
+          } else {
+            lockedEmptySeats.add(seat);
+          }
+          updateEmptySeatLockUi();
+          renderSeatGrid();
+          markExportDirty();
+          return;
+        }
         if (isSwapMode) {
           handleSwapSeatClick(seat);
           return;
@@ -867,13 +1030,28 @@
         markExportDirty();
       }
 
+      function clearAllSeatAssignments() {
+        if (!confirm('確定要清空所有座位嗎？學生資料不會被刪除。')) return;
+        students.forEach(student => {
+          student.position = '';
+        });
+        lockedEmptySeats.clear();
+        isEmptySeatLockMode = false;
+        selectedSeat = null;
+        selectedStudentIndex = null;
+        updateEmptySeatLockUi('已清空所有座位。');
+        renderStudentTable();
+        markExportDirty();
+      }
+
       function arrangeSeatsByVerticalDirection(columnStart, columnStep) {
         const rows = Number(document.getElementById('seatRows').value) || 6;
         const cols = Number(document.getElementById('seatCols').value) || 6;
         const coordinates = [];
         for (let col = columnStart; col >= 1 && col <= cols; col += columnStep) {
           for (let row = rows; row >= 1; row--) {
-            coordinates.push(`${row},${col}`);
+            const seatIndex = (row - 1) * cols + col;
+            if (!lockedEmptySeats.has(seatIndex)) coordinates.push(`${row},${col}`);
           }
         }
         students.forEach(student => {
@@ -1139,11 +1317,11 @@
 
           const sortedStudents = getStudentsSortedBySeat();
           const typo = getPdfListTypography(orientation, sortedStudents.length);
-          const nameFontSize = `${parseFloat(typo.table) + 6}px`;
+          const nameFontSize = getPdfFontSize(`${parseFloat(typo.table) + 6}px`);
 
           const title = document.createElement('div');
           title.textContent = '名條（座號 / 姓名）';
-          title.style.fontSize = typo.title;
+          title.style.fontSize = getPdfFontSize(typo.title);
           title.style.fontWeight = '700';
           title.style.marginBottom = '5px';
           listWrap.appendChild(title);
@@ -1159,7 +1337,7 @@
             table.style.width = '100%';
             table.style.borderCollapse = 'collapse';
             table.style.tableLayout = 'auto';
-            table.style.fontSize = typo.table;
+            table.style.fontSize = getPdfFontSize(typo.table);
             table.style.lineHeight = typo.lineHeight;
 
             const headerRow = document.createElement('tr');
@@ -1221,7 +1399,7 @@
           table.style.width = '100%';
           table.style.borderCollapse = 'collapse';
           table.style.tableLayout = 'auto';
-          table.style.fontSize = typo.table;
+          table.style.fontSize = getPdfFontSize(typo.table);
           table.style.lineHeight = typo.lineHeight;
 
           const headerRow = document.createElement('tr');
@@ -1283,6 +1461,10 @@
           return { name: '19.5px', role: '16.5px', assistant: '16.5px', cellPadding: '6px', minHeight: '56px', gap: '6px' };
         }
 
+        function getPdfFontSize(value) {
+          return `${Math.max(8, parseFloat(value) - 4)}px`;
+        }
+
         function createSeatPanelElement(podiumPosition, flipGrid, orientation) {
           const rows = Number(document.getElementById('seatRows').value) || 6;
           const cols = Number(document.getElementById('seatCols').value) || 6;
@@ -1301,7 +1483,7 @@
             bar.style.background = 'linear-gradient(180deg, #f8f8f8 0%, #eaeaea 100%)';
             bar.style.borderRadius = '1pt';
             bar.style.color = '#555';
-            bar.style.fontSize = '21px';
+            bar.style.fontSize = getPdfFontSize('21px');
             bar.style.fontWeight = '600';
             bar.style.display = 'flex';
             bar.style.alignItems = 'center';
@@ -1333,24 +1515,31 @@
             cell.style.padding = typo.cellPadding;
             cell.style.borderRadius = '1pt';
             cell.style.background = '#fff';
+            cell.style.overflow = 'visible';
 
             const nameLabel = document.createElement('div');
             nameLabel.style.marginTop = '3px';
-            nameLabel.style.fontSize = typo.name;
+            nameLabel.style.fontSize = getPdfFontSize(typo.name);
             nameLabel.style.color = '#000';
             nameLabel.style.fontWeight = '600';
+            nameLabel.style.lineHeight = '1.1';
+            nameLabel.style.wordBreak = 'break-word';
             nameLabel.textContent = assigned ? `${assigned.seat} ${assigned.name}` : '空位';
 
             const officerDetail = document.createElement('div');
-            officerDetail.style.fontSize = typo.role;
+            officerDetail.style.fontSize = getPdfFontSize(typo.role);
             officerDetail.style.color = '#444';
             officerDetail.style.marginTop = '3px';
+            officerDetail.style.lineHeight = '1.1';
+            officerDetail.style.wordBreak = 'break-word';
             officerDetail.textContent = assigned ? getOfficerDisplay(assigned) : '';
 
             const assistantDetail = document.createElement('div');
-            assistantDetail.style.fontSize = typo.assistant;
+            assistantDetail.style.fontSize = getPdfFontSize(typo.assistant);
             assistantDetail.style.color = '#444';
             assistantDetail.style.marginTop = '2px';
+            assistantDetail.style.lineHeight = '1.1';
+            assistantDetail.style.wordBreak = 'break-word';
             assistantDetail.textContent = assigned && assigned.assistant ? assigned.assistant : '';
 
             cell.appendChild(nameLabel);
@@ -1421,7 +1610,7 @@
 
         const title = document.createElement('div');
         title.textContent = pageTitle;
-        title.style.fontSize = '33px';
+        title.style.fontSize = getPdfFontSize('33px');
         title.style.fontWeight = '700';
         title.style.marginBottom = '6px';
         if (orientation === 'landscape') {
@@ -1435,8 +1624,21 @@
         wrapper.appendChild(title);
         layoutElement.style.flex = '1';
         layoutElement.style.minHeight = '0';
+        layoutElement.style.transform = 'none';
+        layoutElement.style.transformOrigin = 'top center';
         wrapper.appendChild(layoutElement);
         document.body.appendChild(wrapper);
+
+        const availableWidth = wrapper.clientWidth;
+        const availableHeight = wrapper.clientHeight - title.offsetHeight;
+        const contentWidth = Math.max(layoutElement.scrollWidth, layoutElement.clientWidth);
+        const contentHeight = Math.max(layoutElement.scrollHeight, layoutElement.clientHeight);
+        const fitScale = Math.min(
+          0.96,
+          availableWidth / contentWidth,
+          availableHeight / contentHeight
+        );
+        layoutElement.style.transform = `scale(${fitScale})`;
 
         return html2canvas(wrapper, { scale: 2, useCORS: true, backgroundColor: '#ffffff' })
           .finally(() => {
