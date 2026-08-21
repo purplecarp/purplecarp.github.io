@@ -393,7 +393,7 @@
     <div class="usage-guide">
       <h3>使用指引</h3>
       <ol>
-        <li><strong>建議先匯出空白的學生資料</strong>，填寫完成後再匯入系統。</li>
+        <li><strong>建議先匯出空白的學生資料</strong>，再從「機構書籤 &gt; 師生帳號查詢 &gt; 學生帳號查詢」複製學生資料到空白學生資料 Excel，完成後再匯入系統。</li>
         <li>設定座位排數、座位列數與講台位置。</li>
         <li>匯入學生資料後，可輸入座號自動帶入位置，或點擊座位後從右側下拉選單指派學生。</li>
         <li>確認座位配置後，選擇直式或橫式並匯出 PDF。</li>
@@ -1008,6 +1008,9 @@
       }
 
       function removeStudentRow(index) {
+        const student = students[index];
+        const studentLabel = student?.name || student?.seat || '這筆學生資料';
+        if (!confirm(`確定要刪除「${studentLabel}」的學生資料嗎？`)) return;
         if (selectedStudentIndex === index) selectedStudentIndex = null;
         students.splice(index, 1);
         renderStudentTable();
