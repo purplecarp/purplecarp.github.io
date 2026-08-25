@@ -332,7 +332,7 @@
         <li><strong>建議先匯出空白的學生資料</strong>，再從「機構書籤 &gt; 師生帳號查詢 &gt; 學生帳號查詢」複製學生資料到空白學生資料 Excel，完成後再匯入系統。</li>
         <li>設定座位排數、座位列數與講台位置。</li>
         <li>匯入學生資料後，可輸入座號自動帶入位置，或點擊座位後從右側下拉選單指派學生。</li>
-        <li>確認座位配置後，選擇直式或橫式並匯出 PDF。</li>
+        <li>輸入導師姓名、選擇是否顯示當日日期，再選擇 PDF 版面樣式並匯出；每次匯出前都可以修改檔名。</li>
       </ol>
       <button class="btn btn-default" type="button" onclick="exportStudents()">📥 先匯出空白學生資料</button>
     </div>
@@ -373,6 +373,16 @@
                   <option value="top">講台在上</option>
                 </select>
               </div>
+              <div class="form-group">
+                <label for="homeroomTeacher">導師姓名</label>
+                <input id="homeroomTeacher" type="text" class="form-control" placeholder="例如：李宜閎" oninput="markExportDirty()">
+              </div>
+              <div class="checkbox" style="margin-bottom: 16px;">
+                <label>
+                  <input id="pdfIncludeDate" type="checkbox" checked onchange="markExportDirty()">
+                  PDF 同步輸出當日日期（民國年）
+                </label>
+              </div>
               <div id="seatAssignmentPanel" class="form-group" style="display: none;">
                 <label id="selectedSeatLabel">指派座位</label>
                 <select id="seatAssignmentSelect" class="form-control" onchange="assignSelectedSeat(this.value)">
@@ -394,12 +404,14 @@
               <p id="swapModeHint" class="pdf-note" style="margin-top: 8px; margin-bottom: 0;">交換模式未啟用。</p>
               <button class="btn btn-default btn-block" style="margin-top: 10px;" onclick="triggerImport()">📤 匯入學生資料</button>
               <button class="btn btn-default btn-block" style="margin-top: 10px;" onclick="exportStudents()">📥 匯出學生資料</button>
-              <select id="pdfOrientation" class="form-control pdf-layout-select" onchange="markExportDirty()">
-                <option value="portrait">PDF 版面：直式</option>
-                <option value="landscape" selected>PDF 版面：橫式</option>
+              <select id="pdfOrientation" class="form-control pdf-layout-select" onchange="onPdfLayoutStyleChange()">
+                <option value="landscape">PDF 版面：橫式（名條＋座位表）</option>
+                <option value="portrait">PDF 版面：直式（名條＋座位表）</option>
+                <option value="portrait-summary" selected>PDF 版面：直式（名條＋幹部名單＋座位表）</option>
               </select>
               <button class="btn btn-primary btn-block" style="margin-top: 10px;" onclick="exportPdf()">🖨️ 匯出 PDF A4</button>
-              <p class="pdf-note" style="margin-top: 10px;">輸出兩頁：講台在上、講台在下（180 度旋轉），且包含名條清單。</p>
+              <p id="pdfLayoutNote" class="pdf-note" style="margin-top: 10px;">橫式輸出兩頁：講台在上、講台在下（180 度旋轉），且包含名條清單。</p>
+              <p class="pdf-note">按下匯出後，可在下載前修改 XLSX 或 PDF 檔名。</p>
               <p id="exportDirtyHint" class="export-dirty-note">目前資料已有變動，請重新匯出座位表。</p>
             </div>
 
@@ -493,6 +505,7 @@
         updateSwapModeUi();
         updateEmptySeatLockUi();
         updateExportDirtyUi();
+        updatePdfLayoutNote();
         document.addEventListener('keydown', handleRoleModalKeydown);
         addStudentRow();
       }
@@ -553,6 +566,71 @@
       function markExportClean() {
         isExportDirty = false;
         updateExportDirtyUi();
+      }
+
+      function getSelectedPdfLayoutStyle() {
+        return document.getElementById('pdfOrientation')?.value || 'landscape';
+      }
+
+      function getSelectedPdfOrientation() {
+        return getSelectedPdfLayoutStyle() === 'landscape' ? 'landscape' : 'portrait';
+      }
+
+      function updatePdfLayoutNote() {
+        const note = document.getElementById('pdfLayoutNote');
+        if (!note) return;
+        const layoutStyle = getSelectedPdfLayoutStyle();
+        if (layoutStyle === 'portrait-summary') {
+          note.textContent = '直式綜合版只輸出一頁 A4：左上分列顯示幹部與小老師、左下為座位表，右側為全班名條。';
+          return;
+        }
+        note.textContent = layoutStyle === 'portrait'
+          ? '舊直式輸出兩頁：座位表在上、名條清單在下，另附講台方向相反版本。'
+          : '舊橫式輸出兩頁：座位表在左、名條清單在右，另附講台方向相反版本。';
+      }
+
+      function onPdfLayoutStyleChange() {
+        updatePdfLayoutNote();
+        markExportDirty();
+      }
+
+      function formatRocDate(date = new Date()) {
+        return `${date.getFullYear() - 1911}/${date.getMonth() + 1}/${date.getDate()}`;
+      }
+
+      function formatRocDateForFileName(date = new Date()) {
+        const pad = value => String(value).padStart(2, '0');
+        return `${date.getFullYear() - 1911}${pad(date.getMonth() + 1)}${pad(date.getDate())}`;
+      }
+
+      function getSeatLayoutExportBaseName() {
+        const className = students
+          .map(student => String(student.class || '').trim())
+          .find(Boolean) || '班號';
+        return `${className}_座位表_${formatRocDateForFileName()}`;
+      }
+
+      function requestExportFileName(defaultBaseName, extension) {
+        const normalizedExtension = String(extension || '').replace(/^\./, '').toLowerCase();
+        const suffix = `.${normalizedExtension}`;
+        const suggestedName = `${defaultBaseName}${suffix}`;
+        const response = window.prompt(`請輸入 ${normalizedExtension.toUpperCase()} 檔名`, suggestedName);
+        if (response === null) return null;
+        let fileName = String(response).trim() || suggestedName;
+        fileName = fileName.replace(/[\\/:*?"<>|]/g, '_').replace(/[.\s]+$/g, '');
+        if (!fileName) fileName = suggestedName;
+        if (!fileName.toLowerCase().endsWith(suffix)) fileName += suffix;
+        return fileName;
+      }
+
+      function getPdfHeaderMetaLines() {
+        const lines = [];
+        const teacherName = String(document.getElementById('homeroomTeacher')?.value || '').trim();
+        if (teacherName) lines.push(`導師：${teacherName}`);
+        if (document.getElementById('pdfIncludeDate')?.checked) {
+          lines.push(`日期：${formatRocDate()}`);
+        }
+        return lines;
       }
 
       function onLayoutConfigChange() {
@@ -1166,6 +1244,8 @@
           alert('目前沒有學生資料。');
           return;
         }
+        const exportFileName = requestExportFileName(getSeatLayoutExportBaseName(), 'xlsx');
+        if (!exportFileName) return;
         const rows = [['班級', '座號', '學號', '姓名', '幹部', '小老師', '位置座標']];
         students.forEach(student => {
           rows.push([student.class || '', student.seat || '', student.studentId || '', student.name || '', getOfficerDisplay(student), getAssistantDisplay(student), student.position || '']);
@@ -1176,9 +1256,11 @@
         const wbout = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
         const blob = new Blob([wbout], { type: 'application/octet-stream' });
         const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = `座位表_${new Date().toISOString().slice(0,10)}.xlsx`;
+        const objectUrl = URL.createObjectURL(blob);
+        link.href = objectUrl;
+        link.download = exportFileName;
         link.click();
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 0);
         markExportClean();
       }
 
@@ -1380,11 +1462,12 @@
           return `${Math.max(8, parseFloat(value) - 4)}px`;
         }
 
-        function createSeatPanelElement(podiumPosition, flipGrid, orientation) {
+        function createSeatPanelElement(podiumPosition, flipGrid, orientation, options = {}) {
           const rows = Number(document.getElementById('seatRows').value) || 6;
           const cols = Number(document.getElementById('seatCols').value) || 6;
           const total = rows * cols;
           const typo = getPdfSeatTypography(orientation, total);
+          const showRoles = options.showRoles !== false;
           const panel = document.createElement('div');
           panel.style.display = 'flex';
           panel.style.flexDirection = 'column';
@@ -1458,8 +1541,8 @@
             assistantDetail.textContent = assigned ? getAssistantDisplay(assigned) : '';
 
             cell.appendChild(nameLabel);
-            if (assigned && getOfficerDisplay(assigned)) cell.appendChild(officerDetail);
-            if (assigned && getAssistantDisplay(assigned)) cell.appendChild(assistantDetail);
+            if (showRoles && assigned && getOfficerDisplay(assigned)) cell.appendChild(officerDetail);
+            if (showRoles && assigned && getAssistantDisplay(assigned)) cell.appendChild(assistantDetail);
             grid.appendChild(cell);
           }
 
@@ -1473,8 +1556,235 @@
           return panel;
         }
 
+      function getPdfRoleRosterEntries() {
+        const grouped = new Map();
+        const addEntry = (key, role, student) => {
+          if (!grouped.has(key)) grouped.set(key, { key, role, students: [] });
+          const seat = String(student.seat || '').trim();
+          const name = String(student.name || '').trim();
+          const studentLabel = [seat, name].filter(Boolean).join(' ');
+          if (studentLabel && !grouped.get(key).students.includes(studentLabel)) {
+            grouped.get(key).students.push(studentLabel);
+          }
+        };
+
+        getStudentsSortedBySeat().forEach(student => {
+          normalizeOfficerList(student.officers ?? student.officer ?? '').forEach(role => {
+            addEntry(`officer:${role}`, role, student);
+          });
+          normalizeAssistantList(student.assistant ?? '').forEach(subject => {
+            addEntry(`assistant:${subject}`, subject, student);
+          });
+        });
+
+        const presetKeys = [
+          ...officerPreset.map(role => `officer:${role}`),
+          ...assistantPreset.map(subject => `assistant:${subject}`)
+        ];
+        const ordered = [];
+        presetKeys.forEach(key => {
+          if (grouped.has(key)) ordered.push(grouped.get(key));
+        });
+        grouped.forEach((entry, key) => {
+          if (!presetKeys.includes(key)) ordered.push(entry);
+        });
+        return ordered;
+      }
+
+      function createPdfRolePairTable(entries, emptyMessage) {
+        const table = document.createElement('table');
+        table.style.width = '100%';
+        table.style.height = '100%';
+        table.style.borderCollapse = 'collapse';
+        table.style.tableLayout = 'fixed';
+        table.style.border = '1px solid #777';
+
+        if (!entries.length) {
+          const emptyRow = document.createElement('tr');
+          const emptyCell = document.createElement('td');
+          emptyCell.textContent = emptyMessage;
+          emptyCell.style.background = '#f3f3f3';
+          emptyCell.style.color = '#666';
+          emptyCell.style.fontSize = getPdfFontSize('18px');
+          emptyCell.style.textAlign = 'center';
+          emptyCell.style.verticalAlign = 'middle';
+          emptyRow.appendChild(emptyCell);
+          table.appendChild(emptyRow);
+          return table;
+        }
+
+        const pairsPerRow = 4;
+        const roleFontSize = entries.length <= 8 ? '21px' : entries.length <= 16 ? '19px' : '17px';
+        const nameFontSize = entries.length <= 8 ? '19px' : entries.length <= 16 ? '17px' : '15px';
+        const columnGroup = document.createElement('colgroup');
+        for (let index = 0; index < pairsPerRow; index += 1) {
+          const roleColumn = document.createElement('col');
+          const nameColumn = document.createElement('col');
+          nameColumn.style.width = '4.4em';
+          columnGroup.appendChild(roleColumn);
+          columnGroup.appendChild(nameColumn);
+        }
+        table.appendChild(columnGroup);
+
+        for (let start = 0; start < entries.length; start += pairsPerRow) {
+          const row = document.createElement('tr');
+          for (let offset = 0; offset < pairsPerRow; offset += 1) {
+            const entry = entries[start + offset];
+            const roleCell = document.createElement('td');
+            const nameCell = document.createElement('td');
+            [roleCell, nameCell].forEach(cell => {
+              cell.style.padding = '2px 3px';
+              cell.style.border = '1px solid #777';
+              cell.style.textAlign = 'center';
+              cell.style.verticalAlign = 'middle';
+              cell.style.whiteSpace = 'nowrap';
+              cell.style.overflow = 'hidden';
+              cell.style.lineHeight = '1.1';
+            });
+
+            if (entry) {
+              roleCell.textContent = entry.role;
+              roleCell.style.background = '#f3f3f3';
+              roleCell.style.fontSize = getPdfFontSize(roleFontSize);
+              roleCell.style.fontWeight = '600';
+
+              nameCell.style.fontSize = getPdfFontSize(nameFontSize);
+              nameCell.style.fontWeight = '700';
+              nameCell.style.whiteSpace = 'normal';
+              entry.students.forEach(studentName => {
+                const nameLine = document.createElement('div');
+                nameLine.textContent = studentName;
+                nameLine.style.whiteSpace = 'nowrap';
+                nameCell.appendChild(nameLine);
+              });
+            } else {
+              roleCell.innerHTML = '&nbsp;';
+              nameCell.innerHTML = '&nbsp;';
+            }
+
+            row.appendChild(roleCell);
+            row.appendChild(nameCell);
+          }
+          table.appendChild(row);
+        }
+        return table;
+      }
+
+      function createPdfRoleRosterElement(entries) {
+        const section = document.createElement('section');
+        section.style.display = 'grid';
+        section.style.gridTemplateRows = 'repeat(2, minmax(0, 1fr))';
+        section.style.gap = '6px';
+        section.style.minHeight = '0';
+
+        const officers = entries.filter(entry => entry.key.startsWith('officer:'));
+        const assistants = entries.filter(entry => entry.key.startsWith('assistant:'));
+        section.appendChild(createPdfRolePairTable(officers, '尚未指派幹部'));
+        section.appendChild(createPdfRolePairTable(assistants, '尚未指派小老師'));
+        return section;
+      }
+
+      function createPortraitNameStripElement() {
+        const sortedStudents = getStudentsSortedBySeat();
+        const panel = document.createElement('section');
+        panel.style.height = '100%';
+        panel.style.minHeight = '0';
+        panel.style.display = 'flex';
+        panel.style.flexDirection = 'column';
+        panel.style.border = '1px solid #555';
+        panel.style.boxSizing = 'border-box';
+
+        const title = document.createElement('div');
+        title.textContent = '名條';
+        title.style.padding = '4px 2px';
+        title.style.borderBottom = '1px solid #555';
+        title.style.background = '#f3f3f3';
+        title.style.fontSize = getPdfFontSize('18px');
+        title.style.fontWeight = '700';
+        title.style.textAlign = 'center';
+        title.style.letterSpacing = '4px';
+        panel.appendChild(title);
+
+        const list = document.createElement('div');
+        list.style.flex = '1';
+        list.style.minHeight = '0';
+        list.style.display = 'grid';
+        list.style.gridTemplateRows = `repeat(${Math.max(1, sortedStudents.length)}, minmax(0, 1fr))`;
+        const rowFontSize = sortedStudents.length <= 36 ? '15px' : sortedStudents.length <= 45 ? '13px' : '11px';
+
+        sortedStudents.forEach((student, index) => {
+          const row = document.createElement('div');
+          row.style.minHeight = '0';
+          row.style.display = 'grid';
+          row.style.gridTemplateColumns = '4.2ch minmax(0, 1fr)';
+          row.style.alignItems = 'center';
+          if (index < sortedStudents.length - 1) row.style.borderBottom = '1px solid #777';
+
+          const seat = document.createElement('div');
+          seat.textContent = String(student.seat || '');
+          seat.style.height = '100%';
+          seat.style.display = 'flex';
+          seat.style.alignItems = 'center';
+          seat.style.justifyContent = 'center';
+          seat.style.borderRight = '1px solid #777';
+          seat.style.fontSize = getPdfFontSize(rowFontSize);
+
+          const name = document.createElement('div');
+          name.textContent = String(student.name || '');
+          name.style.minWidth = '0';
+          name.style.height = '100%';
+          name.style.padding = '0 3px';
+          name.style.display = 'flex';
+          name.style.alignItems = 'center';
+          name.style.justifyContent = 'center';
+          name.style.textAlign = 'center';
+          name.style.fontSize = getPdfFontSize(`${parseFloat(rowFontSize) + 2}px`);
+          name.style.fontWeight = '600';
+          name.style.whiteSpace = 'nowrap';
+          name.style.overflow = 'hidden';
+          name.style.textOverflow = 'ellipsis';
+
+          row.appendChild(seat);
+          row.appendChild(name);
+          list.appendChild(row);
+        });
+
+        panel.appendChild(list);
+        return panel;
+      }
+
+      function createPortraitSummaryLayout(podiumPosition) {
+        const entries = getPdfRoleRosterEntries();
+        const layout = document.createElement('div');
+        layout.style.height = '100%';
+        layout.style.minHeight = '0';
+        layout.style.display = 'grid';
+        layout.style.gridTemplateColumns = 'minmax(0, 1fr) 35mm';
+        layout.style.gap = '8px';
+
+        const leftColumn = document.createElement('div');
+        leftColumn.style.height = '100%';
+        leftColumn.style.minHeight = '0';
+        leftColumn.style.display = 'flex';
+        leftColumn.style.flexDirection = 'column';
+
+        const roster = createPdfRoleRosterElement(entries);
+        roster.style.flex = '0 0 28%';
+        roster.style.marginBottom = '8px';
+
+        const seatPanel = createSeatPanelElement(podiumPosition, false, 'portrait');
+        seatPanel.style.flex = '1';
+        seatPanel.style.minHeight = '0';
+
+        leftColumn.appendChild(roster);
+        leftColumn.appendChild(seatPanel);
+        layout.appendChild(leftColumn);
+        layout.appendChild(createPortraitNameStripElement());
+        return layout;
+      }
+
       function createPdfSeatLayout(podiumPosition, flipGrid) {
-        const orientation = document.getElementById('pdfOrientation')?.value || 'portrait';
+        const orientation = getSelectedPdfOrientation();
         const layout = document.createElement('div');
         layout.style.display = 'flex';
         layout.style.gap = '12px';
@@ -1508,7 +1818,8 @@
       }
 
       function renderLayoutToCanvas(layoutElement, pageTitle) {
-        const orientation = document.getElementById('pdfOrientation')?.value || 'portrait';
+        const orientation = getSelectedPdfOrientation();
+        const layoutStyle = getSelectedPdfLayoutStyle();
         const wrapper = document.createElement('div');
         wrapper.style.position = 'absolute';
         wrapper.style.left = '-9999px';
@@ -1523,20 +1834,59 @@
         wrapper.style.display = 'flex';
         wrapper.style.flexDirection = 'column';
 
+        const header = document.createElement('div');
+        header.style.flex = '0 0 auto';
+        header.style.minHeight = '36px';
+        header.style.marginBottom = '6px';
+        header.style.display = 'grid';
+        header.style.alignItems = 'center';
+        if (orientation === 'landscape') {
+          header.style.gridTemplateColumns = 'minmax(0, 7fr) minmax(0, 3fr)';
+          header.style.columnGap = '12px';
+        } else if (layoutStyle === 'portrait-summary') {
+          header.style.gridTemplateColumns = 'minmax(0, 1fr) 35mm';
+          header.style.columnGap = '8px';
+        } else {
+          header.style.gridTemplateColumns = '1fr auto 1fr';
+        }
+
         const title = document.createElement('div');
         title.textContent = pageTitle;
         title.style.fontSize = getPdfFontSize('33px');
         title.style.fontWeight = '700';
-        title.style.marginBottom = '6px';
+        title.style.minHeight = '36px';
+        title.style.display = 'flex';
+        title.style.alignItems = 'center';
+        title.style.justifyContent = 'center';
+        title.style.textAlign = 'center';
         if (orientation === 'landscape') {
-          title.style.width = '70%';
-          title.style.textAlign = 'center';
-          title.style.alignSelf = 'flex-start';
+          title.style.gridColumn = '1';
+        } else if (layoutStyle === 'portrait-summary') {
+          title.style.gridColumn = '1';
         } else {
-          title.style.width = '100%';
-          title.style.textAlign = 'center';
+          title.style.gridColumn = '2';
         }
-        wrapper.appendChild(title);
+        header.appendChild(title);
+
+        const metaLines = getPdfHeaderMetaLines();
+        if (metaLines.length) {
+          const meta = document.createElement('div');
+          meta.style.gridColumn = orientation === 'landscape' || layoutStyle === 'portrait-summary' ? '2' : '3';
+          meta.style.justifySelf = 'stretch';
+          meta.style.fontSize = getPdfFontSize('16px');
+          meta.style.fontWeight = '600';
+          meta.style.lineHeight = '1.35';
+          meta.style.textAlign = 'right';
+          meta.style.wordBreak = 'break-word';
+          metaLines.forEach(line => {
+            const metaLine = document.createElement('div');
+            metaLine.textContent = line;
+            meta.appendChild(metaLine);
+          });
+          header.appendChild(meta);
+        }
+
+        wrapper.appendChild(header);
         layoutElement.style.flex = '1';
         layoutElement.style.minHeight = '0';
         layoutElement.style.transform = 'none';
@@ -1545,7 +1895,7 @@
         document.body.appendChild(wrapper);
 
         const availableWidth = wrapper.clientWidth;
-        const availableHeight = wrapper.clientHeight - title.offsetHeight;
+        const availableHeight = wrapper.clientHeight - header.offsetHeight - 6;
         const contentWidth = Math.max(layoutElement.scrollWidth, layoutElement.clientWidth);
         const contentHeight = Math.max(layoutElement.scrollHeight, layoutElement.clientHeight);
         const fitScale = Math.min(
@@ -1566,18 +1916,22 @@
           alert('請先新增或匯入學生資料。');
           return;
         }
+        const exportFileName = requestExportFileName(getSeatLayoutExportBaseName(), 'pdf');
+        if (!exportFileName) return;
         const selectedPodiumPosition = document.getElementById('podiumPosition')?.value || 'bottom';
         const oppositePodiumPosition = selectedPodiumPosition === 'top' ? 'bottom' : 'top';
-        const firstLayout = createPdfSeatLayout(selectedPodiumPosition, false);
-        const secondLayout = createPdfSeatLayout(oppositePodiumPosition, true);
+        const layoutStyle = getSelectedPdfLayoutStyle();
+        const layouts = layoutStyle === 'portrait-summary'
+          ? [createPortraitSummaryLayout(selectedPodiumPosition)]
+          : [
+              createPdfSeatLayout(selectedPodiumPosition, false),
+              createPdfSeatLayout(oppositePodiumPosition, true)
+            ];
         const pdfTitle = getPdfTitle();
 
-        Promise.all([
-          renderLayoutToCanvas(firstLayout, pdfTitle),
-          renderLayoutToCanvas(secondLayout, pdfTitle)
-        ])
-          .then(([topCanvas, bottomCanvas]) => {
-            const orientation = document.getElementById('pdfOrientation')?.value || 'portrait';
+        Promise.all(layouts.map(layout => renderLayoutToCanvas(layout, pdfTitle)))
+          .then(canvases => {
+            const orientation = getSelectedPdfOrientation();
             const JsPDFClass = window.jspdf?.jsPDF || window.jsPDF;
             if (!JsPDFClass) {
               throw new Error('jsPDF 未載入');
@@ -1598,10 +1952,11 @@
               pdf.addImage(imgData, 'JPEG', offsetX, offsetY, renderWidth, renderHeight);
             };
 
-            addCanvasToPage(topCanvas);
-            pdf.addPage();
-            addCanvasToPage(bottomCanvas);
-            pdf.save(`座位表_${new Date().toISOString().slice(0,10)}.pdf`);
+            canvases.forEach((canvas, index) => {
+              if (index > 0) pdf.addPage();
+              addCanvasToPage(canvas);
+            });
+            pdf.save(exportFileName);
             markExportClean();
           })
           .catch(() => {
