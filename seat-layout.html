@@ -671,6 +671,11 @@
       function toggleEmptySeatLockMode() {
         isEmptySeatLockMode = !isEmptySeatLockMode;
         selectedSeat = null;
+        if (isEmptySeatLockMode && isSwapMode) {
+          isSwapMode = false;
+          firstSwapSeat = null;
+          updateSwapModeUi('已切換至鎖定空位模式。');
+        }
         updateEmptySeatLockUi();
         renderSeatGrid();
       }
@@ -680,6 +685,10 @@
         firstSwapSeat = null;
         selectedSeat = null;
         if (isSwapMode) {
+          if (isEmptySeatLockMode) {
+            isEmptySeatLockMode = false;
+            updateEmptySeatLockUi('已切換至交換座位模式。');
+          }
           selectedStudentIndex = null;
           updateSwapModeUi('交換模式啟用中：請先點第一個位置。');
         } else {
@@ -1085,6 +1094,14 @@
       }
 
       function handleSwapSeatClick(seat) {
+        if (lockedEmptySeats.has(seat)) {
+          const message = firstSwapSeat === null
+            ? '鎖定空位不能作為交換位置，請選擇其他座位。'
+            : '鎖定空位不能作為交換位置，已保留第一個位置，請改選其他座位。';
+          updateSwapModeUi(message);
+          return;
+        }
+
         if (firstSwapSeat === null) {
           firstSwapSeat = seat;
           const cols = Number(document.getElementById('seatCols').value) || 6;
@@ -1135,15 +1152,13 @@
       }
 
       function clearAllSeatAssignments() {
-        if (!confirm('確定要清空所有座位嗎？學生資料不會被刪除。')) return;
+        if (!confirm('確定要清空所有學生座位嗎？學生資料與鎖定空位都會保留。')) return;
         students.forEach(student => {
           student.position = '';
         });
-        lockedEmptySeats.clear();
-        isEmptySeatLockMode = false;
         selectedSeat = null;
         selectedStudentIndex = null;
-        updateEmptySeatLockUi('已清空所有座位。');
+        updateEmptySeatLockUi(`已清空所有學生座位，保留 ${lockedEmptySeats.size} 個鎖定空位。`);
         renderStudentTable();
         markExportDirty();
       }
@@ -1780,6 +1795,7 @@
       }
 
       function createPortraitSummaryLayout(podiumPosition) {
+        const rotateSeatGridToBottom = podiumPosition === 'top';
         const entries = getPdfRoleRosterEntries();
         const layout = document.createElement('div');
         layout.style.height = '100%';
@@ -1798,7 +1814,7 @@
         roster.style.flex = '0 0 28%';
         roster.style.marginBottom = '8px';
 
-        const seatPanel = createSeatPanelElement(podiumPosition, false, 'portrait');
+        const seatPanel = createSeatPanelElement('bottom', rotateSeatGridToBottom, 'portrait');
         seatPanel.style.flex = '1';
         seatPanel.style.minHeight = '0';
 
@@ -1899,7 +1915,7 @@
           const meta = document.createElement('div');
           meta.style.gridColumn = orientation === 'landscape' || layoutStyle === 'portrait-summary' ? '2' : '3';
           meta.style.justifySelf = 'stretch';
-          meta.style.fontSize = getPdfFontSize('16px');
+          meta.style.fontSize = getPdfFontSize('19px');
           meta.style.fontWeight = '600';
           meta.style.lineHeight = '1.35';
           meta.style.textAlign = 'right';

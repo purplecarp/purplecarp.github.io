@@ -172,6 +172,24 @@
         document.getElementById('placardCount').textContent = count ? `已輸入 ${count} 筆資料` : '尚未輸入資料';
       }
 
+      function formatLocalDateForFileName(date = new Date()) {
+        const pad = value => String(value).padStart(2, '0');
+        return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
+      }
+
+      function requestExportFileName(defaultBaseName, extension) {
+        const normalizedExtension = String(extension || '').replace(/^\./, '').toLowerCase();
+        const suffix = `.${normalizedExtension}`;
+        const suggestedName = `${defaultBaseName}${suffix}`;
+        const response = window.prompt(`請輸入 ${normalizedExtension.toUpperCase()} 檔名`, suggestedName);
+        if (response === null) return null;
+        let fileName = String(response).trim() || suggestedName;
+        fileName = fileName.replace(/[\\/:*?"<>|]/g, '_').replace(/[.\s]+$/g, '');
+        if (!fileName) fileName = suggestedName;
+        if (!fileName.toLowerCase().endsWith(suffix)) fileName += suffix;
+        return fileName;
+      }
+
       function createPlacardRow(placard, rotated, blank) {
         const row = document.createElement('div');
         row.className = 'placard-row' + (rotated ? ' rotated' : '');
@@ -205,6 +223,8 @@
           alert('請先貼上座號與姓名資料。');
           return;
         }
+        const exportFileName = requestExportFileName(`座位立牌_${formatLocalDateForFileName()}`, 'pdf');
+        if (!exportFileName) return;
         const JsPDFClass = window.jspdf?.jsPDF || window.jsPDF;
         if (!JsPDFClass) {
           alert('PDF 元件尚未載入，請確認網路連線後重試。');
@@ -225,7 +245,7 @@
             if (index > 0) pdf.addPage();
             pdf.addImage(canvas.toDataURL('image/jpeg', 1), 'JPEG', 0, 0, 210, 297);
           }
-          pdf.save(`座位立牌_${new Date().toISOString().slice(0, 10)}.pdf`);
+          pdf.save(exportFileName);
         } catch (error) {
           alert('PDF 匯出失敗，請稍後再試。');
         } finally {
