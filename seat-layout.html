@@ -1462,12 +1462,12 @@
           return `${Math.max(8, parseFloat(value) - 4)}px`;
         }
 
-        function createSeatPanelElement(podiumPosition, flipGrid, orientation, options = {}) {
+        function createSeatPanelElement(podiumPosition, flipGrid, orientation) {
           const rows = Number(document.getElementById('seatRows').value) || 6;
           const cols = Number(document.getElementById('seatCols').value) || 6;
           const total = rows * cols;
           const typo = getPdfSeatTypography(orientation, total);
-          const showRoles = options.showRoles !== false;
+          const cardFontAdjustment = orientation === 'landscape' ? -1 : 0;
           const panel = document.createElement('div');
           panel.style.display = 'flex';
           panel.style.flexDirection = 'column';
@@ -1514,35 +1514,61 @@
             cell.style.borderRadius = '1pt';
             cell.style.background = '#fff';
             cell.style.overflow = 'visible';
+            cell.style.textAlign = 'center';
+
+            if (!assigned) {
+              cell.style.display = 'flex';
+              cell.style.alignItems = 'center';
+              cell.style.justifyContent = 'center';
+
+              const emptyMark = document.createElement('div');
+              emptyMark.textContent = 'X';
+              emptyMark.style.fontSize = getPdfFontSize(`${parseFloat(typo.name) + 5 + cardFontAdjustment}px`);
+              emptyMark.style.fontWeight = '700';
+              emptyMark.style.lineHeight = '1';
+              cell.appendChild(emptyMark);
+              grid.appendChild(cell);
+              continue;
+            }
+
+            const seatNumberLabel = document.createElement('div');
+            seatNumberLabel.style.marginTop = '3px';
+            seatNumberLabel.style.fontSize = getPdfFontSize(`${parseFloat(typo.name) + 3 + cardFontAdjustment}px`);
+            seatNumberLabel.style.color = '#000';
+            seatNumberLabel.style.fontWeight = '600';
+            seatNumberLabel.style.lineHeight = '1.1';
+            seatNumberLabel.style.wordBreak = 'break-word';
+            seatNumberLabel.textContent = String(assigned.seat || '');
 
             const nameLabel = document.createElement('div');
-            nameLabel.style.marginTop = '3px';
-            nameLabel.style.fontSize = getPdfFontSize(typo.name);
+            nameLabel.style.marginTop = '2px';
+            nameLabel.style.fontSize = getPdfFontSize(`${parseFloat(typo.name) + 5 + cardFontAdjustment}px`);
             nameLabel.style.color = '#000';
             nameLabel.style.fontWeight = '600';
             nameLabel.style.lineHeight = '1.1';
             nameLabel.style.wordBreak = 'break-word';
-            nameLabel.textContent = assigned ? `${assigned.seat} ${assigned.name}` : '空位';
+            nameLabel.textContent = String(assigned.name || '');
 
             const officerDetail = document.createElement('div');
-            officerDetail.style.fontSize = getPdfFontSize(typo.role);
+            officerDetail.style.fontSize = getPdfFontSize(`${parseFloat(typo.role) + 2 + cardFontAdjustment}px`);
             officerDetail.style.color = '#444';
             officerDetail.style.marginTop = '3px';
             officerDetail.style.lineHeight = '1.1';
             officerDetail.style.wordBreak = 'break-word';
-            officerDetail.textContent = assigned ? getOfficerDisplay(assigned) : '';
+            officerDetail.textContent = getOfficerDisplay(assigned) || '\u00a0';
 
             const assistantDetail = document.createElement('div');
-            assistantDetail.style.fontSize = getPdfFontSize(typo.assistant);
+            assistantDetail.style.fontSize = getPdfFontSize(`${parseFloat(typo.assistant) + 2 + cardFontAdjustment}px`);
             assistantDetail.style.color = '#444';
             assistantDetail.style.marginTop = '2px';
             assistantDetail.style.lineHeight = '1.1';
             assistantDetail.style.wordBreak = 'break-word';
-            assistantDetail.textContent = assigned ? getAssistantDisplay(assigned) : '';
+            assistantDetail.textContent = getAssistantDisplay(assigned) || '\u00a0';
 
+            cell.appendChild(seatNumberLabel);
             cell.appendChild(nameLabel);
-            if (showRoles && assigned && getOfficerDisplay(assigned)) cell.appendChild(officerDetail);
-            if (showRoles && assigned && getAssistantDisplay(assigned)) cell.appendChild(assistantDetail);
+            cell.appendChild(officerDetail);
+            cell.appendChild(assistantDetail);
             grid.appendChild(cell);
           }
 
