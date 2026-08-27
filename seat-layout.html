@@ -332,7 +332,7 @@
         <li><strong>建議先匯出空白的學生資料</strong>，再從「機構書籤 &gt; 師生帳號查詢 &gt; 學生帳號查詢」複製學生資料到空白學生資料 Excel，完成後再匯入系統。</li>
         <li>設定座位排數、座位列數與講台位置。</li>
         <li>匯入學生資料後，可輸入座號自動帶入位置，或點擊座位後從右側下拉選單指派學生。</li>
-        <li>輸入導師姓名、選擇是否顯示當日日期，再選擇 PDF 版面樣式並匯出；每次匯出前都可以修改檔名。</li>
+        <li>輸入導師姓名、選擇是否顯示當日日期，再選擇輸出版面樣式並匯出 PDF 或 Word；每次匯出前都可以修改檔名。</li>
       </ol>
       <button class="btn btn-default" type="button" onclick="exportStudents()">📥 先匯出空白學生資料</button>
     </div>
@@ -380,7 +380,7 @@
               <div class="checkbox" style="margin-bottom: 16px;">
                 <label>
                   <input id="pdfIncludeDate" type="checkbox" checked onchange="markExportDirty()">
-                  PDF 同步輸出當日日期（民國年）
+                  匯出時同步顯示當日日期（民國年）
                 </label>
               </div>
               <div id="seatAssignmentPanel" class="form-group" style="display: none;">
@@ -402,16 +402,18 @@
               <p id="emptySeatLockHint" class="pdf-note" style="margin-top: 8px; margin-bottom: 0;">鎖定模式未啟用。</p>
               <button id="swapModeBtn" class="btn btn-default btn-block" style="margin-top: 10px;" onclick="toggleSwapMode()">🔄 開啟交換座位模式</button>
               <p id="swapModeHint" class="pdf-note" style="margin-top: 8px; margin-bottom: 0;">交換模式未啟用。</p>
-              <button class="btn btn-default btn-block" style="margin-top: 10px;" onclick="triggerImport()">📤 匯入學生資料</button>
-              <button class="btn btn-default btn-block" style="margin-top: 10px;" onclick="exportStudents()">📥 匯出學生資料</button>
+              <button class="btn btn-default btn-block" style="margin-top: 10px;" onclick="triggerImport()">📤 匯入學生資料Excel檔</button>
+              <button class="btn btn-default btn-block" style="margin-top: 10px;" onclick="exportStudents()">📥 匯出學生資料Excel檔</button>
               <select id="pdfOrientation" class="form-control pdf-layout-select" onchange="onPdfLayoutStyleChange()">
-                <option value="landscape">PDF 版面：橫式（名條＋座位表）</option>
-                <option value="portrait">PDF 版面：直式（名條＋座位表）</option>
-                <option value="portrait-summary" selected>PDF 版面：直式（名條＋幹部名單＋座位表）</option>
+                <option value="landscape">版面：橫式（名條＋座位表）</option>
+                <option value="portrait">版面：直式（名條＋座位表）</option>
+                <option value="portrait-summary" selected>版面：直式（名條＋幹部名單＋座位表）</option>
               </select>
               <button class="btn btn-primary btn-block" style="margin-top: 10px;" onclick="exportPdf()">🖨️ 匯出 PDF A4</button>
+              <button class="btn btn-success btn-block" style="margin-top: 10px;" onclick="exportWordA4()">📝 匯出 Word A4（可能會跑版）</button>
               <p id="pdfLayoutNote" class="pdf-note" style="margin-top: 10px;">橫式輸出兩頁：講台在上、講台在下（180 度旋轉），且包含名條清單。</p>
-              <p class="pdf-note">按下匯出後，可在下載前修改 XLSX 或 PDF 檔名。</p>
+              <p class="pdf-note">PDF 與 Word A4 皆會依照上方版面選單匯出。</p>
+              <p class="pdf-note">按下匯出後，可在下載前修改 XLSX、PDF 或 DOCX 檔名。</p>
               <p id="exportDirtyHint" class="export-dirty-note">目前資料已有變動，請重新匯出座位表。</p>
             </div>
 
@@ -1953,6 +1955,534 @@
           });
       }
 
+      function createSelectedExportLayouts() {
+        const selectedPodiumPosition = document.getElementById('podiumPosition')?.value || 'bottom';
+        const oppositePodiumPosition = selectedPodiumPosition === 'top' ? 'bottom' : 'top';
+        return getSelectedPdfLayoutStyle() === 'portrait-summary'
+          ? [createPortraitSummaryLayout(selectedPodiumPosition)]
+          : [
+              createPdfSeatLayout(selectedPodiumPosition, false),
+              createPdfSeatLayout(oppositePodiumPosition, true)
+            ];
+      }
+
+      function calculateCrc32(bytes) {
+        if (!calculateCrc32.table) {
+          calculateCrc32.table = Array.from({ length: 256 }, (_, index) => {
+            let value = index;
+            for (let bit = 0; bit < 8; bit++) {
+              value = (value & 1) ? (0xedb88320 ^ (value >>> 1)) : (value >>> 1);
+            }
+            return value >>> 0;
+          });
+        }
+
+        let crc = 0xffffffff;
+        bytes.forEach(byte => {
+          crc = calculateCrc32.table[(crc ^ byte) & 0xff] ^ (crc >>> 8);
+        });
+        return (crc ^ 0xffffffff) >>> 0;
+      }
+
+      function createStoredZip(files, mimeType) {
+        const encoder = new TextEncoder();
+        const now = new Date();
+        const dosTime = (now.getHours() << 11) | (now.getMinutes() << 5) | Math.floor(now.getSeconds() / 2);
+        const dosDate = ((Math.max(1980, now.getFullYear()) - 1980) << 9) | ((now.getMonth() + 1) << 5) | now.getDate();
+        const localParts = [];
+        const centralParts = [];
+        let localOffset = 0;
+        let centralSize = 0;
+
+        files.forEach(file => {
+          const nameBytes = encoder.encode(file.name);
+          const dataBytes = typeof file.data === 'string' ? encoder.encode(file.data) : file.data;
+          const crc32 = calculateCrc32(dataBytes);
+
+          const localHeader = new Uint8Array(30 + nameBytes.length);
+          const localView = new DataView(localHeader.buffer);
+          localView.setUint32(0, 0x04034b50, true);
+          localView.setUint16(4, 20, true);
+          localView.setUint16(6, 0x0800, true);
+          localView.setUint16(8, 0, true);
+          localView.setUint16(10, dosTime, true);
+          localView.setUint16(12, dosDate, true);
+          localView.setUint32(14, crc32, true);
+          localView.setUint32(18, dataBytes.length, true);
+          localView.setUint32(22, dataBytes.length, true);
+          localView.setUint16(26, nameBytes.length, true);
+          localView.setUint16(28, 0, true);
+          localHeader.set(nameBytes, 30);
+          localParts.push(localHeader, dataBytes);
+
+          const centralHeader = new Uint8Array(46 + nameBytes.length);
+          const centralView = new DataView(centralHeader.buffer);
+          centralView.setUint32(0, 0x02014b50, true);
+          centralView.setUint16(4, 20, true);
+          centralView.setUint16(6, 20, true);
+          centralView.setUint16(8, 0x0800, true);
+          centralView.setUint16(10, 0, true);
+          centralView.setUint16(12, dosTime, true);
+          centralView.setUint16(14, dosDate, true);
+          centralView.setUint32(16, crc32, true);
+          centralView.setUint32(20, dataBytes.length, true);
+          centralView.setUint32(24, dataBytes.length, true);
+          centralView.setUint16(28, nameBytes.length, true);
+          centralView.setUint16(30, 0, true);
+          centralView.setUint16(32, 0, true);
+          centralView.setUint16(34, 0, true);
+          centralView.setUint16(36, 0, true);
+          centralView.setUint32(38, 0, true);
+          centralView.setUint32(42, localOffset, true);
+          centralHeader.set(nameBytes, 46);
+          centralParts.push(centralHeader);
+
+          localOffset += localHeader.length + dataBytes.length;
+          centralSize += centralHeader.length;
+        });
+
+        const endRecord = new Uint8Array(22);
+        const endView = new DataView(endRecord.buffer);
+        endView.setUint32(0, 0x06054b50, true);
+        endView.setUint16(4, 0, true);
+        endView.setUint16(6, 0, true);
+        endView.setUint16(8, files.length, true);
+        endView.setUint16(10, files.length, true);
+        endView.setUint32(12, centralSize, true);
+        endView.setUint32(16, localOffset, true);
+        endView.setUint16(20, 0, true);
+
+        return new Blob([...localParts, ...centralParts, endRecord], { type: mimeType });
+      }
+
+      function escapeWordXml(value) {
+        return String(value ?? '')
+          .replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, '')
+          .replace(/&/g, '&amp;')
+          .replace(/</g, '&lt;')
+          .replace(/>/g, '&gt;')
+          .replace(/"/g, '&quot;')
+          .replace(/'/g, '&apos;');
+      }
+
+      function createWordParagraph(text, options = {}) {
+        const size = Math.max(4, (Number(options.size) || 10) - 2);
+        const alignment = options.alignment || 'center';
+        const color = options.color || '000000';
+        const bold = options.bold ? '<w:b/><w:bCs/>' : '';
+        const content = escapeWordXml(String(text ?? '') || '\u00a0');
+        return `<w:p>
+          <w:pPr><w:spacing w:before="${options.before || 0}" w:after="${options.after || 0}"/><w:jc w:val="${alignment}"/></w:pPr>
+          <w:r>
+            <w:rPr>
+              <w:rFonts w:ascii="Microsoft JhengHei" w:eastAsia="Microsoft JhengHei" w:hAnsi="Microsoft JhengHei"/>
+              ${bold}<w:color w:val="${color}"/><w:sz w:val="${Math.round(size * 2)}"/><w:szCs w:val="${Math.round(size * 2)}"/>
+            </w:rPr>
+            <w:t xml:space="preserve">${content}</w:t>
+          </w:r>
+        </w:p>`;
+      }
+
+      function createWordTableCell(content, width, options = {}) {
+        const borderValue = options.border === false ? 'nil' : 'single';
+        const borderSize = options.border === false ? 0 : 6;
+        const padding = options.padding ?? 45;
+        const gridSpan = options.gridSpan ? `<w:gridSpan w:val="${options.gridSpan}"/>` : '';
+        const fill = options.fill ? `<w:shd w:val="clear" w:color="auto" w:fill="${options.fill}"/>` : '';
+        const nestedTail = options.nested ? '<w:p/>' : '';
+        return `<w:tc>
+          <w:tcPr>
+            <w:tcW w:w="${Math.max(1, Math.round(width))}" w:type="dxa"/>
+            ${gridSpan}
+            <w:tcBorders>
+              <w:top w:val="${borderValue}" w:sz="${borderSize}" w:color="555555"/>
+              <w:left w:val="${borderValue}" w:sz="${borderSize}" w:color="555555"/>
+              <w:bottom w:val="${borderValue}" w:sz="${borderSize}" w:color="555555"/>
+              <w:right w:val="${borderValue}" w:sz="${borderSize}" w:color="555555"/>
+            </w:tcBorders>
+            ${fill}
+            <w:tcMar><w:top w:w="${padding}" w:type="dxa"/><w:left w:w="${padding}" w:type="dxa"/><w:bottom w:w="${padding}" w:type="dxa"/><w:right w:w="${padding}" w:type="dxa"/></w:tcMar>
+            <w:vAlign w:val="${options.vertical || 'center'}"/>
+          </w:tcPr>
+          ${content || createWordParagraph('')}${nestedTail}
+        </w:tc>`;
+      }
+
+      function createWordTable(columnWidths, rows, options = {}) {
+        const tableWidth = columnWidths.reduce((sum, width) => sum + width, 0);
+        const grid = columnWidths.map(width => `<w:gridCol w:w="${Math.round(width)}"/>`).join('');
+        const rowXml = rows.map(row => {
+          let columnIndex = 0;
+          const cells = row.cells.map(cell => {
+            const span = cell.gridSpan || 1;
+            const defaultWidth = columnWidths
+              .slice(columnIndex, columnIndex + span)
+              .reduce((sum, width) => sum + width, 0);
+            columnIndex += span;
+            return createWordTableCell(cell.content, cell.width || defaultWidth, cell);
+          }).join('');
+          const rowHeight = row.height
+            ? `<w:trHeight w:val="${Math.round(row.height)}" w:hRule="${row.heightRule || 'atLeast'}"/>`
+            : '';
+          return `<w:tr><w:trPr><w:cantSplit/>${rowHeight}</w:trPr>${cells}</w:tr>`;
+        }).join('');
+        return `<w:tbl>
+          <w:tblPr>
+            <w:tblW w:w="${Math.round(tableWidth)}" w:type="dxa"/>
+            ${options.alignment ? `<w:jc w:val="${options.alignment}"/>` : ''}
+            <w:tblLayout w:type="fixed"/>
+          </w:tblPr>
+          <w:tblGrid>${grid}</w:tblGrid>
+          ${rowXml}
+        </w:tbl>`;
+      }
+
+      function createWordSpacer(size = 80) {
+        return `<w:p><w:pPr><w:spacing w:before="0" w:after="${size}"/></w:pPr></w:p>`;
+      }
+
+      function getEditableWordSeatTypography(orientation, seatCount, panelWidth, cols) {
+        let typography;
+        if (seatCount <= 30) {
+          typography = orientation === 'landscape'
+            ? { seat: 16, name: 18, role: 12 }
+            : { seat: 17, name: 19, role: 13 };
+        } else if (seatCount <= 40) {
+          typography = orientation === 'landscape'
+            ? { seat: 15, name: 17, role: 11 }
+            : { seat: 14, name: 16, role: 11 };
+        } else {
+          typography = { seat: 10, name: 12, role: 8 };
+        }
+
+        const cellWidthPoints = panelWidth / Math.max(1, cols) / 20;
+        const widthScale = Math.min(1, cellWidthPoints / 62);
+        return {
+          seat: Math.max(7, Math.round(typography.seat * widthScale * 10) / 10),
+          name: Math.max(8, Math.round(typography.name * widthScale * 10) / 10),
+          role: Math.max(6, Math.round(typography.role * widthScale * 10) / 10)
+        };
+      }
+
+      function createEditableWordSeatTable(flipGrid, orientation, tableWidth, tableHeight) {
+        const rows = Number(document.getElementById('seatRows').value) || 6;
+        const cols = Number(document.getElementById('seatCols').value) || 6;
+        const total = rows * cols;
+        const columnWidths = Array.from({ length: cols }, () => Math.floor(tableWidth / cols));
+        columnWidths[columnWidths.length - 1] += tableWidth - columnWidths.reduce((sum, width) => sum + width, 0);
+        const typography = getEditableWordSeatTypography(orientation, total, tableWidth, cols);
+        const rowHeight = Math.max(260, Math.floor(tableHeight / rows));
+        const tableRows = [];
+
+        for (let outputRow = 0; outputRow < rows; outputRow++) {
+          const cells = [];
+          for (let outputCol = 0; outputCol < cols; outputCol++) {
+            const outputIndex = outputRow * cols + outputCol + 1;
+            const sourceIndex = flipGrid ? total - outputIndex + 1 : outputIndex;
+            const coordinate = getSeatCoordinateFromIndex(sourceIndex, cols);
+            const assigned = getStudentBySeatCoordinate(coordinate.row, coordinate.col);
+            if (!assigned) {
+              cells.push({
+                content: createWordParagraph('X', { size: typography.name - 3, bold: true }),
+                padding: 35
+              });
+              continue;
+            }
+
+            cells.push({
+              content: [
+                createWordParagraph(assigned.seat || '', { size: typography.seat - 3, bold: true }),
+                createWordParagraph(assigned.name || '', { size: typography.name - 3, bold: true }),
+                createWordParagraph(getOfficerDisplay(assigned), { size: typography.role - 3, color: '444444' }),
+                createWordParagraph(getAssistantDisplay(assigned), { size: typography.role - 3, color: '444444' })
+              ].join(''),
+              padding: 35
+            });
+          }
+          tableRows.push({ cells, height: rowHeight, heightRule: 'exact' });
+        }
+        return createWordTable(columnWidths, tableRows);
+      }
+
+      function createEditableWordPodium(tableWidth) {
+        return createWordTable([tableWidth], [{
+          height: 340,
+          heightRule: 'exact',
+          cells: [{
+            content: createWordParagraph('講台', { size: 13, bold: true }),
+            fill: 'EEEEEE',
+            padding: 20
+          }]
+        }]);
+      }
+
+      function createEditableWordSeatPanel(podiumPosition, flipGrid, orientation, tableWidth, tableHeight) {
+        const seatTable = createEditableWordSeatTable(flipGrid, orientation, tableWidth, tableHeight);
+        const podium = createEditableWordPodium(tableWidth);
+        return podiumPosition === 'top'
+          ? `${podium}${createWordSpacer(50)}${seatTable}`
+          : `${seatTable}${createWordSpacer(50)}${podium}`;
+      }
+
+      function createEditableWordNameList(orientation, tableWidth) {
+        const sortedStudents = getStudentsSortedBySeat();
+        const groupSize = orientation === 'landscape' ? 20 : 10;
+        const groups = [];
+        for (let index = 0; index < sortedStudents.length; index += groupSize) {
+          groups.push(sortedStudents.slice(index, index + groupSize));
+        }
+        if (!groups.length) groups.push([]);
+
+        const groupWidth = Math.floor(tableWidth / groups.length);
+        const columnWidths = [];
+        groups.forEach((_, index) => {
+          const currentGroupWidth = index === groups.length - 1
+            ? tableWidth - columnWidths.reduce((sum, width) => sum + width, 0)
+            : groupWidth;
+          const seatWidth = Math.max(420, Math.floor(currentGroupWidth * 0.28));
+          columnWidths.push(seatWidth, currentGroupWidth - seatWidth);
+        });
+
+        const headerCells = [];
+        groups.forEach(() => {
+          headerCells.push(
+            { content: createWordParagraph('座號', { size: 8, bold: true }), fill: 'F0F0F0', padding: 25 },
+            { content: createWordParagraph('姓名', { size: 10, bold: true }), fill: 'F0F0F0', padding: 25 }
+          );
+        });
+        const rows = [{ cells: headerCells, height: 280, heightRule: 'exact' }];
+        for (let rowIndex = 0; rowIndex < groupSize; rowIndex++) {
+          const cells = [];
+          groups.forEach(group => {
+            const student = group[rowIndex];
+            cells.push(
+              { content: createWordParagraph(student?.seat || '', { size: 8 }), padding: 20 },
+              { content: createWordParagraph(student?.name || '', { size: 11, bold: true }), padding: 20 }
+            );
+          });
+          rows.push({ cells, height: orientation === 'landscape' ? 300 : 260, heightRule: 'exact' });
+        }
+        return `${createWordParagraph('名條（座號 / 姓名）', { size: 13, bold: true, alignment: 'left', after: 60 })}${createWordTable(columnWidths, rows)}`;
+      }
+
+      function createEditableWordRoleSection(entries, title, tableWidth, emptyMessage) {
+        const columnWidths = [
+          Math.floor(tableWidth * 0.20),
+          Math.floor(tableWidth * 0.30),
+          Math.floor(tableWidth * 0.20),
+          tableWidth - Math.floor(tableWidth * 0.70)
+        ];
+        const rows = [{
+          height: 260,
+          heightRule: 'exact',
+          cells: [{
+            content: createWordParagraph(title, { size: 10, bold: true }),
+            gridSpan: 4,
+            fill: 'EAEAEA',
+            padding: 20
+          }]
+        }];
+
+        if (!entries.length) {
+          rows.push({
+            cells: [{
+              content: createWordParagraph(emptyMessage, { size: 8, color: '666666' }),
+              gridSpan: 4,
+              fill: 'F6F6F6',
+              padding: 20
+            }]
+          });
+          return createWordTable(columnWidths, rows);
+        }
+
+        for (let index = 0; index < entries.length; index += 2) {
+          const cells = [];
+          for (let pairIndex = 0; pairIndex < 2; pairIndex++) {
+            const entry = entries[index + pairIndex];
+            cells.push(
+              {
+                content: createWordParagraph(entry?.role || '', { size: 8, bold: true }),
+                fill: entry ? 'F2F2F2' : undefined,
+                padding: 20
+              },
+              {
+                content: createWordParagraph(entry ? entry.students.join('、') : '', { size: 8.5, bold: true }),
+                padding: 20
+              }
+            );
+          }
+          rows.push({ cells, height: 280, heightRule: 'atLeast' });
+        }
+        return createWordTable(columnWidths, rows);
+      }
+
+      function createEditableWordRoleRoster(tableWidth) {
+        const entries = getPdfRoleRosterEntries();
+        const officers = entries.filter(entry => entry.key.startsWith('officer:'));
+        const assistants = entries.filter(entry => entry.key.startsWith('assistant:'));
+        return `${createEditableWordRoleSection(officers, '幹部', tableWidth, '尚未指派幹部')}
+          ${createWordSpacer(40)}
+          ${createEditableWordRoleSection(assistants, '小老師', tableWidth, '尚未指派小老師')}`;
+      }
+
+      function createEditableWordNameStrip(tableWidth, availableHeight) {
+        const sortedStudents = getStudentsSortedBySeat();
+        const seatWidth = Math.max(400, Math.floor(tableWidth * 0.32));
+        const columnWidths = [seatWidth, tableWidth - seatWidth];
+        const rowHeight = Math.max(220, Math.floor(availableHeight / Math.max(1, sortedStudents.length + 1)));
+        const rows = [{
+          height: rowHeight,
+          heightRule: 'exact',
+          cells: [{
+            content: createWordParagraph('名條', { size: 11, bold: true }),
+            gridSpan: 2,
+            fill: 'EAEAEA',
+            padding: 20
+          }]
+        }];
+        sortedStudents.forEach(student => {
+          rows.push({
+            height: rowHeight,
+            heightRule: 'exact',
+            cells: [
+              { content: createWordParagraph(student.seat || '', { size: 7.5 }), padding: 15 },
+              { content: createWordParagraph(student.name || '', { size: 9, bold: true }), padding: 15 }
+            ]
+          });
+        });
+        return createWordTable(columnWidths, rows);
+      }
+
+      function createEditableWordHeader(tableWidth) {
+        const sideWidth = Math.floor(tableWidth * 0.25);
+        const titleWidth = tableWidth - sideWidth * 2;
+        const metaContent = getPdfHeaderMetaLines()
+          .map(line => createWordParagraph(line, { size: 14, bold: true, alignment: 'right' }))
+          .join('') || createWordParagraph('');
+        return `${createWordTable([sideWidth, titleWidth, sideWidth], [{
+          height: 720,
+          heightRule: 'atLeast',
+          cells: [
+            { content: createWordParagraph(''), border: false, padding: 0 },
+            { content: createWordParagraph(getPdfTitle(), { size: 22, bold: true }), border: false, padding: 0 },
+            { content: metaContent, border: false, padding: 0 }
+          ]
+        }])}${createWordSpacer(50)}`;
+      }
+
+      function createEditableWordStandardPage(podiumPosition, flipGrid, orientation, contentWidth) {
+        const header = createEditableWordHeader(contentWidth);
+        if (orientation === 'landscape') {
+          const seatWidth = Math.floor(contentWidth * 0.70);
+          const nameWidth = contentWidth - seatWidth;
+          const seatPanel = createEditableWordSeatPanel(podiumPosition, flipGrid, orientation, seatWidth - 80, 8500);
+          const nameList = createEditableWordNameList(orientation, nameWidth - 80);
+          const layout = createWordTable([seatWidth, nameWidth], [{
+            cells: [
+              { content: seatPanel, border: false, padding: 40, vertical: 'top', nested: true },
+              { content: nameList, border: false, padding: 40, vertical: 'top', nested: true }
+            ]
+          }]);
+          return `${header}${layout}`;
+        }
+
+        const seatPanel = createEditableWordSeatPanel(podiumPosition, flipGrid, orientation, contentWidth, 8500);
+        return `${header}${seatPanel}${createWordSpacer(80)}${createEditableWordNameList(orientation, contentWidth)}`;
+      }
+
+      function createEditableWordSummaryPage(podiumPosition, contentWidth) {
+        const header = createEditableWordHeader(contentWidth);
+        const nameWidth = 2050;
+        const leftWidth = contentWidth - nameWidth;
+        const rotateToBottom = podiumPosition === 'top';
+        const leftContent = `${createEditableWordRoleRoster(leftWidth - 80)}
+          ${createWordSpacer(60)}
+          ${createEditableWordSeatPanel('bottom', rotateToBottom, 'portrait', leftWidth - 80, 7000)}`;
+        const layout = createWordTable([leftWidth, nameWidth], [{
+          cells: [
+            { content: leftContent, border: false, padding: 40, vertical: 'top', nested: true },
+            { content: createEditableWordNameStrip(nameWidth - 80, 13800), border: false, padding: 40, vertical: 'top', nested: true }
+          ]
+        }]);
+        return `${header}${layout}`;
+      }
+
+      function createEditableWordDocx() {
+        const layoutStyle = getSelectedPdfLayoutStyle();
+        const orientation = getSelectedPdfOrientation();
+        const isLandscape = orientation === 'landscape';
+        const pageWidthTwips = isLandscape ? 16838 : 11906;
+        const pageHeightTwips = isLandscape ? 11906 : 16838;
+        const marginTwips = 397;
+        const contentWidth = pageWidthTwips - marginTwips * 2;
+        const selectedPodiumPosition = document.getElementById('podiumPosition')?.value || 'bottom';
+        const oppositePodiumPosition = selectedPodiumPosition === 'top' ? 'bottom' : 'top';
+        const pages = layoutStyle === 'portrait-summary'
+          ? [createEditableWordSummaryPage(selectedPodiumPosition, contentWidth)]
+          : [
+              createEditableWordStandardPage(selectedPodiumPosition, false, orientation, contentWidth),
+              createEditableWordStandardPage(oppositePodiumPosition, true, orientation, contentWidth)
+            ];
+        const pageBreak = '<w:p><w:pPr><w:spacing w:before="0" w:after="0"/></w:pPr><w:r><w:br w:type="page"/></w:r></w:p>';
+        const documentXml = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+          <w:document xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">
+            <w:body>
+              ${pages.join(pageBreak)}
+              <w:sectPr>
+                <w:pgSz w:w="${pageWidthTwips}" w:h="${pageHeightTwips}"${isLandscape ? ' w:orient="landscape"' : ''}/>
+                <w:pgMar w:top="${marginTwips}" w:right="${marginTwips}" w:bottom="${marginTwips}" w:left="${marginTwips}" w:header="0" w:footer="0" w:gutter="0"/>
+              </w:sectPr>
+            </w:body>
+          </w:document>`;
+        const files = [
+          {
+            name: '[Content_Types].xml',
+            data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+              <Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types">
+                <Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/>
+                <Default Extension="xml" ContentType="application/xml"/>
+                <Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>
+              </Types>`
+          },
+          {
+            name: '_rels/.rels',
+            data: `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+              <Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">
+                <Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/>
+              </Relationships>`
+          },
+          { name: 'word/document.xml', data: documentXml }
+        ];
+        return createStoredZip(
+          files,
+          'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+        );
+      }
+
+      function exportWordA4() {
+        if (!students.length) {
+          alert('請先新增或匯入學生資料。');
+          return;
+        }
+        const exportFileName = requestExportFileName(getSeatLayoutExportBaseName(), 'docx');
+        if (!exportFileName) return;
+
+        try {
+          const docxBlob = createEditableWordDocx();
+          const link = document.createElement('a');
+          const objectUrl = URL.createObjectURL(docxBlob);
+          link.href = objectUrl;
+          link.download = exportFileName;
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+          markExportClean();
+        } catch (error) {
+          alert('Word 匯出失敗，請稍後再試。');
+        }
+      }
+
       function exportPdf() {
         if (!students.length) {
           alert('請先新增或匯入學生資料。');
@@ -1960,15 +2490,7 @@
         }
         const exportFileName = requestExportFileName(getSeatLayoutExportBaseName(), 'pdf');
         if (!exportFileName) return;
-        const selectedPodiumPosition = document.getElementById('podiumPosition')?.value || 'bottom';
-        const oppositePodiumPosition = selectedPodiumPosition === 'top' ? 'bottom' : 'top';
-        const layoutStyle = getSelectedPdfLayoutStyle();
-        const layouts = layoutStyle === 'portrait-summary'
-          ? [createPortraitSummaryLayout(selectedPodiumPosition)]
-          : [
-              createPdfSeatLayout(selectedPodiumPosition, false),
-              createPdfSeatLayout(oppositePodiumPosition, true)
-            ];
+        const layouts = createSelectedExportLayouts();
         const pdfTitle = getPdfTitle();
 
         Promise.all(layouts.map(layout => renderLayoutToCanvas(layout, pdfTitle)))
