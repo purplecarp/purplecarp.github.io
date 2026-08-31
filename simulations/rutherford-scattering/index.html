@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8">
+    <title>Alpha 粒子散射實驗 - 物理模擬</title>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <meta name="description" content="互動式 Rutherford alpha 粒子散射實驗，觀察撞擊參數、粒子能量與原子核電荷數對散射角的影響。">
+    <link href="../../images/fish.png" rel="shortcut icon">
+
+    <link href="../../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../../css/normalize.css" rel="stylesheet">
+    <link href="../../css/style.css" rel="stylesheet">
+    <link href="../../css/responsive.css" rel="stylesheet">
+    <link href="../../css/simulations.css" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Slab:400,700" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,300,500,700" rel="stylesheet" type="text/css">
+
+    <style>
+        :root {
+            --space: #07111f;
+            --space-light: #101e31;
+            --panel: #ffffff;
+            --ink: #263545;
+            --muted: #6c7a89;
+            --alpha: #ffd166;
+            --alpha-glow: #ff9f1c;
+            --nucleus: #ff5d73;
+            --cyan: #4dd9ff;
+            --purple: #9b7cff;
+        }
+
+        .page-header .course-tag {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 5px 13px;
+            border-radius: 999px;
+            background: #ede8ff;
+            color: #6741d9;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: .04em;
+        }
+
+        .principle-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .principle-card {
+            padding: 11px 13px;
+            border: 1px solid #dfe7ef;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, .72);
+        }
+
+        .principle-card strong {
+            display: block;
+            margin-bottom: 4px;
+            color: #34495e;
+            font-size: 13px;
+        }
+
+        .principle-card span {
+            color: #556575;
+            font-size: 13px;
+            line-height: 1.55;
+        }
+
+        .control-deck {
+            margin-bottom: 14px;
+            padding: 14px;
+            border: 1px solid #e1e7ee;
+            border-radius: 12px;
+            background: var(--panel);
+            box-shadow: 0 7px 24px rgba(27, 43, 65, .08);
+        }
+
+        .control-topline,
+        .control-grid,
+        .readout-grid {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .control-topline {
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .mode-switch {
+            display: inline-flex;
+            padding: 3px;
+            border-radius: 8px;
+            background: #edf1f5;
+        }
+
+        .mode-btn {
+            min-width: 112px;
+            padding: 7px 13px;
+            border: 0;
+            border-radius: 6px;
+            background: transparent;
+            color: #536273;
+            font-size: 13px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .mode-btn.active {
+            background: #34495e;
+            color: #fff;
+            box-shadow: 0 2px 7px rgba(31, 49, 68, .25);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 6px;
+        }
+
+        .action-buttons .btn {
+            min-width: 88px;
+            padding: 7px 11px;
+            border: 0;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .action-buttons .btn:disabled {
+            opacity: .48;
+            cursor: not-allowed;
+        }
+
+        .control-grid {
+            display: grid;
+            grid-template-columns: 1.05fr 1.4fr 1.4fr 1fr auto;
+            padding-top: 12px;
+            border-top: 1px solid #edf0f3;
+        }
+
+        .control-unit {
+            min-width: 0;
+        }
+
+        .control-unit label {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 4px;
+            color: #4d5c6b;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .control-unit output {
+            color: #325d88;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .control-unit input[type="range"] {
+            width: 100%;
+            accent-color: #547bd1;
+        }
+
+        .control-unit select {
+            width: 100%;
+            height: 31px;
+            padding: 4px 7px;
+            border: 1px solid #cad3dc;
+            border-radius: 5px;
+            background: #fff;
+            color: #34495e;
+            font-size: 13px;
+        }
+
+        .toggle-stack {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            padding-top: 1px;
+        }
+
+        .toggle-stack label {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            margin: 0;
+            color: #536273;
+            font-size: 12px;
+            font-weight: 500;
+            white-space: nowrap;
+        }
+
+        .readout-grid {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            margin-top: 12px;
+        }
+
+        .readout {
+            min-width: 0;
+            padding: 8px 10px;
+            border-left: 3px solid #8ca6c1;
+            border-radius: 5px;
+            background: #f5f8fb;
+        }
+
+        .readout:nth-child(1) { border-color: var(--alpha-glow); }
+        .readout:nth-child(2) { border-color: var(--cyan); }
+        .readout:nth-child(3) { border-color: var(--nucleus); }
+        .readout:nth-child(4) { border-color: var(--purple); }
+
+        .readout-label {
+            display: block;
+            overflow: hidden;
+            color: #798796;
+            font-size: 10px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .readout-value {
+            display: block;
+            overflow: hidden;
+            margin-top: 2px;
+            color: #263849;
+            font-size: 16px;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .experiment-stage {
+            display: grid;
+            grid-template-columns: minmax(0, 2.5fr) minmax(255px, 1fr);
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        .canvas-card {
+            position: relative;
+            min-width: 0;
+            overflow: hidden;
+            border-radius: 12px;
+            background: var(--space);
+            box-shadow: 0 10px 30px rgba(5, 16, 31, .18);
+        }
+
+        .canvas-title {
+            position: absolute;
+            z-index: 2;
+            top: 13px;
+            left: 16px;
+            margin: 0;
+            color: #eaf4ff;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: .03em;
+            pointer-events: none;
+        }
+
+        .canvas-hint {
+            position: absolute;
+            z-index: 2;
+            right: 14px;
+            bottom: 10px;
+            margin: 0;
+            color: rgba(220, 235, 248, .64);
+            font-size: 10px;
+            pointer-events: none;
+        }
+
+        .canvas-card canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+
+        #simCanvas {
+            aspect-ratio: 16 / 9;
+            cursor: crosshair;
+        }
+
+        #histCanvas {
+            aspect-ratio: 2 / 3;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            color: #5b6a79;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #95a5a6;
+            box-shadow: 0 0 0 3px rgba(149, 165, 166, .15);
+        }
+
+        .status-pill.running .status-dot {
+            background: #35b779;
+            box-shadow: 0 0 0 3px rgba(53, 183, 121, .16);
+            animation: status-pulse 1.2s ease-in-out infinite;
+        }
+
+        @keyframes status-pulse {
+            50% { transform: scale(1.3); }
+        }
+
+        .experiment-note {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 18px;
+        }
+
+        .experiment-note ol {
+            margin: 7px 0 0 20px;
+            padding: 0;
+        }
+
+        .experiment-note li {
+            margin-bottom: 5px;
+            color: #526170;
+            line-height: 1.55;
+        }
+
+        @media (max-width: 991px) {
+            .principle-grid { grid-template-columns: 1fr; }
+            .control-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .toggle-stack { grid-column: 1 / -1; flex-direction: row; gap: 15px; }
+            .experiment-stage { grid-template-columns: 1fr; }
+        }
+
+        @media (max-width: 680px) {
+            .control-topline { align-items: stretch; flex-direction: column; }
+            .mode-switch, .action-buttons { display: grid; grid-template-columns: 1fr 1fr; }
+            .action-buttons { grid-template-columns: repeat(3, 1fr); }
+            .mode-btn, .action-buttons .btn { min-width: 0; }
+            .control-grid { grid-template-columns: 1fr; }
+            .toggle-stack { grid-column: auto; }
+            .readout-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .readout:last-child { grid-column: 1 / -1; }
+            .readout-value { font-size: 14px; }
+            .experiment-note { grid-template-columns: 1fr; gap: 4px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .status-pill.running .status-dot { animation: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+      <div class="for-sticky">
+        <div class="col-md-2 col-xs-6 logo">
+          <a href="../../index.html"><img alt="logo" class="logo-nav" src="../../images/fish.png"></a>
+        </div>
+      </div>
+      <div class="menu-wrap">
+        <nav class="menu">
+          <div class="menu-list">
+            <a href="../../index.html#home"><span>首頁</span></a>
+            <a href="../../index.html#about"><span>關於我</span></a>
+            <a href="../../index.html#experience"><span>教學經驗</span></a>
+            <a href="../../teaching-gallery.html"><span>查看教學剪影</span></a>
+            <a href="../../physics-simulations.html" class="active"><span>高中物理內容</span></a>
+            <a href="../../index.html#skills"><span>專業技能</span></a>
+            <a href="../../index.html#achievements"><span>成果展示</span></a>
+            <a href="../../index.html#philosophy"><span>教育理念</span></a>
+            <a href="../../index.html#contact"><span>聯絡方式</span></a>
+          </div>
+        </nav>
+        <button class="close-button" id="close-button">Close Menu</button>
+      </div>
+      <button class="menu-button" id="open-button" aria-label="開啟選單">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+
+    <div class="top-nav">
+        <div class="container">
+            <a href="../../index.html" class="nav-brand">
+                <img src="../../images/fish.png" alt="Logo">
+                <h2>物鯉魚教學模擬</h2>
+            </a>
+            <a href="../../physics-simulations.html" class="btn-back">← 返回列表</a>
+        </div>
+    </div>
+
+    <main class="main-container">
+        <div class="page-header">
+            <h1>☢️ Alpha 粒子散射實驗</h1>
+            <p class="subtitle">Rutherford Scattering Experiment｜用粒子軌跡看見原子核</p>
+            <span class="course-tag">選修物理 V・近代物理</span>
+        </div>
+
+        <section class="info-box physics-principle" aria-labelledby="principle-title">
+            <h4 id="principle-title">📚 物理原理與公式</h4>
+            <p>
+                帶正電的 alpha 粒子（<sup>4</sup>He<sup>2+</sup>）接近帶正電的原子核時，受到庫侖斥力而偏轉。
+                多數粒子近乎直線穿過，少數非常接近原子核的粒子會大角度散射，顯示原子的正電荷與大部分質量集中在極小的原子核內。
+            </p>
+            <div class="principle-grid">
+                <div class="principle-card">
+                    <strong>庫侖斥力</strong>
+                    <span>F = k(2e)(Ze) / r²，距離越近，排斥作用越強。</span>
+                </div>
+                <div class="principle-card">
+                    <strong>Rutherford 散射角</strong>
+                    <span>θ = 2 tan⁻¹[(1.44 Z) / (E·|b|)]，E 以 MeV、b 以 fm 表示。</span>
+                </div>
+                <div class="principle-card">
+                    <strong>正面碰撞最近距離</strong>
+                    <span>r<sub>min</sub> = 2.88 Z / E（fm），由初動能完全轉為電位能。</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="control-deck" aria-label="實驗控制面板">
+            <div class="control-topline">
+                <div class="mode-switch" role="group" aria-label="模擬模式">
+                    <button type="button" class="mode-btn active" id="singleModeBtn" aria-pressed="true">單一粒子</button>
+                    <button type="button" class="mode-btn" id="beamModeBtn" aria-pressed="false">粒子束</button>
+                </div>
+                <div class="status-pill" id="statusPill" aria-live="polite">
+                    <span class="status-dot"></span>
+                    <span id="statusText">已就緒</span>
+                </div>
+                <div class="action-buttons">
+                    <button type="button" class="btn btn-start" id="startBtn">▶ 開始</button>
+                    <button type="button" class="btn btn-pause" id="pauseBtn" disabled>⏸ 暫停</button>
+                    <button type="button" class="btn btn-reset" id="resetBtn">↻ 重置</button>
+                </div>
+            </div>
+
+            <div class="control-grid">
+                <div class="control-unit">
+                    <label for="targetSelect"><span>靶核</span><output id="targetValue">Au，Z = 79</output></label>
+                    <select id="targetSelect">
+                        <option value="13">鋁 Al（Z = 13）</option>
+                        <option value="29">銅 Cu（Z = 29）</option>
+                        <option value="47">銀 Ag（Z = 47）</option>
+                        <option value="79" selected>金 Au（Z = 79）</option>
+                    </select>
+                </div>
+                <div class="control-unit">
+                    <label for="energySlider"><span>粒子能量 E</span><output id="energyValue">5.0 MeV</output></label>
+                    <input type="range" id="energySlider" min="3" max="10" step="0.1" value="5">
+                </div>
+                <div class="control-unit" id="impactControl">
+                    <label for="impactSlider"><span>撞擊參數 b</span><output id="impactValue">+35 fm</output></label>
+                    <input type="range" id="impactSlider" min="-120" max="120" step="1" value="35">
+                </div>
+                <div class="control-unit" id="beamControl" hidden>
+                    <label for="beamSlider"><span>粒子束半寬</span><output id="beamValue">120 fm</output></label>
+                    <input type="range" id="beamSlider" min="50" max="180" step="5" value="120">
+                </div>
+                <div class="control-unit">
+                    <label for="speedSlider"><span>播放速度</span><output id="speedValue">1.0×</output></label>
+                    <input type="range" id="speedSlider" min="0.5" max="2.5" step="0.25" value="1">
+                </div>
+                <div class="toggle-stack">
+                    <label><input type="checkbox" id="trailToggle" checked> 顯示軌跡</label>
+                    <label><input type="checkbox" id="forceToggle" checked> 顯示受力</label>
+                </div>
+            </div>
+
+            <div class="readout-grid" aria-label="即時數據">
+                <div class="readout">
+                    <span class="readout-label">理論散射角 |θ|</span>
+                    <span class="readout-value" id="angleReadout">66.1°</span>
+                </div>
+                <div class="readout">
+                    <span class="readout-label">理論最近距離 r<sub>min</sub></span>
+                    <span class="readout-value" id="distanceReadout">64.5 fm</span>
+                </div>
+                <div class="readout">
+                    <span class="readout-label">靶核電荷</span>
+                    <span class="readout-value" id="chargeReadout">+79e</span>
+                </div>
+                <div class="readout">
+                    <span class="readout-label">已偵測粒子</span>
+                    <span class="readout-value" id="detectedReadout">0</span>
+                </div>
+                <div class="readout">
+                    <span class="readout-label">大角度散射（≥ 90°）</span>
+                    <span class="readout-value" id="backscatterReadout">0.0%</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="experiment-stage" aria-label="模擬動畫與統計圖">
+            <div class="canvas-card">
+                <h2 class="canvas-title">放大的金屬箔原子核區域</h2>
+                <canvas id="simCanvas" width="960" height="540">此瀏覽器不支援 Canvas，無法顯示 alpha 粒子散射動畫。</canvas>
+                <p class="canvas-hint" id="canvasHint">單一粒子模式：點擊畫布可快速改變撞擊參數</p>
+            </div>
+            <div class="canvas-card">
+                <h2 class="canvas-title">散射角分布</h2>
+                <canvas id="histCanvas" width="360" height="540">此瀏覽器不支援 Canvas，無法顯示散射角分布。</canvas>
+            </div>
+        </section>
+
+        <section class="info-box teaching-note experiment-note">
+            <div>
+                <h4>💡 建議操作</h4>
+                <ol>
+                    <li>在「單一粒子」模式改變 b，觀察粒子越靠近原子核，散射角越大。</li>
+                    <li>比較 Al 與 Au：相同 E、b 下，核電荷數越大，偏轉越明顯。</li>
+                    <li>提高 E，觀察高速 alpha 粒子較不容易被偏轉。</li>
+                    <li>切換「粒子束」，累積角度分布並留意大角度事件很少發生。</li>
+                </ol>
+            </div>
+            <div>
+                <h4>🔎 思考問題</h4>
+                <ol>
+                    <li>為什麼大多數粒子幾乎不偏轉？這反映原子內部有多少空間？</li>
+                    <li>若正電荷平均分散在整個原子中，還會出現向後散射嗎？</li>
+                    <li>b = 0 時，動能在最近點轉換成哪一種能量？</li>
+                </ol>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        class RutherfordSimulation {
+            constructor() {
+                this.canvas = document.getElementById('simCanvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.histCanvas = document.getElementById('histCanvas');
+                this.histCtx = this.histCanvas.getContext('2d');
+                this.dpr = Math.max(1, window.devicePixelRatio || 1);
+                this.simSize = this.prepareCanvas(this.canvas, this.ctx);
+                this.histSize = this.prepareCanvas(this.histCanvas, this.histCtx);
+
+                this.world = { minX: -520, maxX: 520, minY: -290, maxY: 290 };
+                this.detectorRadius = 215;
+                this.mode = 'single';
+                this.params = { Z: 79, energy: 5, impact: 35, beamWidth: 120, speed: 1 };
+                this.symbols = { 13: 'Al', 29: 'Cu', 47: 'Ag', 79: 'Au' };
+                this.colors = { 13: '#b7c4cf', 29: '#e89b63', 47: '#dce6ed', 79: '#ffd166' };
+                this.isRunning = false;
+                this.animationId = null;
+                this.lastTimestamp = null;
+                this.spawnAccumulator = 0;
+                this.particles = [];
+                this.flashes = [];
+                this.angleBins = new Array(12).fill(0);
+                this.detected = 0;
+                this.backscattered = 0;
+
+                this.cacheElements();
+                this.bindControls();
+                this.reset();
+            }
+
+            prepareCanvas(canvas, ctx) {
+                const width = Number(canvas.getAttribute('width'));
+                const height = Number(canvas.getAttribute('height'));
+                canvas.width = Math.round(width * this.dpr);
+                canvas.height = Math.round(height * this.dpr);
+                ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+                return { width, height };
+            }
+
+            cacheElements() {
+                this.el = {
+                    target: document.getElementById('targetSelect'),
+                    energy: document.getElementById('energySlider'),
+                    impact: document.getElementById('impactSlider'),
+                    beam: document.getElementById('beamSlider'),
+                    speed: document.getElementById('speedSlider'),
+                    trail: document.getElementById('trailToggle'),
+                    force: document.getElementById('forceToggle'),
+                    targetValue: document.getElementById('targetValue'),
+                    energyValue: document.getElementById('energyValue'),
+                    impactValue: document.getElementById('impactValue'),
+                    beamValue: document.getElementById('beamValue'),
+                    speedValue: document.getElementById('speedValue'),
+                    impactControl: document.getElementById('impactControl'),
+                    beamControl: document.getElementById('beamControl'),
+                    singleMode: document.getElementById('singleModeBtn'),
+                    beamMode: document.getElementById('beamModeBtn'),
+                    start: document.getElementById('startBtn'),
+                    pause: document.getElementById('pauseBtn'),
+                    reset: document.getElementById('resetBtn'),
+                    statusPill: document.getElementById('statusPill'),
+                    statusText: document.getElementById('statusText'),
+                    canvasHint: document.getElementById('canvasHint'),
+                    angle: document.getElementById('angleReadout'),
+                    distance: document.getElementById('distanceReadout'),
+                    charge: document.getElementById('chargeReadout'),
+                    detected: document.getElementById('detectedReadout'),
+                    backscatter: document.getElementById('backscatterReadout')
+                };
+            }
+
+            bindControls() {
+                this.el.target.addEventListener('change', () => {
+                    this.params.Z = Number(this.el.target.value);
+                    this.parameterChanged();
+                });
+                this.el.energy.addEventListener('input', () => {
+                    this.params.energy = Number(this.el.energy.value);
+                    this.parameterChanged();
+                });
+                this.el.impact.addEventListener('input', () => {
+                    this.params.impact = Number(this.el.impact.value);
+                    this.parameterChanged();
+                });
+                this.el.beam.addEventListener('input', () => {
+                    this.params.beamWidth = Number(this.el.beam.value);
+                    this.parameterChanged();
+                });
+                this.el.speed.addEventListener('input', () => {
+                    this.params.speed = Number(this.el.speed.value);
+                    this.updateLabels();
+                });
+                this.el.trail.addEventListener('change', () => this.draw());
+                this.el.force.addEventListener('change', () => this.draw());
+                this.el.singleMode.addEventListener('click', () => this.setMode('single'));
+                this.el.beamMode.addEventListener('click', () => this.setMode('beam'));
+                this.el.start.addEventListener('click', () => this.start());
+                this.el.pause.addEventListener('click', () => this.pause());
+                this.el.reset.addEventListener('click', () => this.reset());
+                this.canvas.addEventListener('click', (event) => this.setImpactFromCanvas(event));
+            }
+
+            parameterChanged() {
+                this.reset();
+            }
+
+            setMode(mode) {
+                if (this.mode === mode) return;
+                this.mode = mode;
+                const single = mode === 'single';
+                this.el.singleMode.classList.toggle('active', single);
+                this.el.beamMode.classList.toggle('active', !single);
+                this.el.singleMode.setAttribute('aria-pressed', String(single));
+                this.el.beamMode.setAttribute('aria-pressed', String(!single));
+                this.el.impactControl.hidden = !single;
+                this.el.beamControl.hidden = single;
+                this.el.canvasHint.textContent = single
+                    ? '單一粒子模式：點擊畫布可快速改變撞擊參數'
+                    : '粒子束模式：累積更多粒子以觀察角度分布';
+                this.reset();
+            }
+
+            setImpactFromCanvas(event) {
+                if (this.mode !== 'single') return;
+                const rect = this.canvas.getBoundingClientRect();
+                const cssY = (event.clientY - rect.top) * this.simSize.height / rect.height;
+                const worldY = this.screenToWorldY(cssY);
+                this.params.impact = Math.round(Math.max(-120, Math.min(120, worldY)));
+                this.el.impact.value = this.params.impact;
+                this.reset();
+            }
+
+            start() {
+                if (this.isRunning) return;
+                if (this.mode === 'single' && (this.particles.length === 0 || this.particles[0].done)) {
+                    this.particles = [this.createParticle(this.params.impact, this.params.energy)];
+                }
+                this.isRunning = true;
+                this.lastTimestamp = null;
+                this.updateStatus();
+                this.animationId = requestAnimationFrame((time) => this.loop(time));
+            }
+
+            pause() {
+                this.isRunning = false;
+                if (this.animationId !== null) cancelAnimationFrame(this.animationId);
+                this.animationId = null;
+                this.updateStatus();
+                this.draw();
+            }
+
+            reset() {
+                this.pause();
+                this.spawnAccumulator = 0;
+                this.flashes = [];
+                this.angleBins.fill(0);
+                this.detected = 0;
+                this.backscattered = 0;
+                this.particles = this.mode === 'single'
+                    ? [this.createParticle(this.params.impact, this.params.energy)]
+                    : [];
+                this.updateLabels();
+                this.updateReadouts();
+                this.draw();
+            }
+
+            loop(timestamp) {
+                if (!this.isRunning) return;
+                if (this.lastTimestamp === null) this.lastTimestamp = timestamp;
+                const realDt = Math.min((timestamp - this.lastTimestamp) / 1000, 0.035);
+                this.lastTimestamp = timestamp;
+                this.update(realDt * this.params.speed);
+                this.draw();
+
+                if (this.mode === 'single' && this.particles[0] && this.particles[0].done) {
+                    this.pause();
+                    this.el.statusText.textContent = '本次散射完成';
+                    return;
+                }
+                this.animationId = requestAnimationFrame((time) => this.loop(time));
+            }
+
+            createParticle(impact, energy) {
+                const x = -500;
+                const y = impact;
+                const asymptoticSpeed = 185;
+                const A = 1.439964 * this.params.Z / energy;
+                const r = Math.hypot(x, y);
+                const vx = asymptoticSpeed * Math.sqrt(Math.max(0.72, 1 - (2 * A / r)));
+                return {
+                    x, y, vx, vy: 0, energy,
+                    k: asymptoticSpeed * asymptoticSpeed * A,
+                    radius: 4.2,
+                    trail: [{ x, y }],
+                    trailClock: 0,
+                    minR: r,
+                    previousR: r,
+                    detected: false,
+                    done: false
+                };
+            }
+
+            update(dt) {
+                if (this.mode === 'beam') {
+                    this.spawnAccumulator += dt;
+                    const interval = 0.105;
+                    while (this.spawnAccumulator >= interval && this.particles.length < 75) {
+                        this.spawnAccumulator -= interval;
+                        const impact = (Math.random() * 2 - 1) * this.params.beamWidth;
+                        const energy = this.params.energy * (0.97 + Math.random() * 0.06);
+                        this.particles.push(this.createParticle(impact, energy));
+                    }
+                }
+
+                const steps = Math.max(5, Math.ceil(dt / 0.004));
+                const h = dt / steps;
+                for (let step = 0; step < steps; step += 1) {
+                    for (const p of this.particles) {
+                        if (p.done) continue;
+                        const r2 = p.x * p.x + p.y * p.y;
+                        const r = Math.sqrt(r2);
+                        const factor = p.k / Math.max(r2 * r, 1);
+                        p.vx += factor * p.x * h;
+                        p.vy += factor * p.y * h;
+                        p.x += p.vx * h;
+                        p.y += p.vy * h;
+                        p.minR = Math.min(p.minR, r);
+
+                        const newR = Math.hypot(p.x, p.y);
+                        const movingOutward = p.x * p.vx + p.y * p.vy > 0;
+                        if (!p.detected && p.previousR < this.detectorRadius && newR >= this.detectorRadius && movingOutward) {
+                            this.recordDetection(p);
+                        }
+                        p.previousR = newR;
+
+                        p.trailClock += h;
+                        if (p.trailClock >= 0.025) {
+                            p.trailClock = 0;
+                            p.trail.push({ x: p.x, y: p.y });
+                            if (p.trail.length > 260) p.trail.shift();
+                        }
+
+                        if (p.x > 540 || p.x < -540 || Math.abs(p.y) > 330) p.done = true;
+                    }
+                }
+
+                this.flashes.forEach((flash) => { flash.life -= dt; });
+                this.flashes = this.flashes.filter((flash) => flash.life > 0);
+                if (this.mode === 'beam') this.particles = this.particles.filter((p) => !p.done);
+                this.updateReadouts();
+            }
+
+            recordDetection(p) {
+                p.detected = true;
+                const angle = Math.min(180, Math.abs(Math.atan2(p.vy, p.vx) * 180 / Math.PI));
+                const bin = Math.min(this.angleBins.length - 1, Math.floor(angle / 15));
+                this.angleBins[bin] += 1;
+                this.detected += 1;
+                if (angle >= 90) this.backscattered += 1;
+                const phi = Math.atan2(p.y, p.x);
+                this.flashes.push({ angle: phi, life: 0.55, maxLife: 0.55 });
+            }
+
+            theoreticalValues() {
+                const b = Math.abs(this.params.impact);
+                const A = 1.439964 * this.params.Z / this.params.energy;
+                const angle = b < 0.001 ? 180 : 2 * Math.atan(A / b) * 180 / Math.PI;
+                const closest = A + Math.sqrt(A * A + b * b);
+                return { angle, closest };
+            }
+
+            updateLabels() {
+                const symbol = this.symbols[this.params.Z];
+                this.el.targetValue.textContent = `${symbol}，Z = ${this.params.Z}`;
+                this.el.energyValue.textContent = `${this.params.energy.toFixed(1)} MeV`;
+                const sign = this.params.impact > 0 ? '+' : this.params.impact < 0 ? '−' : '';
+                this.el.impactValue.textContent = `${sign}${Math.abs(this.params.impact)} fm`;
+                this.el.beamValue.textContent = `${this.params.beamWidth} fm`;
+                this.el.speedValue.textContent = `${this.params.speed.toFixed(2).replace(/\.00$/, '.0')}×`;
+                this.el.charge.textContent = `+${this.params.Z}e`;
+            }
+
+            updateReadouts() {
+                const theory = this.theoreticalValues();
+                this.el.angle.textContent = this.mode === 'single' ? `${theory.angle.toFixed(1)}°` : '逐粒子變化';
+                this.el.distance.textContent = this.mode === 'single' ? `${theory.closest.toFixed(1)} fm` : '逐粒子變化';
+                this.el.detected.textContent = String(this.detected);
+                const percentage = this.detected ? 100 * this.backscattered / this.detected : 0;
+                this.el.backscatter.textContent = `${percentage.toFixed(1)}%`;
+            }
+
+            updateStatus() {
+                this.el.statusPill.classList.toggle('running', this.isRunning);
+                this.el.statusText.textContent = this.isRunning
+                    ? (this.mode === 'single' ? '粒子飛行中' : '粒子束發射中')
+                    : '已就緒';
+                this.el.start.disabled = this.isRunning;
+                this.el.pause.disabled = !this.isRunning;
+            }
+
+            worldToScreen(x, y) {
+                const { width, height } = this.simSize;
+                return {
+                    x: (x - this.world.minX) / (this.world.maxX - this.world.minX) * width,
+                    y: height - (y - this.world.minY) / (this.world.maxY - this.world.minY) * height
+                };
+            }
+
+            screenToWorldY(y) {
+                return this.world.minY + (this.simSize.height - y) / this.simSize.height * (this.world.maxY - this.world.minY);
+            }
+
+            worldRadiusToPixels(radius) {
+                return radius / (this.world.maxX - this.world.minX) * this.simSize.width;
+            }
+
+            draw() {
+                this.drawSimulation();
+                this.drawHistogram();
+            }
+
+            drawSimulation() {
+                const ctx = this.ctx;
+                const { width: W, height: H } = this.simSize;
+                const gradient = ctx.createRadialGradient(W * .51, H * .5, 10, W * .51, H * .5, W * .7);
+                gradient.addColorStop(0, '#132842');
+                gradient.addColorStop(.45, '#0b192b');
+                gradient.addColorStop(1, '#050c16');
+                ctx.fillStyle = gradient;
+                ctx.fillRect(0, 0, W, H);
+
+                this.drawGrid(ctx, W, H);
+                const center = this.worldToScreen(0, 0);
+                this.drawDetector(ctx, center);
+                this.drawIncomingBeam(ctx);
+                this.drawNucleus(ctx, center);
+
+                for (const p of this.particles) {
+                    if (this.el.trail.checked) this.drawTrail(ctx, p);
+                }
+                for (const p of this.particles) this.drawParticle(ctx, p);
+
+                const active = [...this.particles].reverse().find((p) => !p.done);
+                if (active && this.el.force.checked) this.drawForceVector(ctx, active);
+                this.drawImpactGuide(ctx);
+                this.drawFlashes(ctx, center);
+                this.drawLegend(ctx, W, H);
+            }
+
+            drawGrid(ctx, W, H) {
+                ctx.save();
+                ctx.strokeStyle = 'rgba(129, 177, 218, .065)';
+                ctx.lineWidth = 1;
+                for (let x = 0; x <= W; x += 48) {
+                    ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, H); ctx.stroke();
+                }
+                for (let y = 0; y <= H; y += 48) {
+                    ctx.beginPath(); ctx.moveTo(0, y); ctx.lineTo(W, y); ctx.stroke();
+                }
+                ctx.restore();
+            }
+
+            drawDetector(ctx, center) {
+                const radius = this.worldRadiusToPixels(this.detectorRadius);
+                ctx.save();
+                ctx.translate(center.x, center.y);
+                ctx.setLineDash([9, 7]);
+                ctx.strokeStyle = 'rgba(77, 217, 255, .33)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(0, 0, radius, 0, Math.PI * 2);
+                ctx.stroke();
+                ctx.setLineDash([]);
+                for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 12) {
+                    ctx.rotate(Math.PI / 12);
+                    ctx.fillStyle = 'rgba(77, 217, 255, .42)';
+                    ctx.fillRect(radius - 4, -2, 8, 4);
+                }
+                ctx.restore();
+                ctx.fillStyle = 'rgba(183, 222, 246, .58)';
+                ctx.font = '11px Roboto, sans-serif';
+                ctx.fillText('環形偵測器', center.x + radius * .64, center.y - radius * .72);
+            }
+
+            drawIncomingBeam(ctx) {
+                const guideY = this.mode === 'single' ? this.params.impact : 0;
+                const from = this.worldToScreen(-500, guideY);
+                const to = this.worldToScreen(-360, guideY);
+                const grad = ctx.createLinearGradient(from.x, 0, to.x, 0);
+                grad.addColorStop(0, 'rgba(255, 209, 102, 0)');
+                grad.addColorStop(1, 'rgba(255, 209, 102, .38)');
+                ctx.strokeStyle = grad;
+                ctx.lineWidth = this.mode === 'single' ? 2 : Math.max(8, this.worldRadiusToPixels(this.params.beamWidth * 2));
+                ctx.beginPath();
+                ctx.moveTo(from.x, from.y);
+                ctx.lineTo(to.x, to.y);
+                ctx.stroke();
+                this.drawArrow(ctx, to.x - 35, to.y, to.x, to.y, '#ffd166', 7);
+            }
+
+            drawNucleus(ctx, center) {
+                const Z = this.params.Z;
+                const radius = 13 + Math.sqrt(Z) * .65;
+                const halo = ctx.createRadialGradient(center.x, center.y, radius * .4, center.x, center.y, radius * 2.7);
+                halo.addColorStop(0, 'rgba(255, 93, 115, .36)');
+                halo.addColorStop(1, 'rgba(255, 93, 115, 0)');
+                ctx.fillStyle = halo;
+                ctx.beginPath(); ctx.arc(center.x, center.y, radius * 2.7, 0, Math.PI * 2); ctx.fill();
+
+                ctx.save();
+                ctx.translate(center.x, center.y);
+                const nucleons = Math.min(18, 8 + Math.round(Math.sqrt(Z)));
+                for (let i = 0; i < nucleons; i += 1) {
+                    const angle = i * 2.39996;
+                    const spread = radius * .62 * Math.sqrt(i / nucleons);
+                    const x = Math.cos(angle) * spread;
+                    const y = Math.sin(angle) * spread;
+                    ctx.fillStyle = i % 2 ? this.colors[Z] : '#ff5d73';
+                    ctx.beginPath(); ctx.arc(x, y, 5.2, 0, Math.PI * 2); ctx.fill();
+                    ctx.strokeStyle = 'rgba(255,255,255,.28)'; ctx.lineWidth = .8; ctx.stroke();
+                }
+                ctx.restore();
+                ctx.fillStyle = '#f5f9ff';
+                ctx.font = '700 12px Roboto, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(`${this.symbols[Z]}  +${Z}e`, center.x, center.y + radius + 22);
+                ctx.textAlign = 'start';
+            }
+
+            drawTrail(ctx, p) {
+                if (p.trail.length < 2) return;
+                ctx.save();
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                for (let i = 1; i < p.trail.length; i += 1) {
+                    const a = this.worldToScreen(p.trail[i - 1].x, p.trail[i - 1].y);
+                    const b = this.worldToScreen(p.trail[i].x, p.trail[i].y);
+                    ctx.strokeStyle = `rgba(255, 190, 64, ${.08 + .72 * i / p.trail.length})`;
+                    ctx.lineWidth = 1.2 + 1.2 * i / p.trail.length;
+                    ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+                }
+                ctx.restore();
+            }
+
+            drawParticle(ctx, p) {
+                if (p.done) return;
+                const pt = this.worldToScreen(p.x, p.y);
+                ctx.save();
+                ctx.shadowColor = '#ffb11b';
+                ctx.shadowBlur = 13;
+                ctx.fillStyle = '#ffd166';
+                ctx.beginPath(); ctx.arc(pt.x, pt.y, p.radius + 1.5, 0, Math.PI * 2); ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = '#fff4bf';
+                ctx.beginPath(); ctx.arc(pt.x - 1.5, pt.y - 1.5, 2, 0, Math.PI * 2); ctx.fill();
+                ctx.restore();
+            }
+
+            drawImpactGuide(ctx) {
+                if (this.mode !== 'single') return;
+                const origin = this.worldToScreen(0, 0);
+                const beam = this.worldToScreen(-415, this.params.impact);
+                ctx.save();
+                ctx.strokeStyle = 'rgba(171, 203, 229, .38)';
+                ctx.setLineDash([5, 5]);
+                ctx.beginPath(); ctx.moveTo(beam.x, beam.y); ctx.lineTo(origin.x, beam.y); ctx.stroke();
+                ctx.beginPath(); ctx.moveTo(origin.x, origin.y); ctx.lineTo(origin.x, beam.y); ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.fillStyle = '#b9d2e5';
+                ctx.font = 'italic 12px serif';
+                ctx.fillText('b', origin.x + 7, (origin.y + beam.y) / 2);
+                ctx.restore();
+            }
+
+            drawForceVector(ctx, p) {
+                const r = Math.hypot(p.x, p.y);
+                if (r > 235 || r < 1) return;
+                const pt = this.worldToScreen(p.x, p.y);
+                const length = Math.min(72, 18 + 2100 / Math.max(r, 35));
+                const ux = p.x / r;
+                const uy = -p.y / r;
+                const endX = pt.x + ux * length;
+                const endY = pt.y + uy * length;
+                this.drawArrow(ctx, pt.x, pt.y, endX, endY, '#ff6b81', 8);
+                ctx.fillStyle = '#ff9baa';
+                ctx.font = 'italic 12px serif';
+                ctx.fillText('F', endX + 5, endY - 4);
+            }
+
+            drawArrow(ctx, x1, y1, x2, y2, color, head) {
+                const angle = Math.atan2(y2 - y1, x2 - x1);
+                ctx.save();
+                ctx.strokeStyle = color;
+                ctx.fillStyle = color;
+                ctx.lineWidth = 2;
+                ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(x2, y2);
+                ctx.lineTo(x2 - head * Math.cos(angle - Math.PI / 6), y2 - head * Math.sin(angle - Math.PI / 6));
+                ctx.lineTo(x2 - head * Math.cos(angle + Math.PI / 6), y2 - head * Math.sin(angle + Math.PI / 6));
+                ctx.closePath(); ctx.fill();
+                ctx.restore();
+            }
+
+            drawFlashes(ctx, center) {
+                const radius = this.worldRadiusToPixels(this.detectorRadius);
+                for (const flash of this.flashes) {
+                    const alpha = flash.life / flash.maxLife;
+                    const x = center.x + Math.cos(flash.angle) * radius;
+                    const y = center.y - Math.sin(flash.angle) * radius;
+                    ctx.save();
+                    ctx.globalAlpha = alpha;
+                    ctx.shadowColor = '#4dd9ff'; ctx.shadowBlur = 22;
+                    ctx.fillStyle = '#d9f8ff';
+                    ctx.beginPath(); ctx.arc(x, y, 4 + (1 - alpha) * 8, 0, Math.PI * 2); ctx.fill();
+                    ctx.restore();
+                }
+            }
+
+            drawLegend(ctx, W, H) {
+                const items = [
+                    { color: '#ffd166', text: 'alpha 粒子 (+2e)' },
+                    { color: '#ff5d73', text: '原子核' },
+                    { color: '#4dd9ff', text: '偵測器' }
+                ];
+                ctx.save();
+                ctx.font = '11px Roboto, sans-serif';
+                let x = 18;
+                const y = H - 19;
+                for (const item of items) {
+                    ctx.fillStyle = item.color;
+                    ctx.beginPath(); ctx.arc(x, y - 3, 4, 0, Math.PI * 2); ctx.fill();
+                    ctx.fillStyle = 'rgba(231,242,251,.78)';
+                    ctx.fillText(item.text, x + 9, y);
+                    x += ctx.measureText(item.text).width + 35;
+                }
+                ctx.restore();
+            }
+
+            drawHistogram() {
+                const ctx = this.histCtx;
+                const { width: W, height: H } = this.histSize;
+                ctx.fillStyle = '#081321';
+                ctx.fillRect(0, 0, W, H);
+                const margin = { left: 46, right: 18, top: 58, bottom: 54 };
+                const chartW = W - margin.left - margin.right;
+                const chartH = H - margin.top - margin.bottom;
+                const maxCount = Math.max(1, ...this.angleBins);
+
+                ctx.strokeStyle = 'rgba(155, 190, 220, .16)';
+                ctx.lineWidth = 1;
+                ctx.font = '10px Roboto, sans-serif';
+                ctx.fillStyle = 'rgba(210, 228, 243, .64)';
+                ctx.textAlign = 'right';
+                for (let i = 0; i <= 4; i += 1) {
+                    const y = margin.top + chartH * i / 4;
+                    ctx.beginPath(); ctx.moveTo(margin.left, y); ctx.lineTo(W - margin.right, y); ctx.stroke();
+                    ctx.fillText(String(Math.round(maxCount * (4 - i) / 4)), margin.left - 7, y + 3);
+                }
+
+                const gap = 3;
+                const barW = chartW / this.angleBins.length;
+                this.angleBins.forEach((count, i) => {
+                    const ratio = count / maxCount;
+                    const height = ratio * chartH;
+                    const x = margin.left + i * barW + gap / 2;
+                    const y = margin.top + chartH - height;
+                    const hue = 194 + i * 3.8;
+                    ctx.fillStyle = `hsla(${hue}, 82%, 62%, .88)`;
+                    ctx.fillRect(x, y, Math.max(1, barW - gap), height);
+                });
+
+                ctx.strokeStyle = 'rgba(225, 238, 249, .62)';
+                ctx.beginPath();
+                ctx.moveTo(margin.left, margin.top);
+                ctx.lineTo(margin.left, margin.top + chartH);
+                ctx.lineTo(W - margin.right, margin.top + chartH);
+                ctx.stroke();
+
+                ctx.fillStyle = 'rgba(222, 237, 248, .74)';
+                ctx.textAlign = 'center';
+                [0, 30, 60, 90, 120, 150, 180].forEach((degree) => {
+                    const x = margin.left + chartW * degree / 180;
+                    ctx.fillText(String(degree), x, H - margin.bottom + 18);
+                });
+                ctx.font = '11px Roboto, sans-serif';
+                ctx.fillText('散射角 |θ|（度）', margin.left + chartW / 2, H - 13);
+                ctx.save();
+                ctx.translate(14, margin.top + chartH / 2);
+                ctx.rotate(-Math.PI / 2);
+                ctx.fillText('偵測次數', 0, 0);
+                ctx.restore();
+
+                ctx.textAlign = 'left';
+                ctx.fillStyle = 'rgba(184, 207, 226, .72)';
+                ctx.font = '11px Roboto, sans-serif';
+                ctx.fillText(this.detected ? `樣本數 n = ${this.detected}` : '按下開始以收集數據', margin.left, 39);
+
+                if (!this.detected) {
+                    ctx.save();
+                    ctx.fillStyle = 'rgba(190, 210, 228, .32)';
+                    ctx.font = '700 40px Roboto, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.fillText('θ', margin.left + chartW / 2, margin.top + chartH / 2);
+                    ctx.restore();
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            window.rutherfordSimulation = new RutherfordSimulation();
+        });
+    </script>
+
+    <script>
+        (function () {
+            const openButton = document.getElementById('open-button');
+            const closeButton = document.getElementById('close-button');
+            const menu = document.querySelector('.menu-wrap');
+            if (!openButton || !closeButton || !menu) return;
+            openButton.addEventListener('click', function () {
+                menu.classList.add('active');
+            });
+            closeButton.addEventListener('click', function () {
+                menu.classList.remove('active');
+            });
+        }());
+    </script>
+</body>
+</html>
