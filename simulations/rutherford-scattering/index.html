@@ -70,6 +70,150 @@
             line-height: 1.55;
         }
 
+        .scale-comparison {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) 92px minmax(0, 1fr);
+            align-items: stretch;
+            gap: 12px;
+            margin-bottom: 18px;
+        }
+
+        .scale-card {
+            position: relative;
+            min-width: 0;
+            overflow: hidden;
+            border: 1px solid #dfe7ef;
+            border-radius: 12px;
+            background: #fff;
+            box-shadow: 0 7px 24px rgba(27, 43, 65, .08);
+        }
+
+        .scale-card-header {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 12px 15px 8px;
+        }
+
+        .scale-kicker {
+            display: block;
+            margin-bottom: 2px;
+            color: #7a8794;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+        }
+
+        .scale-card h2 {
+            margin: 0;
+            color: #2d4053;
+            font-family: 'Roboto Slab', serif;
+            font-size: 17px;
+            font-weight: 700;
+        }
+
+        .scale-badge {
+            flex-shrink: 0;
+            padding: 4px 8px;
+            border-radius: 999px;
+            background: #fff2c7;
+            color: #966900;
+            font-size: 10px;
+            font-weight: 700;
+        }
+
+        .scale-card svg {
+            display: block;
+            width: 100%;
+            height: auto;
+            background: linear-gradient(135deg, #091627, #102943);
+        }
+
+        .scale-caption {
+            min-height: 54px;
+            margin: 0;
+            padding: 9px 14px 11px;
+            color: #5b6977;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        .scale-caption strong {
+            color: #9a6a00;
+        }
+
+        .zoom-bridge {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            color: #6c5ce7;
+            text-align: center;
+        }
+
+        .zoom-lens {
+            display: grid;
+            width: 48px;
+            height: 48px;
+            place-items: center;
+            border: 2px solid #8b7cf6;
+            border-radius: 50%;
+            background: #f3f0ff;
+            font-size: 24px;
+            box-shadow: 0 5px 14px rgba(108, 92, 231, .17);
+        }
+
+        .zoom-bridge strong {
+            font-size: 11px;
+            line-height: 1.35;
+        }
+
+        .zoom-arrow {
+            font-size: 24px;
+            line-height: 1;
+        }
+
+        .macro-alpha {
+            animation: macro-alpha-flight 2.2s linear infinite;
+        }
+
+        .macro-alpha.delay-1 { animation-delay: -.72s; }
+        .macro-alpha.delay-2 { animation-delay: -1.44s; }
+
+        .scatter-pulse {
+            animation: scatter-pulse 2.2s ease-out infinite;
+            transform-origin: 272px 102px;
+        }
+
+        .scatter-pulse.delay { animation-delay: -1.1s; }
+
+        .selected-atom {
+            animation: selected-atom-pulse 1.8s ease-in-out infinite;
+            transform-origin: center;
+            transform-box: fill-box;
+        }
+
+        @keyframes macro-alpha-flight {
+            0% { transform: translateX(0); opacity: 0; }
+            12% { opacity: 1; }
+            72% { opacity: 1; }
+            82%, 100% { transform: translateX(160px); opacity: 0; }
+        }
+
+        @keyframes scatter-pulse {
+            0%, 62% { opacity: 0; stroke-dashoffset: 30; }
+            68% { opacity: 1; }
+            100% { opacity: 0; stroke-dashoffset: 0; }
+        }
+
+        @keyframes selected-atom-pulse {
+            0%, 100% { transform: scale(1); opacity: .72; }
+            50% { transform: scale(1.14); opacity: 1; }
+        }
+
         .control-deck {
             margin-bottom: 14px;
             padding: 14px;
@@ -337,6 +481,9 @@
 
         @media (max-width: 991px) {
             .principle-grid { grid-template-columns: 1fr; }
+            .scale-comparison { grid-template-columns: 1fr; }
+            .zoom-bridge { flex-direction: row; padding: 0 10px; }
+            .zoom-arrow { transform: rotate(90deg); }
             .control-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
             .toggle-stack { grid-column: 1 / -1; flex-direction: row; gap: 15px; }
             .experiment-stage { grid-template-columns: 1fr; }
@@ -357,6 +504,9 @@
 
         @media (prefers-reduced-motion: reduce) {
             .status-pill.running .status-dot { animation: none; }
+            .macro-alpha,
+            .scatter-pulse,
+            .selected-atom { animation: none; }
         }
     </style>
 </head>
@@ -425,6 +575,108 @@
                     <span>r<sub>min</sub> = 2.88 Z / E（fm），由初動能完全轉為電位能。</span>
                 </div>
             </div>
+        </section>
+
+        <section class="scale-comparison" aria-label="Rutherford 實驗巨觀與微觀尺度對照">
+            <article class="scale-card">
+                <div class="scale-card-header">
+                    <div>
+                        <span class="scale-kicker">Macroscopic view</span>
+                        <h2>巨觀：完整實驗裝置</h2>
+                    </div>
+                    <span class="scale-badge">中心是薄金箔</span>
+                </div>
+                <svg viewBox="0 0 520 205" role="img" aria-labelledby="macro-title macro-desc">
+                    <title id="macro-title">Rutherford 散射實驗巨觀裝置</title>
+                    <desc id="macro-desc">左側 alpha 粒子源向中央的薄金箔發射粒子，外圍的螢光屏偵測散射方向。</desc>
+                    <defs>
+                        <radialGradient id="macroGlow" cx="50%" cy="50%" r="50%">
+                            <stop offset="0" stop-color="#4dd9ff" stop-opacity=".28"/>
+                            <stop offset="1" stop-color="#4dd9ff" stop-opacity="0"/>
+                        </radialGradient>
+                        <linearGradient id="foilGold" x1="0" x2="1">
+                            <stop offset="0" stop-color="#9a6500"/>
+                            <stop offset=".48" stop-color="#ffe48b"/>
+                            <stop offset="1" stop-color="#c78900"/>
+                        </linearGradient>
+                    </defs>
+
+                    <ellipse cx="272" cy="102" rx="151" ry="77" fill="none" stroke="#4dd9ff" stroke-opacity=".4" stroke-width="9"/>
+                    <ellipse cx="272" cy="102" rx="151" ry="77" fill="none" stroke="#dff9ff" stroke-opacity=".4" stroke-width="1.5" stroke-dasharray="4 6"/>
+                    <text x="272" y="193" fill="#9fc4db" font-size="11" text-anchor="middle">硫化鋅螢光屏／環形偵測器</text>
+
+                    <rect x="30" y="72" width="74" height="60" rx="8" fill="#263c55" stroke="#6f8da8"/>
+                    <circle cx="68" cy="102" r="14" fill="#ff5d73" opacity=".88"/>
+                    <path d="M62 102h12M68 96v12" stroke="#fff" stroke-width="2"/>
+                    <text x="67" y="151" fill="#d7e8f5" font-size="11" text-anchor="middle">alpha 粒子源</text>
+
+                    <rect x="103" y="91" width="27" height="22" rx="3" fill="#17283b" stroke="#8ea6bb"/>
+                    <line x1="130" y1="102" x2="264" y2="102" stroke="#ffd166" stroke-opacity=".48" stroke-width="2"/>
+                    <circle class="macro-alpha" cx="116" cy="102" r="4" fill="#ffd166"/>
+                    <circle class="macro-alpha delay-1" cx="116" cy="102" r="4" fill="#ffd166"/>
+                    <circle class="macro-alpha delay-2" cx="116" cy="102" r="4" fill="#ffd166"/>
+
+                    <rect x="265" y="57" width="14" height="90" rx="3" fill="url(#foilGold)" stroke="#fff1a8" stroke-width="1.5"/>
+                    <line x1="272" y1="50" x2="272" y2="33" stroke="#ffd166"/>
+                    <rect x="224" y="12" width="96" height="23" rx="11" fill="#6e5100"/>
+                    <text id="macroFoilSvgLabel" x="272" y="28" fill="#fff2bd" font-size="12" font-weight="700" text-anchor="middle">中央：金箔 Au</text>
+
+                    <g class="scatter-pulse" fill="none" stroke="#ffd166" stroke-width="2" stroke-dasharray="5 4">
+                        <path d="M279 102 Q330 83 386 61"/>
+                        <path d="M279 102 Q335 111 397 133"/>
+                    </g>
+                    <g class="scatter-pulse delay" fill="none" stroke="#ff8f70" stroke-width="2" stroke-dasharray="5 4">
+                        <path d="M267 102 Q225 72 189 42"/>
+                    </g>
+                    <circle cx="272" cy="102" r="54" fill="url(#macroGlow)"/>
+                </svg>
+                <p class="scale-caption">在實驗室看到的是一整片極薄的<strong id="macroFoilCaption">金箔</strong>；金箔位於偵測器中央，粒子源從左側照射。</p>
+            </article>
+
+            <div class="zoom-bridge" aria-hidden="true">
+                <span class="zoom-lens">🔍</span>
+                <strong>放大<br>中央薄箔</strong>
+                <span class="zoom-arrow">→</span>
+            </div>
+
+            <article class="scale-card">
+                <div class="scale-card-header">
+                    <div>
+                        <span class="scale-kicker">Microscopic view</span>
+                        <h2>微觀：薄箔中的原子</h2>
+                    </div>
+                    <span class="scale-badge">再聚焦原子核</span>
+                </div>
+                <svg viewBox="0 0 520 205" role="img" aria-labelledby="micro-title micro-desc">
+                    <title id="micro-title">薄金箔內部的原子排列</title>
+                    <desc id="micro-desc">許多金原子排列成薄箔，其中一個原子核被圈選並放大為下方的散射模擬。</desc>
+                    <defs>
+                        <radialGradient id="atomGold" cx="35%" cy="30%" r="70%">
+                            <stop offset="0" stop-color="#fff4ad"/>
+                            <stop offset=".42" stop-color="#ffd166"/>
+                            <stop offset="1" stop-color="#b87600"/>
+                        </radialGradient>
+                        <filter id="selectedGlow" x="-80%" y="-80%" width="260%" height="260%">
+                            <feGaussianBlur stdDeviation="5" result="blur"/>
+                            <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                        </filter>
+                    </defs>
+                    <g opacity=".78" fill="url(#atomGold)" stroke="#fff0a2" stroke-opacity=".35">
+                        <circle cx="58" cy="48" r="18"/><circle cx="111" cy="48" r="18"/><circle cx="164" cy="48" r="18"/><circle cx="217" cy="48" r="18"/><circle cx="270" cy="48" r="18"/><circle cx="323" cy="48" r="18"/><circle cx="376" cy="48" r="18"/>
+                        <circle cx="84" cy="95" r="18"/><circle cx="137" cy="95" r="18"/><circle cx="190" cy="95" r="18"/><circle cx="243" cy="95" r="18"/><circle cx="296" cy="95" r="18"/><circle cx="349" cy="95" r="18"/><circle cx="402" cy="95" r="18"/>
+                        <circle cx="58" cy="142" r="18"/><circle cx="111" cy="142" r="18"/><circle cx="164" cy="142" r="18"/><circle cx="217" cy="142" r="18"/><circle cx="270" cy="142" r="18"/><circle cx="323" cy="142" r="18"/><circle cx="376" cy="142" r="18"/>
+                    </g>
+                    <g class="selected-atom" filter="url(#selectedGlow)">
+                        <circle cx="243" cy="95" r="27" fill="none" stroke="#4dd9ff" stroke-width="3"/>
+                        <circle cx="243" cy="95" r="6" fill="#ff5d73"/>
+                    </g>
+                    <path d="M276 95 C346 91 390 105 440 135" fill="none" stroke="#4dd9ff" stroke-width="2" stroke-dasharray="5 5"/>
+                    <circle cx="455" cy="145" r="30" fill="#ff5d73" fill-opacity=".16" stroke="#ff7b8e" stroke-width="2"/>
+                    <circle cx="455" cy="145" r="9" fill="#ff5d73"/>
+                    <text x="455" y="185" fill="#d8eaf7" font-size="11" text-anchor="middle">下方動畫再放大此原子核</text>
+                </svg>
+                <p class="scale-caption"><strong id="microFoilCaption">金箔</strong>由大量金原子組成；下方動畫把視野繼續縮小到其中一個原子核附近。</p>
+            </article>
         </section>
 
         <section class="control-deck" aria-label="實驗控制面板">
@@ -502,7 +754,7 @@
 
         <section class="experiment-stage" aria-label="模擬動畫與統計圖">
             <div class="canvas-card">
-                <h2 class="canvas-title">放大的金屬箔原子核區域</h2>
+                <h2 class="canvas-title" id="microCanvasTitle">微觀模擬：金箔中單一原子核附近</h2>
                 <canvas id="simCanvas" width="960" height="540">此瀏覽器不支援 Canvas，無法顯示 alpha 粒子散射動畫。</canvas>
                 <p class="canvas-hint" id="canvasHint">單一粒子模式：點擊畫布可快速改變撞擊參數</p>
             </div>
@@ -549,6 +801,7 @@
                 this.mode = 'single';
                 this.params = { Z: 79, energy: 5, impact: 35, beamWidth: 120, speed: 1 };
                 this.symbols = { 13: 'Al', 29: 'Cu', 47: 'Ag', 79: 'Au' };
+                this.targetNames = { 13: '鋁', 29: '銅', 47: '銀', 79: '金' };
                 this.colors = { 13: '#b7c4cf', 29: '#e89b63', 47: '#dce6ed', 79: '#ffd166' };
                 this.isRunning = false;
                 this.animationId = null;
@@ -598,6 +851,10 @@
                     statusPill: document.getElementById('statusPill'),
                     statusText: document.getElementById('statusText'),
                     canvasHint: document.getElementById('canvasHint'),
+                    macroFoilSvgLabel: document.getElementById('macroFoilSvgLabel'),
+                    macroFoilCaption: document.getElementById('macroFoilCaption'),
+                    microFoilCaption: document.getElementById('microFoilCaption'),
+                    microCanvasTitle: document.getElementById('microCanvasTitle'),
                     angle: document.getElementById('angleReadout'),
                     distance: document.getElementById('distanceReadout'),
                     charge: document.getElementById('chargeReadout'),
@@ -808,7 +1065,12 @@
 
             updateLabels() {
                 const symbol = this.symbols[this.params.Z];
+                const targetName = this.targetNames[this.params.Z];
                 this.el.targetValue.textContent = `${symbol}，Z = ${this.params.Z}`;
+                this.el.macroFoilSvgLabel.textContent = `中央：${targetName}箔 ${symbol}`;
+                this.el.macroFoilCaption.textContent = `${targetName}箔`;
+                this.el.microFoilCaption.textContent = `${targetName}箔`;
+                this.el.microCanvasTitle.textContent = `微觀模擬：${targetName}箔中單一原子核附近`;
                 this.el.energyValue.textContent = `${this.params.energy.toFixed(1)} MeV`;
                 const sign = this.params.impact > 0 ? '+' : this.params.impact < 0 ? '−' : '';
                 this.el.impactValue.textContent = `${sign}${Math.abs(this.params.impact)} fm`;
