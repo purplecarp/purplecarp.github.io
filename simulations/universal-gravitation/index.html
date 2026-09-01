@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8">
+    <title>萬有引力與重力加速度 - 物理模擬</title>
+    <meta content="IE=edge" http-equiv="X-UA-Compatible">
+    <meta content="width=device-width, initial-scale=1" name="viewport">
+    <meta name="description" content="互動式萬有引力模擬，視覺化物體所受重力、重力加速度與距離地心的反平方關係。">
+    <link href="../../images/fish.png" rel="shortcut icon">
+
+    <link href="../../css/bootstrap.min.css" rel="stylesheet">
+    <link href="../../css/normalize.css" rel="stylesheet">
+    <link href="../../css/style.css" rel="stylesheet">
+    <link href="../../css/responsive.css" rel="stylesheet">
+    <link href="../../css/simulations.css" rel="stylesheet">
+
+    <link href="https://fonts.googleapis.com/css?family=Roboto+Slab:400,700" rel="stylesheet" type="text/css">
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,300,500,700" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
+
+    <style>
+        :root {
+            --space: #07111f;
+            --space-2: #0d2037;
+            --ink: #263849;
+            --muted: #6c7a89;
+            --cyan: #4dd9ff;
+            --orange: #ffb347;
+            --green: #56d98b;
+            --purple: #a990ff;
+            --line: #dfe7ef;
+        }
+
+        .page-header { margin-bottom: 24px; }
+
+        .page-header .course-tag {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 5px 13px;
+            border-radius: 999px;
+            background: #e8f3ff;
+            color: #2471a3;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: .04em;
+        }
+
+        .principle-grid {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 12px;
+            margin-top: 14px;
+        }
+
+        .principle-card {
+            padding: 12px 14px;
+            border: 1px solid #d6e4ef;
+            border-radius: 9px;
+            background: rgba(255, 255, 255, .72);
+        }
+
+        .principle-card strong {
+            display: block;
+            margin-bottom: 5px;
+            color: #2d5273;
+            font-size: 13px;
+        }
+
+        .principle-card span {
+            color: #586b7b;
+            font-size: 13px;
+            line-height: 1.55;
+        }
+
+        .control-deck {
+            margin-bottom: 14px;
+            padding: 14px;
+            border: 1px solid var(--line);
+            border-radius: 12px;
+            background: #fff;
+            box-shadow: 0 7px 24px rgba(27, 43, 65, .08);
+        }
+
+        .control-topline {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .control-topline h2 {
+            margin: 0;
+            color: var(--ink);
+            font-family: 'Roboto Slab', serif;
+            font-size: 17px;
+        }
+
+        .action-buttons { display: flex; gap: 6px; }
+
+        .action-buttons .btn {
+            min-width: 92px;
+            min-height: 36px;
+            padding: 7px 12px;
+            border: 0;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: none;
+        }
+
+        .action-buttons .btn:disabled { opacity: .48; cursor: not-allowed; }
+
+        .control-grid {
+            display: grid;
+            grid-template-columns: minmax(220px, 1.35fr) minmax(220px, 1fr) auto;
+            align-items: end;
+            gap: 14px;
+            padding-top: 12px;
+            border-top: 1px solid #edf0f3;
+        }
+
+        .control-unit { min-width: 0; }
+
+        .control-unit label {
+            display: flex;
+            justify-content: space-between;
+            gap: 8px;
+            margin-bottom: 5px;
+            color: #4d5c6b;
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .control-unit output {
+            color: #2471a3;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .control-unit input[type="range"] {
+            width: 100%;
+            accent-color: #3498db;
+        }
+
+        .preset-group { display: flex; gap: 6px; }
+
+        .preset-btn {
+            padding: 6px 11px;
+            border: 1px solid #cbd8e5;
+            border-radius: 999px;
+            background: #f6f9fc;
+            color: #42617c;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .preset-btn:hover,
+        .preset-btn.active {
+            border-color: #3498db;
+            background: #eaf5ff;
+            color: #1d6fa5;
+        }
+
+        .readout-grid {
+            display: grid;
+            grid-template-columns: repeat(5, minmax(0, 1fr));
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .readout {
+            min-width: 0;
+            padding: 9px 11px;
+            border-left: 3px solid #8ca6c1;
+            border-radius: 6px;
+            background: #f5f8fb;
+        }
+
+        .readout:nth-child(2) { border-color: var(--purple); }
+        .readout:nth-child(3) { border-color: var(--cyan); }
+        .readout:nth-child(4) { border-color: var(--orange); }
+        .readout:nth-child(5) { border-color: var(--green); }
+
+        .readout-label {
+            display: block;
+            color: #798796;
+            font-size: 10px;
+            white-space: nowrap;
+        }
+
+        .readout-value {
+            display: block;
+            overflow: hidden;
+            margin-top: 2px;
+            color: var(--ink);
+            font-size: 16px;
+            font-weight: 700;
+            font-variant-numeric: tabular-nums;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .experiment-stage {
+            display: grid;
+            grid-template-columns: minmax(0, 1.28fr) minmax(390px, 1fr);
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+
+        .canvas-card {
+            position: relative;
+            min-width: 0;
+            overflow: hidden;
+            border-radius: 12px;
+            background: var(--space);
+            box-shadow: 0 10px 30px rgba(5, 16, 31, .18);
+        }
+
+        .canvas-card header {
+            position: absolute;
+            z-index: 2;
+            top: 12px;
+            left: 15px;
+            pointer-events: none;
+        }
+
+        .canvas-card header h3 {
+            margin: 0;
+            color: #edf7ff;
+            font-size: 13px;
+            font-weight: 700;
+        }
+
+        .canvas-card header p {
+            margin: 3px 0 0;
+            color: rgba(220, 235, 248, .62);
+            font-size: 10px;
+        }
+
+        .canvas-card canvas {
+            display: block;
+            width: 100%;
+            height: auto;
+            background: linear-gradient(135deg, var(--space), var(--space-2));
+        }
+
+        #gravityCanvas { cursor: ew-resize; touch-action: none; }
+
+        .legend-overlay {
+            position: absolute;
+            z-index: 2;
+            right: 12px;
+            top: 12px;
+            display: flex;
+            gap: 10px;
+            color: #dceaf5;
+            font-size: 10px;
+            pointer-events: none;
+        }
+
+        .legend-overlay span { display: flex; align-items: center; gap: 4px; }
+        .legend-overlay i { width: 15px; height: 3px; border-radius: 2px; }
+
+        .equation-strip {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+            margin: 0 0 24px;
+        }
+
+        .equation-card {
+            padding: 13px 15px;
+            border: 1px solid var(--line);
+            border-radius: 9px;
+            background: #fff;
+            box-shadow: 0 4px 15px rgba(27, 43, 65, .06);
+        }
+
+        .equation-card small {
+            display: block;
+            margin-bottom: 5px;
+            color: #7a8794;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .06em;
+        }
+
+        .equation-main {
+            color: #294b68;
+            font-size: 16px;
+            font-weight: 700;
+        }
+
+        .equation-detail {
+            margin-top: 4px;
+            color: #697b8c;
+            font-size: 11px;
+            line-height: 1.5;
+        }
+
+        .challenge-row {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 10px;
+            margin-top: 13px;
+        }
+
+        .challenge {
+            padding: 10px 12px;
+            border: 1px solid #f2dfad;
+            border-radius: 8px;
+            background: #fffdf7;
+            color: #6e613d;
+            font-size: 12px;
+            line-height: 1.55;
+        }
+
+        .challenge strong { color: #8b6416; }
+
+        @media (max-width: 1050px) {
+            .experiment-stage { grid-template-columns: 1fr; }
+            .control-grid { grid-template-columns: 1fr 1fr; }
+            .preset-group { grid-column: 1 / -1; }
+        }
+
+        @media (max-width: 768px) {
+            body { overflow-x: hidden; }
+            .top-nav .container-nav { gap: 8px; }
+            .nav-brand { min-width: 0; gap: 8px; }
+            .nav-brand img { width: 34px; height: 34px; }
+            .nav-brand h2 { overflow: hidden; font-size: 18px; text-overflow: ellipsis; white-space: nowrap; }
+            .btn-back { flex-shrink: 0; padding: 8px 10px; font-size: 11px; white-space: nowrap; }
+            .page-header h1 { overflow-wrap: anywhere; }
+            .principle-grid,
+            .equation-strip,
+            .challenge-row { grid-template-columns: 1fr; }
+
+            .control-topline { align-items: flex-start; flex-direction: column; }
+            .action-buttons { width: 100%; }
+            .action-buttons .btn { flex: 1; min-width: 0; }
+            .control-grid { grid-template-columns: 1fr; }
+            .preset-group { grid-column: auto; flex-wrap: wrap; }
+            .readout-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+            .readout:last-child { grid-column: 1 / -1; }
+            .readout-value { font-size: 14px; }
+            .experiment-stage { grid-template-columns: minmax(0, 1fr); }
+            .canvas-card { max-width: 100%; }
+            .legend-overlay { top: 12px; right: 10px; bottom: auto; gap: 7px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="for-sticky">
+            <div class="col-md-2 col-xs-6 logo">
+                <a href="../../index.html"><img alt="logo" class="logo-nav" src="../../images/fish.png"></a>
+            </div>
+        </div>
+        <div class="menu-wrap">
+            <nav class="menu">
+                <div class="menu-list">
+                    <a href="../../index.html#home"><span>首頁</span></a>
+                    <a href="../../index.html#about"><span>關於我</span></a>
+                    <a href="../../index.html#experience"><span>教學經驗</span></a>
+                    <a href="../../teaching-gallery.html"><span>查看教學剪影</span></a>
+                    <a href="../../physics-simulations.html" class="active"><span>高中物理內容</span></a>
+                    <a href="../../index.html#skills"><span>專業技能</span></a>
+                    <a href="../../index.html#achievements"><span>成果展示</span></a>
+                    <a href="../../index.html#philosophy"><span>教育理念</span></a>
+                    <a href="../../index.html#contact"><span>聯絡方式</span></a>
+                </div>
+            </nav>
+            <button class="close-button" id="close-button">Close Menu</button>
+        </div>
+        <button class="menu-button" id="open-button"><span></span><span></span><span></span></button>
+    </div>
+
+    <div class="top-nav">
+        <div class="container-nav">
+            <a href="../../index.html" class="nav-brand">
+                <img src="../../images/fish.png" alt="Logo">
+                <h2>物鯉魚教學模擬</h2>
+            </a>
+            <a href="../../physics-simulations.html" class="btn-back">← 返回列表</a>
+        </div>
+    </div>
+
+    <main class="main-container">
+        <div class="page-header">
+            <h1>🌍 萬有引力與重力加速度</h1>
+            <p class="subtitle">拖曳物體離開地球，觀察重力如何隨距離快速減弱</p>
+            <span class="course-tag">選修物理一 · 萬有引力</span>
+        </div>
+
+        <section class="info-box physics-principle">
+            <h4>📚 從萬有引力到重力加速度</h4>
+            <div class="principle-grid">
+                <div class="principle-card">
+                    <strong>萬有引力</strong>
+                    <span>地球與物體互相吸引，力的大小為 $F=\dfrac{GMm}{r^2}$。</span>
+                </div>
+                <div class="principle-card">
+                    <strong>重力加速度</strong>
+                    <span>由 $F=mg$ 得 $g=\dfrac{GM}{r^2}$，與受力物體質量 $m$ 無關。</span>
+                </div>
+                <div class="principle-card">
+                    <strong>反平方關係</strong>
+                    <span>距地心變為 $n$ 倍時，$F$ 與 $g$ 都變為原本的 $1/n^2$。</span>
+                </div>
+            </div>
+        </section>
+
+        <section class="control-deck" aria-label="模擬控制面板">
+            <div class="control-topline">
+                <h2>調整觀測條件</h2>
+                <div class="action-buttons">
+                    <button class="btn btn-start" id="startBtn">▶ 自動掃描</button>
+                    <button class="btn btn-pause" id="pauseBtn" disabled>⏸ 暫停</button>
+                    <button class="btn btn-reset" id="resetBtn">↺ 重置</button>
+                </div>
+            </div>
+            <div class="control-grid">
+                <div class="control-unit">
+                    <label for="distanceSlider"><span>距地心 $r$</span><output id="distanceOutput">2.00 Rₑ</output></label>
+                    <input id="distanceSlider" type="range" min="1" max="8" step="0.01" value="2" aria-describedby="dragHint">
+                </div>
+                <div class="control-unit">
+                    <label for="massSlider"><span>物體質量 $m$</span><output id="massOutput">80 kg</output></label>
+                    <input id="massSlider" type="range" min="10" max="500" step="1" value="80">
+                </div>
+                <div class="preset-group" aria-label="距離快速選擇">
+                    <button class="preset-btn" data-distance="1">地表 Rₑ</button>
+                    <button class="preset-btn active" data-distance="2">2 Rₑ</button>
+                    <button class="preset-btn" data-distance="4">4 Rₑ</button>
+                    <button class="preset-btn" data-distance="8">8 Rₑ</button>
+                </div>
+            </div>
+            <div class="readout-grid" aria-live="polite">
+                <div class="readout"><span class="readout-label">距地心 r</span><span class="readout-value" id="radiusReadout">12,742 km</span></div>
+                <div class="readout"><span class="readout-label">離地高度 h</span><span class="readout-value" id="heightReadout">6,371 km</span></div>
+                <div class="readout"><span class="readout-label">重力加速度 g</span><span class="readout-value" id="gravityReadout">2.46 m/s²</span></div>
+                <div class="readout"><span class="readout-label">萬有引力 F</span><span class="readout-value" id="forceReadout">196 N</span></div>
+                <div class="readout"><span class="readout-label">相對地表值</span><span class="readout-value" id="ratioReadout">25.0%</span></div>
+            </div>
+        </section>
+
+        <section class="experiment-stage">
+            <div class="canvas-card">
+                <header>
+                    <h3>空間視圖</h3>
+                    <p id="dragHint">拖曳物體或距離尺，改變距地心距離</p>
+                </header>
+                <div class="legend-overlay" aria-hidden="true">
+                    <span><i style="background:var(--cyan)"></i>重力加速度 g</span>
+                    <span><i style="background:var(--orange)"></i>萬有引力 F</span>
+                </div>
+                <canvas id="gravityCanvas" width="660" height="460" role="img" aria-label="地球、物體、距地心距離與指向地心的重力向量"></canvas>
+            </div>
+            <div class="canvas-card">
+                <header>
+                    <h3>關係圖</h3>
+                    <p>兩條曲線皆呈 1/r² 下降</p>
+                </header>
+                <div class="legend-overlay" aria-hidden="true">
+                    <span><i style="background:var(--cyan)"></i>g–r</span>
+                    <span><i style="background:var(--orange)"></i>F–r</span>
+                </div>
+                <canvas id="graphCanvas" width="520" height="460" role="img" aria-label="重力加速度及萬有引力對距地心距離的反平方曲線"></canvas>
+            </div>
+        </section>
+
+        <section class="equation-strip" aria-label="目前數值代入公式">
+            <div class="equation-card">
+                <small>固定常數</small>
+                <div class="equation-main">$M_E=5.972\times10^{24}\ \mathrm{kg}$</div>
+                <div class="equation-detail">$R_E=6371\ \mathrm{km}$，$G=6.6743\times10^{-11}\ \mathrm{N\,m^2/kg^2}$</div>
+            </div>
+            <div class="equation-card">
+                <small>目前重力加速度</small>
+                <div class="equation-main" id="gravityEquation">g = GMₑ/r² = 2.46 m/s²</div>
+                <div class="equation-detail">物體質量改變時，這個數值不會改變。</div>
+            </div>
+            <div class="equation-card">
+                <small>目前所受重力</small>
+                <div class="equation-main" id="forceEquation">F = mg = 196 N</div>
+                <div class="equation-detail">相同位置下，物體質量加倍，重力也加倍。</div>
+            </div>
+        </section>
+
+        <section class="info-box teaching-note">
+            <h4>💡 觀察任務</h4>
+            <p>先固定物體質量，依序比較 $r=R_E$、$2R_E$、$4R_E$；再固定距離並改變質量，分辨「重力」與「重力加速度」的不同。</p>
+            <div class="challenge-row">
+                <div class="challenge"><strong>任務 1</strong><br>距離變成 2 倍時，$g$ 與 $F$ 是原來的幾倍？</div>
+                <div class="challenge"><strong>任務 2</strong><br>質量由 80 kg 變成 160 kg，哪一個量不會改變？</div>
+                <div class="challenge"><strong>想一想</strong><br>太空人離開地表後，真的會「沒有重力」嗎？</div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        class GravitationSimulation {
+            constructor() {
+                this.G = 6.67430e-11;
+                this.earthMass = 5.9722e24;
+                this.earthRadius = 6.371e6;
+                this.distanceRatio = 2;
+                this.objectMass = 80;
+                this.isRunning = false;
+                this.scanDirection = 1;
+                this.lastTimestamp = null;
+                this.animationId = null;
+                this.dragging = false;
+                this.canvases = [
+                    { element: document.getElementById('gravityCanvas'), width: 660, height: 460 },
+                    { element: document.getElementById('graphCanvas'), width: 520, height: 460 }
+                ];
+                this.canvases.forEach(item => {
+                    item.ctx = item.element.getContext('2d');
+                    this.scaleCanvas(item);
+                });
+                this.bindControls();
+                this.update();
+            }
+
+            scaleCanvas(item) {
+                const dpr = window.devicePixelRatio || 1;
+                item.element.width = Math.round(item.width * dpr);
+                item.element.height = Math.round(item.height * dpr);
+                item.element.style.aspectRatio = item.width + ' / ' + item.height;
+                item.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            }
+
+            bindControls() {
+                this.distanceSlider = document.getElementById('distanceSlider');
+                this.massSlider = document.getElementById('massSlider');
+                this.distanceSlider.addEventListener('input', event => {
+                    this.distanceRatio = Number(event.target.value);
+                    this.update();
+                });
+                this.massSlider.addEventListener('input', event => {
+                    this.objectMass = Number(event.target.value);
+                    this.update();
+                });
+                document.querySelectorAll('.preset-btn').forEach(button => {
+                    button.addEventListener('click', () => {
+                        this.pause();
+                        this.distanceRatio = Number(button.dataset.distance);
+                        this.distanceSlider.value = this.distanceRatio;
+                        this.update();
+                    });
+                });
+                document.getElementById('startBtn').addEventListener('click', () => this.start());
+                document.getElementById('pauseBtn').addEventListener('click', () => this.pause());
+                document.getElementById('resetBtn').addEventListener('click', () => this.reset());
+
+                const canvas = document.getElementById('gravityCanvas');
+                canvas.addEventListener('pointerdown', event => {
+                    this.dragging = true;
+                    canvas.setPointerCapture(event.pointerId);
+                    this.pause();
+                    this.setDistanceFromPointer(event);
+                });
+                canvas.addEventListener('pointermove', event => {
+                    if (this.dragging) this.setDistanceFromPointer(event);
+                });
+                const stopDragging = event => {
+                    this.dragging = false;
+                    if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
+                };
+                canvas.addEventListener('pointerup', stopDragging);
+                canvas.addEventListener('pointercancel', stopDragging);
+            }
+
+            setDistanceFromPointer(event) {
+                const canvas = document.getElementById('gravityCanvas');
+                const rect = canvas.getBoundingClientRect();
+                const x = (event.clientX - rect.left) * 660 / rect.width;
+                const ratio = 1 + (x - 190) / 420 * 7;
+                this.distanceRatio = Math.max(1, Math.min(8, ratio));
+                this.distanceSlider.value = this.distanceRatio.toFixed(2);
+                this.update();
+            }
+
+            valuesAt(ratio = this.distanceRatio) {
+                const r = ratio * this.earthRadius;
+                const g = this.G * this.earthMass / (r * r);
+                return { r, g, force: this.objectMass * g, relative: 1 / (ratio * ratio) };
+            }
+
+            start() {
+                if (this.isRunning) return;
+                this.isRunning = true;
+                this.lastTimestamp = null;
+                document.getElementById('startBtn').disabled = true;
+                document.getElementById('pauseBtn').disabled = false;
+                this.animationId = requestAnimationFrame(timestamp => this.loop(timestamp));
+            }
+
+            pause() {
+                this.isRunning = false;
+                this.lastTimestamp = null;
+                document.getElementById('startBtn').disabled = false;
+                document.getElementById('pauseBtn').disabled = true;
+                if (this.animationId) cancelAnimationFrame(this.animationId);
+                this.animationId = null;
+            }
+
+            reset() {
+                this.pause();
+                this.distanceRatio = 2;
+                this.objectMass = 80;
+                this.scanDirection = 1;
+                this.distanceSlider.value = 2;
+                this.massSlider.value = 80;
+                this.update();
+            }
+
+            loop(timestamp) {
+                if (!this.isRunning) return;
+                if (this.lastTimestamp !== null) {
+                    const dt = Math.min((timestamp - this.lastTimestamp) / 1000, .05);
+                    this.distanceRatio += this.scanDirection * dt * .8;
+                    if (this.distanceRatio >= 8) { this.distanceRatio = 8; this.scanDirection = -1; }
+                    if (this.distanceRatio <= 1) { this.distanceRatio = 1; this.scanDirection = 1; }
+                    this.distanceSlider.value = this.distanceRatio.toFixed(2);
+                    this.update();
+                }
+                this.lastTimestamp = timestamp;
+                this.animationId = requestAnimationFrame(next => this.loop(next));
+            }
+
+            update() {
+                const values = this.valuesAt();
+                document.getElementById('distanceOutput').textContent = this.distanceRatio.toFixed(2) + ' Rₑ';
+                document.getElementById('massOutput').textContent = this.objectMass.toFixed(0) + ' kg';
+                document.getElementById('radiusReadout').textContent = this.formatKilometres(values.r / 1000);
+                document.getElementById('heightReadout').textContent = this.formatKilometres((values.r - this.earthRadius) / 1000);
+                document.getElementById('gravityReadout').textContent = this.formatNumber(values.g) + ' m/s²';
+                document.getElementById('forceReadout').textContent = this.formatNumber(values.force) + ' N';
+                document.getElementById('ratioReadout').textContent = (values.relative * 100).toFixed(values.relative < .1 ? 2 : 1) + '%';
+                document.getElementById('gravityEquation').textContent = 'g = GMₑ/r² = ' + this.formatNumber(values.g) + ' m/s²';
+                document.getElementById('forceEquation').textContent = 'F = mg = ' + this.formatNumber(values.force) + ' N';
+                document.querySelectorAll('.preset-btn').forEach(button => {
+                    button.classList.toggle('active', Math.abs(Number(button.dataset.distance) - this.distanceRatio) < .015);
+                });
+                this.drawSpace();
+                this.drawGraphs();
+            }
+
+            formatKilometres(value) {
+                return Math.round(value).toLocaleString('zh-TW') + ' km';
+            }
+
+            formatNumber(value) {
+                if (value >= 1000 || value < .01) return value.toExponential(2).replace('e+', '×10^');
+                if (value >= 100) return value.toFixed(0);
+                if (value >= 10) return value.toFixed(1);
+                return value.toFixed(2);
+            }
+
+            drawSpace() {
+                const item = this.canvases[0];
+                const ctx = item.ctx;
+                const W = item.width;
+                const H = item.height;
+                ctx.clearRect(0, 0, W, H);
+                this.drawStars(ctx, W, H);
+
+                const cx = 105;
+                const cy = 238;
+                const earthRadiusPx = 76;
+                const objectX = 190 + (this.distanceRatio - 1) / 7 * 420;
+                const objectY = cy;
+                const values = this.valuesAt();
+
+                const atmosphere = ctx.createRadialGradient(cx, cy, earthRadiusPx * .8, cx, cy, earthRadiusPx * 1.25);
+                atmosphere.addColorStop(0, 'rgba(77,217,255,.18)');
+                atmosphere.addColorStop(.72, 'rgba(77,217,255,.12)');
+                atmosphere.addColorStop(1, 'rgba(77,217,255,0)');
+                ctx.fillStyle = atmosphere;
+                ctx.beginPath();
+                ctx.arc(cx, cy, earthRadiusPx * 1.25, 0, Math.PI * 2);
+                ctx.fill();
+
+                const earth = ctx.createRadialGradient(cx - 24, cy - 28, 8, cx, cy, earthRadiusPx);
+                earth.addColorStop(0, '#65c5ff');
+                earth.addColorStop(.55, '#2179b5');
+                earth.addColorStop(1, '#0d3c68');
+                ctx.fillStyle = earth;
+                ctx.beginPath();
+                ctx.arc(cx, cy, earthRadiusPx, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.fillStyle = '#57b977';
+                ctx.beginPath();
+                ctx.ellipse(cx - 22, cy - 18, 28, 13, -.45, 0, Math.PI * 2);
+                ctx.ellipse(cx + 20, cy + 20, 23, 10, .75, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(200,235,255,.8)';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.arc(cx, cy, earthRadiusPx, 0, Math.PI * 2);
+                ctx.stroke();
+
+                ctx.setLineDash([6, 6]);
+                ctx.strokeStyle = 'rgba(214,230,244,.38)';
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                ctx.moveTo(cx, cy);
+                ctx.lineTo(objectX, objectY);
+                ctx.stroke();
+                ctx.setLineDash([]);
+
+                this.drawDimension(ctx, cx, objectX, cy + 67, 'r = ' + this.distanceRatio.toFixed(2) + ' Rₑ');
+                ctx.fillStyle = '#d9edf9';
+                ctx.beginPath();
+                ctx.arc(cx, cy, 4, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.font = '11px Roboto, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillStyle = '#b9ccdc';
+                ctx.fillText('地心', cx, cy + 15);
+
+                const bodyRadius = 12 + Math.min(5, Math.sqrt(this.objectMass) / 5);
+                const bodyGradient = ctx.createRadialGradient(objectX - 4, objectY - 5, 2, objectX, objectY, bodyRadius);
+                bodyGradient.addColorStop(0, '#ffffff');
+                bodyGradient.addColorStop(.25, '#dce8f1');
+                bodyGradient.addColorStop(1, '#7c8d9e');
+                ctx.shadowColor = 'rgba(255,255,255,.6)';
+                ctx.shadowBlur = 12;
+                ctx.fillStyle = bodyGradient;
+                ctx.beginPath();
+                ctx.arc(objectX, objectY, bodyRadius, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.shadowBlur = 0;
+
+                const scaledArrow = 35 + 68 * Math.sqrt(values.relative);
+                this.drawArrow(ctx, objectX - bodyRadius - 4, objectY - 10, objectX - bodyRadius - 4 - scaledArrow, objectY - 10, '#4dd9ff', 4);
+                this.drawArrow(ctx, objectX - bodyRadius - 4, objectY + 14, objectX - bodyRadius - 4 - scaledArrow, objectY + 14, '#ffb347', 4);
+                ctx.textAlign = 'right';
+                ctx.font = 'bold 11px Roboto, sans-serif';
+                ctx.fillStyle = '#4dd9ff';
+                ctx.fillText('g ' + this.formatNumber(values.g) + ' m/s²', objectX - bodyRadius - 7, objectY - 20);
+                ctx.fillStyle = '#ffb347';
+                ctx.fillText('F ' + this.formatNumber(values.force) + ' N', objectX - bodyRadius - 7, objectY + 35);
+
+                ctx.textAlign = 'center';
+                ctx.fillStyle = '#e4eef6';
+                ctx.font = 'bold 11px Roboto, sans-serif';
+                ctx.fillText(this.objectMass.toFixed(0) + ' kg', objectX, objectY - bodyRadius - 12);
+
+                ctx.fillStyle = 'rgba(7,17,31,.78)';
+                ctx.fillRect(0, H - 39, W, 39);
+                ctx.textAlign = 'left';
+                ctx.font = '11px Roboto, sans-serif';
+                ctx.fillStyle = '#9db3c6';
+                ctx.fillText('箭頭長度採平方根比例，避免遠距離時完全看不見；標示數值為真實計算值。', 16, H - 16);
+            }
+
+            drawGraphs() {
+                const item = this.canvases[1];
+                const ctx = item.ctx;
+                const W = item.width;
+                const H = item.height;
+                ctx.clearRect(0, 0, W, H);
+                this.drawStars(ctx, W, H, 17);
+                const surfaceG = this.valuesAt(1).g;
+                const surfaceF = this.objectMass * surfaceG;
+                this.drawPlot(ctx, {
+                    x: 58, y: 70, w: W - 82, h: 135,
+                    color: '#4dd9ff', title: '重力加速度 g（m/s²）', maxY: surfaceG,
+                    valueAt: ratio => surfaceG / (ratio * ratio),
+                    current: this.valuesAt().g
+                });
+                this.drawPlot(ctx, {
+                    x: 58, y: 260, w: W - 82, h: 135,
+                    color: '#ffb347', title: '萬有引力 F（N）', maxY: surfaceF,
+                    valueAt: ratio => surfaceF / (ratio * ratio),
+                    current: this.valuesAt().force
+                });
+                ctx.fillStyle = '#91a9bc';
+                ctx.font = '10px Roboto, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText('距地心 r / Rₑ', W / 2, H - 20);
+            }
+
+            drawPlot(ctx, plot) {
+                const { x, y, w, h, color, title, maxY, valueAt, current } = plot;
+                ctx.fillStyle = 'rgba(255,255,255,.025)';
+                ctx.fillRect(x, y, w, h);
+                ctx.strokeStyle = 'rgba(200,220,235,.18)';
+                ctx.lineWidth = 1;
+                ctx.font = '9px Roboto, sans-serif';
+                for (let i = 0; i <= 4; i++) {
+                    const gy = y + h - i / 4 * h;
+                    ctx.beginPath(); ctx.moveTo(x, gy); ctx.lineTo(x + w, gy); ctx.stroke();
+                    ctx.fillStyle = '#7890a4';
+                    ctx.textAlign = 'right';
+                    ctx.fillText(this.axisNumber(maxY * i / 4), x - 7, gy + 3);
+                }
+                for (let ratio = 1; ratio <= 8; ratio++) {
+                    const gx = x + (ratio - 1) / 7 * w;
+                    ctx.beginPath(); ctx.moveTo(gx, y); ctx.lineTo(gx, y + h); ctx.stroke();
+                    ctx.fillStyle = '#7890a4';
+                    ctx.textAlign = 'center';
+                    ctx.fillText(String(ratio), gx, y + h + 14);
+                }
+                ctx.strokeStyle = color;
+                ctx.lineWidth = 3;
+                ctx.beginPath();
+                for (let i = 0; i <= 180; i++) {
+                    const ratio = 1 + i / 180 * 7;
+                    const px = x + (ratio - 1) / 7 * w;
+                    const py = y + h - valueAt(ratio) / maxY * h;
+                    if (i === 0) ctx.moveTo(px, py); else ctx.lineTo(px, py);
+                }
+                ctx.stroke();
+
+                const pointX = x + (this.distanceRatio - 1) / 7 * w;
+                const pointY = y + h - current / maxY * h;
+                ctx.setLineDash([4, 4]);
+                ctx.strokeStyle = 'rgba(255,255,255,.42)';
+                ctx.beginPath(); ctx.moveTo(pointX, y); ctx.lineTo(pointX, y + h); ctx.stroke();
+                ctx.setLineDash([]);
+                ctx.shadowColor = color;
+                ctx.shadowBlur = 10;
+                ctx.fillStyle = color;
+                ctx.beginPath(); ctx.arc(pointX, pointY, 5, 0, Math.PI * 2); ctx.fill();
+                ctx.shadowBlur = 0;
+                ctx.fillStyle = '#dfeaf3';
+                ctx.textAlign = 'left';
+                ctx.font = 'bold 11px Roboto, sans-serif';
+                ctx.fillText(title, x, y - 11);
+                ctx.textAlign = 'right';
+                ctx.fillStyle = color;
+                ctx.fillText('目前 ' + this.formatNumber(current), x + w, y - 11);
+            }
+
+            axisNumber(value) {
+                if (value >= 1000) return (value / 1000).toFixed(value >= 10000 ? 0 : 1) + 'k';
+                if (value >= 100) return value.toFixed(0);
+                if (value >= 10) return value.toFixed(1);
+                return value.toFixed(2);
+            }
+
+            drawDimension(ctx, x1, x2, y, label) {
+                ctx.strokeStyle = '#a990ff';
+                ctx.fillStyle = '#a990ff';
+                ctx.lineWidth = 1.5;
+                ctx.beginPath(); ctx.moveTo(x1, y); ctx.lineTo(x2, y); ctx.stroke();
+                [x1, x2].forEach((x, index) => {
+                    ctx.beginPath();
+                    ctx.moveTo(x, y);
+                    ctx.lineTo(x + (index === 0 ? 8 : -8), y - 5);
+                    ctx.lineTo(x + (index === 0 ? 8 : -8), y + 5);
+                    ctx.closePath(); ctx.fill();
+                });
+                ctx.fillStyle = '#c7baff';
+                ctx.font = 'bold 11px Roboto, sans-serif';
+                ctx.textAlign = 'center';
+                ctx.fillText(label, (x1 + x2) / 2, y - 9);
+            }
+
+            drawArrow(ctx, x1, y1, x2, y2, color, width) {
+                const angle = Math.atan2(y2 - y1, x2 - x1);
+                const head = 9;
+                ctx.strokeStyle = color;
+                ctx.fillStyle = color;
+                ctx.lineWidth = width;
+                ctx.lineCap = 'round';
+                ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(x2, y2);
+                ctx.lineTo(x2 - head * Math.cos(angle - Math.PI / 6), y2 - head * Math.sin(angle - Math.PI / 6));
+                ctx.lineTo(x2 - head * Math.cos(angle + Math.PI / 6), y2 - head * Math.sin(angle + Math.PI / 6));
+                ctx.closePath(); ctx.fill();
+            }
+
+            drawStars(ctx, width, height, count = 28) {
+                ctx.fillStyle = '#07111f';
+                ctx.fillRect(0, 0, width, height);
+                for (let i = 0; i < count; i++) {
+                    const x = (i * 83 + 29) % width;
+                    const y = (i * 47 + 61) % height;
+                    const radius = i % 5 === 0 ? 1.2 : .65;
+                    ctx.fillStyle = i % 4 === 0 ? 'rgba(130,205,255,.65)' : 'rgba(255,255,255,.45)';
+                    ctx.beginPath(); ctx.arc(x, y, radius, 0, Math.PI * 2); ctx.fill();
+                }
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => new GravitationSimulation());
+    </script>
+    <script src="../../js/jquery-1.9.1.min.js"></script>
+    <script src="../../js/classie.js"></script>
+    <script src="../../js/main.js"></script>
+</body>
+</html>
