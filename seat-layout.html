@@ -40,6 +40,37 @@
         padding: 0;
         line-height: 1.8;
       }
+      .export-actions {
+        max-width: 1160px;
+        margin: 14px auto 0;
+        padding: 18px 24px;
+        background: #fff;
+        border-left: 4px solid #3f51b5;
+        border-radius: 4px;
+        box-shadow: 0 2px 8px rgba(0,0,0,.08);
+      }
+      .export-actions h3 {
+        margin: 0 0 12px;
+        color: #333;
+        font-size: 20px;
+      }
+      .export-action-grid {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+      }
+      .export-action-grid .btn,
+      .export-action-grid .form-control {
+        width: 100%;
+        min-height: 40px;
+        margin: 0;
+      }
+      .export-action-notes {
+        margin-top: 10px;
+      }
+      .export-action-notes p {
+        margin: 4px 0 0;
+      }
       .back-btn {
         position: fixed;
         top: 20px;
@@ -162,6 +193,23 @@
         border-color: #999;
         background: #eeeeee;
         color: #777;
+      }
+      .seat-cell.prebound {
+        border-color: #7b4ab5;
+        background: #f5effc;
+        box-shadow: inset 0 0 0 1px #7b4ab5;
+      }
+      .seat-binding-badge {
+        position: absolute;
+        top: 5px;
+        right: 6px;
+        padding: 1px 5px;
+        border-radius: 10px;
+        background: #7b4ab5;
+        color: #fff;
+        font-size: 10px;
+        font-weight: 700;
+        line-height: 1.5;
       }
       .seat-number {
         font-size: 14px;
@@ -308,6 +356,9 @@
         border-left: 0;
       }
       @media (max-width: 767px) {
+        .export-action-grid {
+          grid-template-columns: 1fr;
+        }
         .seat-grid {
           grid-template-columns: repeat(2, minmax(0, 1fr));
         }
@@ -331,11 +382,31 @@
       <ol>
         <li><strong>建議先匯出空白的學生資料</strong>，再從「機構書籤 &gt; 師生帳號查詢 &gt; 學生帳號查詢」複製學生資料到空白學生資料Excel，完成後再匯入系統。</li>
         <li>設定座位排數、座位列數與講台位置。</li>
-        <li>匯入學生資料後，可輸入座號自動帶入位置，或點擊座位後從右側下拉選單指派學生。</li>
+        <li>匯入學生資料後，可輸入座號自動帶入位置，或點擊座位後從右側下拉選單指派學生；若要保留特定學生的位置，請勾選「預先綁定」。隨機安排預設會避免未綁定學生回到前次位置。</li>
         <li>輸入導師姓名、選擇是否顯示當日日期，再選擇輸出版面樣式並匯出 PDF 或 Word；每次匯出前都可以修改檔名。</li>
       </ol>
-      <button class="btn btn-default" type="button" onclick="exportStudents()">📥 先匯出空白學生資料</button>
     </div>
+
+    <section class="export-actions" aria-labelledby="exportActionsTitle">
+      <h3 id="exportActionsTitle">檔案與匯出</h3>
+      <div class="export-action-grid">
+        <button class="btn btn-default" type="button" onclick="exportStudents()">📥 第一次使用，先匯出空白學生資料</button>
+        <button class="btn btn-default" type="button" onclick="triggerImport()">📤 匯入學生資料 Excel 檔</button>
+        <button class="btn btn-default" type="button" onclick="exportStudents()">📥 匯出學生資料 Excel 檔</button>
+        <select id="pdfOrientation" class="form-control" onchange="onPdfLayoutStyleChange()" aria-label="選擇匯出版面">
+          <option value="landscape">版面：橫式（名條＋座位表）</option>
+          <option value="portrait">版面：直式（名條＋座位表）</option>
+          <option value="portrait-summary" selected>版面：直式（名條＋幹部名單＋座位表）</option>
+        </select>
+        <button class="btn btn-primary" type="button" onclick="exportPdf()">🖨️ 匯出 PDF A4</button>
+        <button class="btn btn-success" type="button" onclick="exportWordA4()">📝 匯出 Word A4（可能會跑版）</button>
+      </div>
+      <div class="export-action-notes">
+        <p id="pdfLayoutNote" class="pdf-note">橫式輸出兩頁：講台在上、講台在下（180 度旋轉），且包含名條清單。</p>
+        <p class="pdf-note">PDF 與 Word A4 皆會依照上方版面選單匯出；下載前可修改 XLSX、PDF 或 DOCX 檔名。</p>
+        <p id="exportDirtyHint" class="export-dirty-note">目前資料已有變動，請重新匯出座位表。</p>
+      </div>
+    </section>
 
     <div class="tool-container">
       <div class="tool-card">
@@ -388,7 +459,13 @@
                 <select id="seatAssignmentSelect" class="form-control" onchange="assignSelectedSeat(this.value)">
                   <option value="">空位</option>
                 </select>
-                <p class="pdf-note" style="margin: 6px 0 0;">點擊座位後，可從這裡指派學生。</p>
+                <div id="seatPrebindControl" class="checkbox" style="display:none; margin: 8px 0 0;">
+                  <label>
+                    <input id="seatPrebindCheckbox" type="checkbox" onchange="toggleSelectedSeatPrebinding(this.checked)">
+                    預先綁定（隨機分配時保留此位置）
+                  </label>
+                </div>
+                <p class="pdf-note" style="margin: 6px 0 0;">先指派學生，再勾選預先綁定；隨機安排只會分配其他學生。</p>
               </div>
             </div>
 
@@ -397,24 +474,21 @@
               <button class="btn btn-custom btn-block" style="margin-top: 10px;" onclick="quickArrangeSeats1()">↙️ 快速排列 1：左下往上、向右</button>
               <button class="btn btn-custom btn-block" style="margin-top: 10px;" onclick="quickArrangeSeats2()">↘️ 快速排列 2：右下往上、向左</button>
               <button class="btn btn-custom btn-block" style="margin-top: 10px;" onclick="randomizeSeats()">🎲 隨機安排座位</button>
+              <div class="checkbox" style="margin: 9px 0 0;">
+                <label>
+                  <input id="avoidPreviousSeat" type="checkbox">
+                  避免與前次座位重複
+                </label>
+              </div>
+              <p class="pdf-note" style="margin: 3px 0 0;">未綁定學生不會回到隨機前的原位置；預先綁定者不受此限制。</p>
+              <p id="preboundSeatHint" class="pdf-note" style="margin-top: 8px; margin-bottom: 0;">目前沒有預先綁定的座位。</p>
+              <button id="clearPrebindingsBtn" class="btn btn-default btn-block" style="display:none; margin-top: 8px;" onclick="clearAllPrebindings()">🔓 解除所有預先綁定</button>
               <button class="btn btn-default btn-block" style="margin-top: 10px;" onclick="clearAllSeatAssignments()">🧹 清空所有座位</button>
+              <button class="btn btn-default btn-block" style="margin-top: 10px;" onclick="resetToOriginalSeatState()">↩️ 重置為原始</button>
               <button id="emptySeatLockBtn" class="btn btn-default btn-block" style="margin-top: 10px;" onclick="toggleEmptySeatLockMode()">🔒 鎖定座位為空</button>
               <p id="emptySeatLockHint" class="pdf-note" style="margin-top: 8px; margin-bottom: 0;">鎖定模式未啟用。</p>
               <button id="swapModeBtn" class="btn btn-default btn-block" style="margin-top: 10px;" onclick="toggleSwapMode()">🔄 開啟交換座位模式</button>
               <p id="swapModeHint" class="pdf-note" style="margin-top: 8px; margin-bottom: 0;">交換模式未啟用。</p>
-              <button class="btn btn-default btn-block" style="margin-top: 10px;" onclick="triggerImport()">📤 匯入學生資料Excel檔</button>
-              <button class="btn btn-default btn-block" style="margin-top: 10px;" onclick="exportStudents()">📥 匯出學生資料Excel檔</button>
-              <select id="pdfOrientation" class="form-control pdf-layout-select" onchange="onPdfLayoutStyleChange()">
-                <option value="landscape">版面：橫式（名條＋座位表）</option>
-                <option value="portrait">版面：直式（名條＋座位表）</option>
-                <option value="portrait-summary" selected>版面：直式（名條＋幹部名單＋座位表）</option>
-              </select>
-              <button class="btn btn-primary btn-block" style="margin-top: 10px;" onclick="exportPdf()">🖨️ 匯出 PDF A4</button>
-              <button class="btn btn-success btn-block" style="margin-top: 10px;" onclick="exportWordA4()">📝 匯出 Word A4（可能會跑版）</button>
-              <p id="pdfLayoutNote" class="pdf-note" style="margin-top: 10px;">橫式輸出兩頁：講台在上、講台在下（180 度旋轉），且包含名條清單。</p>
-              <p class="pdf-note">PDF 與 Word A4 皆會依照上方版面選單匯出。</p>
-              <p class="pdf-note">按下匯出後，可在下載前修改 XLSX、PDF 或 DOCX 檔名。</p>
-              <p id="exportDirtyHint" class="export-dirty-note">目前資料已有變動，請重新匯出座位表。</p>
             </div>
 
           </div>
@@ -423,7 +497,7 @@
 
       <div class="tool-card">
         <h4>學生資料清單</h4>
-        <p>可匯入或匯出 XLSX 檔案，資料欄位為：班級、座號、學號、姓名、幹部、小老師、位置座標。</p>
+        <p>可匯入或匯出 XLSX 檔案，資料欄位為：班級、座號、學號、姓名、幹部、小老師、位置座標、預先綁定。</p>
         <div class="table-responsive">
           <table class="table table-bordered table-hover" id="studentTable">
             <thead>
@@ -435,6 +509,7 @@
                 <th>幹部</th>
                 <th>小老師</th>
                 <th style="width:120px;">位置座標</th>
+                <th style="width:110px;">預先綁定</th>
                 <th style="width:230px;">操作</th>
               </tr>
             </thead>
@@ -496,6 +571,7 @@
       let firstSwapSeat = null;
       let isEmptySeatLockMode = false;
       const lockedEmptySeats = new Set();
+      let originalSeatState = null;
       let isExportDirty = true;
       const officerPreset = ['班長', '副班長', '學藝股長', '學藝幹事', '環保股長', '衛生股長', '衛生幹事', '風紀股長', '資安股長', '資安幹事', '總務股長', '康樂股長', '輔導股長', '圖書股長', '設備股長'];
       const assistantPreset = ['國文', '英文', '數學', '地理', '歷史', '公民', '物理', '化學', '生物', '地科', '探究', '美術', '健護', '體育', '家政', '音樂'];
@@ -506,6 +582,7 @@
         renderSeatGrid();
         updateSwapModeUi();
         updateEmptySeatLockUi();
+        updatePreboundSeatUi();
         updateExportDirtyUi();
         updatePdfLayoutNote();
         document.addEventListener('keydown', handleRoleModalKeydown);
@@ -538,6 +615,17 @@
         return normalizeAssistantList(student?.assistant ?? '').join('、');
       }
 
+      function normalizePreboundValue(value) {
+        if (typeof value === 'boolean') return value;
+        if (typeof value === 'number') return value === 1;
+        return ['1', 'true', 'yes', 'y', '是', '已綁定', '綁定'].includes(String(value || '').trim().toLowerCase());
+      }
+
+      function isStudentDataRow(student) {
+        return [student.class, student.seat, student.studentId, student.name, student.assistant]
+          .some(value => String(value || '').trim()) || getOfficerDisplay(student) !== '';
+      }
+
       function ensureStudentShape(record = {}) {
         return {
           class: '',
@@ -548,9 +636,11 @@
           officer: '',
           officers: [],
           assistant: '',
+          prebound: false,
           ...record,
           officers: normalizeOfficerList(record.officers ?? record.officer ?? ''),
-          assistant: getAssistantDisplay(record)
+          assistant: getAssistantDisplay(record),
+          prebound: normalizePreboundValue(record.prebound)
         };
       }
 
@@ -670,6 +760,70 @@
         hint.textContent = message || `目前已鎖定 ${lockedEmptySeats.size} 個空位。`;
       }
 
+      function updatePreboundSeatUi(message) {
+        const hint = document.getElementById('preboundSeatHint');
+        const clearButton = document.getElementById('clearPrebindingsBtn');
+        if (!hint || !clearButton) return;
+        const count = students.filter(student => isStudentDataRow(student) && student.prebound).length;
+        hint.textContent = message || (count
+          ? `已預先綁定 ${count} 位學生；隨機安排時會保留其位置。`
+          : '目前沒有預先綁定的座位。');
+        clearButton.style.display = count ? 'block' : 'none';
+      }
+
+      function clearAllPrebindings() {
+        const count = students.filter(student => student.prebound).length;
+        if (!count) return;
+        if (!confirm(`確定要解除 ${count} 位學生的預先綁定嗎？目前座位不會被清除。`)) return;
+        captureOriginalSeatState();
+        students.forEach(student => {
+          student.prebound = false;
+        });
+        renderStudentTable();
+        updatePreboundSeatUi('已解除所有預先綁定，目前座位維持不變。');
+        markExportDirty();
+      }
+
+      function captureOriginalSeatState(force = false) {
+        if (originalSeatState && !force) return;
+        originalSeatState = {
+          studentStates: new Map(students.map(student => [student, {
+            position: student.position || '',
+            prebound: Boolean(student.prebound)
+          }])),
+          lockedEmptySeats: new Set(lockedEmptySeats),
+          rows: document.getElementById('seatRows')?.value || '6',
+          cols: document.getElementById('seatCols')?.value || '6',
+          podiumPosition: document.getElementById('podiumPosition')?.value || 'bottom'
+        };
+      }
+
+      function resetToOriginalSeatState() {
+        if (!originalSeatState) {
+          alert('目前尚未建立可還原的原始座位。執行隨機、快速排列或清空座位前，系統會自動保存原始狀態。');
+          return;
+        }
+        if (!confirm('確定要恢復原始座位嗎？目前的座位、預先綁定與鎖定空位會被取代。')) return;
+
+        students.forEach(student => {
+          const savedState = originalSeatState.studentStates.get(student);
+          student.position = savedState?.position || '';
+          student.prebound = Boolean(savedState?.prebound);
+        });
+        lockedEmptySeats.clear();
+        originalSeatState.lockedEmptySeats.forEach(seatIndex => lockedEmptySeats.add(seatIndex));
+        document.getElementById('seatRows').value = originalSeatState.rows;
+        document.getElementById('seatCols').value = originalSeatState.cols;
+        document.getElementById('podiumPosition').value = originalSeatState.podiumPosition;
+        selectedSeat = null;
+        selectedStudentIndex = null;
+        firstSwapSeat = null;
+        renderStudentTable();
+        updateEmptySeatLockUi(`已恢復原始座位，包含 ${lockedEmptySeats.size} 個鎖定空位。`);
+        updatePreboundSeatUi();
+        markExportDirty();
+      }
+
       function toggleEmptySeatLockMode() {
         isEmptySeatLockMode = !isEmptySeatLockMode;
         selectedSeat = null;
@@ -707,10 +861,7 @@
           .filter(seatIndex => seatIndex >= 1 && seatIndex <= total)
           .length;
         const availableSeatCount = total - lockedSeatCount;
-        const studentCount = students.filter(student => {
-          return [student.class, student.seat, student.studentId, student.name, student.assistant]
-            .some(value => String(value || '').trim()) || getOfficerDisplay(student) !== '';
-        }).length;
+        const studentCount = students.filter(isStudentDataRow).length;
         const seatCount = document.getElementById('seatCount');
 
         seatCount.className = 'form-control-static';
@@ -774,12 +925,14 @@
           const seatCell = document.createElement('div');
           seatCell.className = 'seat-cell' + (selectedSeat === i ? ' selected' : '');
           if (!assigned && lockedEmptySeats.has(i)) seatCell.className += ' locked-empty';
+          if (assigned?.prebound) seatCell.className += ' prebound';
           if (isSwapMode && firstSwapSeat === i) {
             seatCell.className += ' swap-pending';
           }
           seatCell.dataset.seat = i;
           const officerText = assigned ? getOfficerDisplay(assigned) : '';
           seatCell.innerHTML = `
+            ${assigned?.prebound ? '<span class="seat-binding-badge">已綁定</span>' : ''}
             <div class="seat-name">${assigned ? `${assigned.seat} ${assigned.name}` : (lockedEmptySeats.has(i) ? '<span class="seat-empty">鎖定空位</span>' : '<span class="seat-empty">空位</span>')}</div>
             <div class="seat-role">${officerText || '&nbsp;'}</div>
             <div class="seat-assistant">${assigned && getAssistantDisplay(assigned) ? getAssistantDisplay(assigned) : '&nbsp;'}</div>
@@ -794,9 +947,12 @@
         const panel = document.getElementById('seatAssignmentPanel');
         const label = document.getElementById('selectedSeatLabel');
         const select = document.getElementById('seatAssignmentSelect');
-        if (!panel || !label || !select) return;
+        const prebindControl = document.getElementById('seatPrebindControl');
+        const prebindCheckbox = document.getElementById('seatPrebindCheckbox');
+        if (!panel || !label || !select || !prebindControl || !prebindCheckbox) return;
         if (!selectedSeat) {
           panel.style.display = 'none';
+          prebindControl.style.display = 'none';
           return;
         }
 
@@ -813,7 +969,63 @@
           select.appendChild(option);
         });
         select.disabled = lockedEmptySeats.has(selectedSeat) && !assigned;
+        prebindControl.style.display = assigned ? 'block' : 'none';
+        prebindCheckbox.checked = Boolean(assigned?.prebound);
+        prebindCheckbox.disabled = !assigned;
         panel.style.display = 'block';
+      }
+
+      function setStudentPrebound(index, shouldBind) {
+        const student = students[index];
+        if (!student) return;
+        if (!shouldBind) {
+          student.prebound = false;
+          renderStudentTable();
+          updatePreboundSeatUi();
+          markExportDirty();
+          return;
+        }
+
+        const rows = Number(document.getElementById('seatRows').value) || 6;
+        const cols = Number(document.getElementById('seatCols').value) || 6;
+        const position = parsePositionCoordinate(student.position);
+        const label = [student.seat, student.name].filter(Boolean).join(' ') || '這位學生';
+        if (!position || position.row > rows || position.col > cols) {
+          alert(`請先替「${label}」指定有效的座位，再進行預先綁定。`);
+          renderStudentTable();
+          return;
+        }
+        const seatIndex = (position.row - 1) * cols + position.col;
+        if (lockedEmptySeats.has(seatIndex)) {
+          alert('此位置已鎖定為空，無法預先綁定學生。');
+          renderStudentTable();
+          return;
+        }
+        const conflict = students.find((other, otherIndex) => (
+          otherIndex !== index && other.prebound && parsePositionCoordinate(other.position)?.label === position.label
+        ));
+        if (conflict) {
+          const conflictLabel = [conflict.seat, conflict.name].filter(Boolean).join(' ') || '另一位學生';
+          alert(`位置 ${position.label} 已預先綁定給「${conflictLabel}」。`);
+          renderStudentTable();
+          return;
+        }
+        student.prebound = true;
+        renderStudentTable();
+        updatePreboundSeatUi();
+        markExportDirty();
+      }
+
+      function toggleSelectedSeatPrebinding(shouldBind) {
+        if (!selectedSeat) return;
+        const cols = Number(document.getElementById('seatCols').value) || 6;
+        const coordinate = getSeatCoordinateFromIndex(selectedSeat, cols);
+        const studentIndex = getStudentIndexByCoordinateLabel(coordinate.label);
+        if (studentIndex === -1) {
+          updateSeatAssignmentUi();
+          return;
+        }
+        setStudentPrebound(studentIndex, shouldBind);
       }
 
       function assignSelectedSeat(studentIndex) {
@@ -828,7 +1040,10 @@
           return;
         }
 
-        if (occupantIndex !== -1) students[occupantIndex].position = '';
+        if (occupantIndex !== -1) {
+          students[occupantIndex].position = '';
+          students[occupantIndex].prebound = false;
+        }
         if (studentIndex !== '') {
           const nextIndex = Number(studentIndex);
           if (!students[nextIndex]) return;
@@ -840,6 +1055,7 @@
         }
         selectedStudentIndex = null;
         renderStudentTable();
+        updatePreboundSeatUi();
         markExportDirty();
       }
 
@@ -972,6 +1188,12 @@
             <td>${getAssistantDisplay(student) || '-'}</td>
             <td><input class="form-control input-sm" placeholder="例如 2,3" value="${student.position || ''}" onchange="updateStudentField(${index}, 'position', this.value)"></td>
             <td>
+              <label style="font-weight:400; white-space:nowrap; margin:0;">
+                <input type="checkbox" ${student.prebound ? 'checked' : ''} onchange="setStudentPrebound(${index}, this.checked)">
+                保留位置
+              </label>
+            </td>
+            <td>
               <button class="btn btn-xs btn-primary" onclick="openRoleAssignmentModal(${index})">指派幹部或小老師</button>
               <button class="btn btn-xs btn-default" onclick="selectStudentRow(${index})">選取</button>
               <button class="btn btn-xs btn-danger" onclick="removeStudentRow(${index})">刪除</button>
@@ -980,6 +1202,7 @@
           tbody.appendChild(tr);
         });
         renderSeatGrid();
+        updatePreboundSeatUi();
       }
 
       function updateStudentField(index, field, value) {
@@ -1002,6 +1225,7 @@
         } else if (field === 'position') {
           const parsed = parsePositionCoordinate(value);
           students[index][field] = parsed ? parsed.label : (value ? String(value).trim() : '');
+          if (!parsed) students[index].prebound = false;
         } else {
           students[index][field] = value;
         }
@@ -1048,8 +1272,20 @@
         if (selectedStudentIndex !== null && students[selectedStudentIndex]) {
           const cols = Number(document.getElementById('seatCols').value) || 6;
           const coordinate = getSeatCoordinateFromIndex(seat, cols);
+          const occupantIndex = getStudentIndexByCoordinateLabel(coordinate.label);
+          if (lockedEmptySeats.has(seat) && occupantIndex === -1) {
+            updateEmptySeatLockUi('此位置已鎖定為空，請先解除空位鎖定。');
+            renderSeatGrid();
+            return;
+          }
+          if (occupantIndex !== -1 && occupantIndex !== selectedStudentIndex) {
+            students[occupantIndex].position = '';
+            students[occupantIndex].prebound = false;
+          }
           students[selectedStudentIndex].position = coordinate.label;
+          lockedEmptySeats.delete(seat);
           renderStudentTable();
+          updatePreboundSeatUi();
           markExportDirty();
           return;
         }
@@ -1135,53 +1371,167 @@
         markExportDirty();
       }
 
+      function getPreboundAllocation(rows, cols) {
+        const activeStudents = students.filter(isStudentDataRow);
+        const preboundStudents = activeStudents.filter(student => student.prebound);
+        const boundSeatIndexes = new Set();
+        const errors = [];
+
+        preboundStudents.forEach(student => {
+          const studentLabel = [student.seat, student.name].filter(Boolean).join(' ') || '未命名學生';
+          const position = parsePositionCoordinate(student.position);
+          if (!position || position.row > rows || position.col > cols) {
+            errors.push(`${studentLabel}：尚未指定有效座位`);
+            return;
+          }
+          const seatIndex = (position.row - 1) * cols + position.col;
+          if (lockedEmptySeats.has(seatIndex)) {
+            errors.push(`${studentLabel}：位置 ${position.label} 已鎖定為空`);
+            return;
+          }
+          if (boundSeatIndexes.has(seatIndex)) {
+            errors.push(`${studentLabel}：位置 ${position.label} 與其他綁定學生重複`);
+            return;
+          }
+          boundSeatIndexes.add(seatIndex);
+        });
+
+        if (errors.length) {
+          alert(`無法安排座位，請先修正預先綁定：\n${errors.join('\n')}`);
+          return null;
+        }
+        return { activeStudents, preboundStudents, boundSeatIndexes };
+      }
+
+      function getShuffledCopy(items) {
+        const shuffled = [...items];
+        for (let i = shuffled.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+        }
+        return shuffled;
+      }
+
+      function buildRandomSeatAssignment(studentsToRandomize, coordinates, avoidPreviousSeat) {
+        if (!avoidPreviousSeat) {
+          const shuffledCoordinates = getShuffledCopy(coordinates);
+          return new Map(studentsToRandomize.map((student, index) => [student, shuffledCoordinates[index]]));
+        }
+
+        const candidatesByStudent = new Map();
+        studentsToRandomize.forEach(student => {
+          const previousPosition = parsePositionCoordinate(student.position)?.label || '';
+          const candidates = coordinates.filter(coordinate => coordinate !== previousPosition);
+          candidatesByStudent.set(student, getShuffledCopy(candidates));
+        });
+
+        const randomizedStudents = getShuffledCopy(studentsToRandomize)
+          .sort((first, second) => candidatesByStudent.get(first).length - candidatesByStudent.get(second).length);
+        const studentByCoordinate = new Map();
+
+        function tryAssignStudent(student, visitedCoordinates) {
+          const candidates = candidatesByStudent.get(student) || [];
+          for (const coordinate of candidates) {
+            if (visitedCoordinates.has(coordinate)) continue;
+            visitedCoordinates.add(coordinate);
+            const currentStudent = studentByCoordinate.get(coordinate);
+            if (!currentStudent || tryAssignStudent(currentStudent, visitedCoordinates)) {
+              studentByCoordinate.set(coordinate, student);
+              return true;
+            }
+          }
+          return false;
+        }
+
+        for (const student of randomizedStudents) {
+          if (!tryAssignStudent(student, new Set())) return null;
+        }
+
+        const assignment = new Map();
+        studentByCoordinate.forEach((student, coordinate) => {
+          assignment.set(student, coordinate);
+        });
+        return assignment;
+      }
+
       function randomizeSeats() {
         const rows = Number(document.getElementById('seatRows').value) || 6;
         const cols = Number(document.getElementById('seatCols').value) || 6;
         const total = rows * cols;
+        const allocation = getPreboundAllocation(rows, cols);
+        if (!allocation) return;
+        const preboundStudentSet = new Set(allocation.preboundStudents);
         const coordinates = Array.from({ length: total }, (_, i) => i + 1)
-          .filter(seatIndex => !lockedEmptySeats.has(seatIndex))
+          .filter(seatIndex => !lockedEmptySeats.has(seatIndex) && !allocation.boundSeatIndexes.has(seatIndex))
           .map(seatIndex => getSeatCoordinateFromIndex(seatIndex, cols).label);
-        for (let i = coordinates.length - 1; i > 0; i--) {
-          const j = Math.floor(Math.random() * (i + 1));
-          [coordinates[i], coordinates[j]] = [coordinates[j], coordinates[i]];
+        const studentsToRandomize = allocation.activeStudents.filter(student => !preboundStudentSet.has(student));
+        if (coordinates.length < studentsToRandomize.length) {
+          alert(`可用座位不足：尚有 ${studentsToRandomize.length} 位學生，但只剩 ${coordinates.length} 個可分配座位。`);
+          return;
         }
-        students.forEach((student, index) => {
-          student.position = coordinates[index] || '';
+        const avoidPreviousSeat = document.getElementById('avoidPreviousSeat')?.checked !== false;
+        const assignment = buildRandomSeatAssignment(studentsToRandomize, coordinates, avoidPreviousSeat);
+        if (!assignment) {
+          alert('目前的綁定與空位限制無法讓所有學生避開前次位置。請增加可用座位、解除部分鎖定，或取消勾選「避免與前次座位重複」。');
+          return;
+        }
+        captureOriginalSeatState();
+        students.filter(student => !isStudentDataRow(student)).forEach(student => {
+          student.position = '';
+          student.prebound = false;
+        });
+        studentsToRandomize.forEach(student => {
+          student.position = assignment.get(student) || '';
         });
         renderStudentTable();
+        updatePreboundSeatUi();
         markExportDirty();
       }
 
       function clearAllSeatAssignments() {
-        if (!confirm('確定要清空所有學生座位嗎？學生資料與鎖定空位都會保留。')) return;
+        if (!confirm('確定要清空所有學生座位嗎？學生資料與鎖定空位會保留，預先綁定則會一併解除。')) return;
+        captureOriginalSeatState();
         students.forEach(student => {
           student.position = '';
+          student.prebound = false;
         });
         selectedSeat = null;
         selectedStudentIndex = null;
         updateEmptySeatLockUi(`已清空所有學生座位，保留 ${lockedEmptySeats.size} 個鎖定空位。`);
         renderStudentTable();
+        updatePreboundSeatUi();
         markExportDirty();
       }
 
       function arrangeSeatsByVerticalDirection(columnStart, columnStep) {
         const rows = Number(document.getElementById('seatRows').value) || 6;
         const cols = Number(document.getElementById('seatCols').value) || 6;
+        const allocation = getPreboundAllocation(rows, cols);
+        if (!allocation) return;
+        const preboundStudentSet = new Set(allocation.preboundStudents);
         const coordinates = [];
         for (let col = columnStart; col >= 1 && col <= cols; col += columnStep) {
           for (let row = rows; row >= 1; row--) {
             const seatIndex = (row - 1) * cols + col;
-            if (!lockedEmptySeats.has(seatIndex)) coordinates.push(`${row},${col}`);
+            if (!lockedEmptySeats.has(seatIndex) && !allocation.boundSeatIndexes.has(seatIndex)) coordinates.push(`${row},${col}`);
           }
         }
-        students.forEach(student => {
-          student.position = '';
-        });
-        getStudentsSortedBySeat().forEach((student, index) => {
+        const studentsToArrange = getStudentsSortedBySeat()
+          .filter(student => isStudentDataRow(student) && !preboundStudentSet.has(student));
+        if (coordinates.length < studentsToArrange.length) {
+          alert(`可用座位不足：尚有 ${studentsToArrange.length} 位學生，但只剩 ${coordinates.length} 個可分配座位。`);
+          return;
+        }
+        captureOriginalSeatState();
+        studentsToArrange.forEach((student, index) => {
           student.position = coordinates[index] || '';
         });
+        students.filter(student => !isStudentDataRow(student)).forEach(student => {
+          student.position = '';
+          student.prebound = false;
+        });
         renderStudentTable();
+        updatePreboundSeatUi();
         markExportDirty();
       }
 
@@ -1229,6 +1579,7 @@
           if (header.includes('名') || header.includes('name')) headerMap.name = index;
           if (header.includes('幹') || header.includes('officer')) headerMap.officer = index;
           if (header.includes('小') || header.includes('assistant') || header.includes('helper')) headerMap.assistant = index;
+          if (header.includes('預先綁定') || header.includes('prebound') || header.includes('fixed')) headerMap.prebound = index;
         });
         if (!('class' in headerMap) || !('seat' in headerMap) || !('studentId' in headerMap) || !('name' in headerMap) || !('position' in headerMap)) {
           alert('XLSX 標頭必須包含 班級、座號、學號、姓名、位置座標。可選擇新增 幹部、小老師。');
@@ -1248,10 +1599,12 @@
             name: cols[headerMap.name] || '',
             officers: headerMap.officer !== undefined ? normalizeOfficerList(cols[headerMap.officer] || '') : [],
             officer: '',
-            assistant: headerMap.assistant !== undefined ? cols[headerMap.assistant] || '' : ''
+            assistant: headerMap.assistant !== undefined ? cols[headerMap.assistant] || '' : '',
+            prebound: headerMap.prebound !== undefined ? normalizePreboundValue(cols[headerMap.prebound]) : false
           };
-        });
+        }).map(ensureStudentShape);
         selectedStudentIndex = null;
+        captureOriginalSeatState(true);
         renderStudentTable();
         markExportDirty();
       }
@@ -1263,9 +1616,9 @@
         }
         const exportFileName = requestExportFileName(getSeatLayoutExportBaseName(), 'xlsx');
         if (!exportFileName) return;
-        const rows = [['班級', '座號', '學號', '姓名', '幹部', '小老師', '位置座標']];
+        const rows = [['班級', '座號', '學號', '姓名', '幹部', '小老師', '位置座標', '預先綁定']];
         students.forEach(student => {
-          rows.push([student.class || '', student.seat || '', student.studentId || '', student.name || '', getOfficerDisplay(student), getAssistantDisplay(student), student.position || '']);
+          rows.push([student.class || '', student.seat || '', student.studentId || '', student.name || '', getOfficerDisplay(student), getAssistantDisplay(student), student.position || '', student.prebound ? '是' : '']);
         });
         const worksheet = XLSX.utils.aoa_to_sheet(rows);
         const workbook = XLSX.utils.book_new();
