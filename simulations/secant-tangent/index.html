@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>割線與切線：從平均到瞬時 - 物鯉魚教學模擬</title>
+  <meta name="description" content="移動函數上的兩點，觀察割線如何逼近切線，理解平均變化率、瞬時變化率與導數。適合高中數學與物理課堂。">
+  <link rel="icon" href="../../images/fish.png">
+  <link rel="stylesheet" href="../../css/simulations.css">
+  <link rel="stylesheet" href="style.css">
+  <script src="simulation.js" defer></script>
+</head>
+<body class="secant-page">
+  <nav class="top-nav" aria-label="網站導覽"><div class="container-nav">
+    <a class="nav-brand" href="../../index.html"><img src="../../images/fish.png" alt=""><h2>物鯉魚教學模擬</h2></a>
+    <a class="btn-back" href="../../physics-simulations.html">← 返回列表</a>
+  </div></nav>
+  <main class="st-main">
+    <header class="st-heading"><p class="st-eyebrow">高中數學 × 物理 · 函數與變化率</p><h1>割線與切線：從平均到瞬時</h1><p>固定 P，讓 Q 慢慢靠近。看一段區間的變化，如何告訴我們一個瞬間的變化。</p></header>
+    <div class="st-toolbar" aria-label="演示控制">
+      <button id="play" class="st-primary">▶ 播放逼近</button>
+      <button id="replay">重播本次</button>
+      <button id="step">距離減半</button>
+      <label for="speed">速度 <select id="speed"><option value="0.25">0.25×</option><option value="0.5">0.5×</option><option value="1" selected>1×</option></select></label>
+      <button id="controls-toggle" aria-expanded="true" aria-controls="controls">收合參數</button>
+      <button id="mode" aria-pressed="false">課堂演示</button>
+      <button id="large" aria-pressed="false">大字</button>
+      <button id="fullscreen">全螢幕</button>
+    </div>
+    <div class="st-workspace">
+      <section class="st-visual" aria-label="函數圖形及即時變化率">
+        <div class="st-legend"><span class="st-curve">━ 函數 <b id="function-label">f(x) = x²</b></span><span class="st-secant">━ 割線 PQ</span><span class="st-tangent">┄ P 點切線</span></div>
+        <div class="st-plot"><canvas id="graph" role="img" aria-label="函數、P 與 Q 兩點、割線與切線；下方提供相同數據。">請使用支援 Canvas 的瀏覽器；即時數值仍列於下方。</canvas></div>
+        <div class="st-metrics">
+          <div><span>水平變化 Δx = h</span><strong id="h-value">2.000</strong></div>
+          <div class="st-secant"><span>平均變化率<br>割線斜率</span><strong id="average">4.000</strong></div>
+          <div class="st-tangent"><span>瞬時變化率<br>切線斜率</span><strong id="instant">2.000</strong></div>
+        </div>
+        <p id="status" class="st-status" role="status"></p>
+      </section>
+      <aside id="controls" class="st-panel" aria-label="參數與教學情境">
+        <h2>動手探索</h2>
+        <label for="scenario">教學情境</label>
+        <select id="scenario"><option value="right">① 從右側靠近 P</option><option value="left">② 從左側靠近 P</option><option value="corner">③ 尖點的瞬時變化率</option></select>
+        <p id="question" class="st-question"></p><p id="observe"></p>
+        <button id="reveal" aria-expanded="false" aria-controls="conclusion">揭示結論</button><p id="conclusion" hidden></p>
+        <hr>
+        <label for="function">函數</label><select id="function"><option value="quadratic">f(x) = x²　二次函數</option><option value="cubic">f(x) = x³ / 4　三次函數</option><option value="linear">f(x) = 2x + 1　一次函數</option><option value="absolute">f(x) = |x|　絕對值函數</option></select>
+        <label for="a">固定點 P：a = <output id="a-value">1.00</output></label>
+        <div class="st-slider"><button data-adjust="a" data-delta="-0.1" aria-label="a 減少 0.1">−</button><input id="a" type="range" min="-2" max="2" step="0.1" value="1"><button data-adjust="a" data-delta="0.1" aria-label="a 增加 0.1">＋</button></div>
+        <p class="st-hint">範圍 −2 ～ 2；P = (a, f(a))</p>
+        <label for="side">Q 的方向</label><select id="side"><option value="1">右側：h ≥ 0</option><option value="-1">左側：h ≤ 0</option></select>
+        <label for="distance">水平距離 |h| = <output id="distance-value">2.00</output></label>
+        <div class="st-slider"><button data-adjust="distance" data-delta="-0.01" aria-label="距離減少 0.01">−</button><input id="distance" type="range" min="0" max="2" step="0.01" value="2"><button data-adjust="distance" data-delta="0.01" aria-label="距離增加 0.01">＋</button></div>
+        <p class="st-hint">範圍 0 ～ 2；Q = (a + h, f(a + h))</p>
+        <label class="st-check"><input id="tangent" type="checkbox" checked>顯示切線</label>
+        <label class="st-check"><input id="triangle" type="checkbox" checked>顯示 Δx、Δy 輔助線</label>
+        <button id="reset">恢復預設</button>
+      </aside>
+    </div>
+    <section class="st-explanation" aria-label="詳細說明">
+      <h2>先看一段，再看一瞬間</h2>
+      <div class="st-reading-grid">
+        <article><h3>1 · 函數在說什麼？</h3><p>函數把輸入 x 對應到輸出 f(x)。圖上的 P 與 Q，是兩組「輸入、輸出」。斜率表示 x 每增加 1 單位，f(x) 改變多少；負斜率表示下降。</p><p>本頁的 x、f(x) 是無單位的數學量。若把橫軸看成時間 t（秒）、縱軸看成位置 s（公尺），斜率的單位就是公尺／秒。</p></article>
+        <article><h3>2 · 割線：一段區間的平均</h3><p>連接兩個不同點 P、Q 的直線叫做割線。用總變化量除以輸入的變化量，就得到平均變化率。</p><p class="st-formula">m<sub>割線</sub> = Δy / Δx<br>= [f(a + h) − f(a)] / h，h ≠ 0</p><p id="calculation" class="st-calculation"></p><p>平均變化率不是兩個函數值的平均，也通常不等於兩端瞬時變化率的平均。</p></article>
+        <article><h3>3 · 切線：某一點的瞬時</h3><p>固定 P，讓 Q 從左右兩側越來越接近 P。若割線斜率都趨近同一個有限值，這個極限就是 P 點的導數，也就是瞬時變化率。</p><p class="st-formula">f′(a) = lim<sub>h → 0</sub> [f(a + h) − f(a)] / h</p><p><strong>趨近 0 不等於直接代入 0。</strong>h = 0 時兩點重合，差商成為 0 / 0，無法定義割線斜率；切線斜率來自極限。切線也不一定只和整條曲線相交一次。</p></article>
+      </div>
+      <article class="st-example"><h3>把圖形變成速度：s(t) = t²</h3><p>若物體在 t 秒時的位置為 t² 公尺，從第 1 秒到第 3 秒，平均速度為 (9 − 1) / (3 − 1) = <strong>4 公尺／秒</strong>。但第 1 秒的瞬時速度為 s′(1) = <strong>2 公尺／秒</strong>。把時間區間縮成第 1 秒到第 1.01 秒，平均速度變成 2.01 公尺／秒，逐漸接近 2。</p><p>這裡討論的是「位置變化／時間變化」的速度；若物體中途折返，平均速率則要以總路程除以時間計算。</p></article>
+      <details><summary>查看左右逼近的數值與模型</summary><p>下表固定目前的函數與 a，只縮小 h。動畫最小停在 |h| = 0.01，仍是平均變化率的近似；瞬時值由解析導數計算。每個函數使用固定座標範圍，切換函數時會更換縱軸範圍。</p><div class="st-table-wrap"><table><caption>左右差商比較</caption><thead><tr><th scope="col">|h|</th><th scope="col">左側 h &lt; 0</th><th scope="col">右側 h &gt; 0</th></tr></thead><tbody id="limit-table"></tbody></table></div><p>解析導數：x² → 2x；x³ / 4 → 3x² / 4；2x + 1 → 2；|x| 在 x &gt; 0 時為 1、x &lt; 0 時為 −1，在 x = 0 不可微。本頁只示範這四種函數；不涵蓋垂直切線或不連續函數。</p></details>
+    </section>
+  </main>
+</body>
+</html>

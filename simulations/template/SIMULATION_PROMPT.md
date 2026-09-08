@@ -1,404 +1,177 @@
-# 物理模擬生成指引 (Physics Simulation Generation Prompt)
-
-此文件為生成 agent 的參考規範，建立新模擬前請完整閱讀。
-
----
-
-## 專案概覽
-
-**網站**：purplecarp.github.io — 高中物理教學個人網站  
-**目的**：製作互動式物理模擬，供台灣高中學生（選修物理 I~III）自學與課堂使用  
-**語言**：繁體中文介面，程式碼以英文撰寫  
-**技術**：純 HTML + CSS + JavaScript（Canvas 2D API），不使用框架
-
----
-
-## 目錄結構
-
-```
-purplecarp.github.io/
-├── index.html
-├── physics-simulations.html      ← 模擬列表頁，新增模擬後需在此加入連結
-├── css/
-│   ├── simulations.css           ← 所有模擬共用的樣式（必須引用）
-│   ├── style.css
-│   └── ...
-├── simulations/
-│   ├── template/
-│   │   ├── index.html            ← HTML 結構模板
-│   │   └── SIMULATION_PROMPT.md  ← 本文件
-│   ├── spring-shm/index.html     ← 範例：最完整的模擬，請參考其架構
-│   ├── uniform-acceleration/index.html
-│   ├── water-wave-interference/index.html
-│   ├── ripple-tank/index.html
-│   └── charged-particle-magnetic-field/index.html
-```
-
-**每個新模擬**放在 `simulations/<英文名稱>/index.html`，路徑使用小寫連字號。
-
----
-
-## HTML `<head>` 標準結構
-
-```html
-<!DOCTYPE html>
-<html lang="zh-Hant">
-<head>
-    <meta charset="utf-8">
-    <title>[模擬名稱] - 物理模擬</title>
-    <meta content="IE=edge" http-equiv="X-UA-Compatible">
-    <meta content="width=device-width, initial-scale=1" name="viewport">
-    <link href="../../images/fish.png" rel="shortcut icon">
-
-    <link href="../../css/bootstrap.min.css" rel="stylesheet">
-    <link href="../../css/normalize.css" rel="stylesheet">
-    <link href="../../css/style.css" rel="stylesheet">
-    <link href="../../css/responsive.css" rel="stylesheet">
-    <link href="../../css/simulations.css" rel="stylesheet">
-
-    <link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700' rel='stylesheet' type='text/css'>
-    <link href='https://fonts.googleapis.com/css?family=Roboto:400,300,500,700' rel='stylesheet' type='text/css'>
-
-    <!-- 若有數學公式，加入 KaTeX -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
-        onload="renderMathInElement(document.body, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
-
-    <!-- 若需要額外 CSS，放在 <style> 內 -->
-    <style>
-        /* 頁面專屬樣式 */
-    </style>
-</head>
-```
-
----
-
-## 頁面 Layout 規範
-
-### 版型：`sim-layout`（控制面板右側，模擬區左側）
-
-```html
-<div class="sim-layout">
-    <!-- 右側控制面板（寬度固定約 280px） -->
-    <div class="sim-layout-left">
-        <div class="controls">
-            <div class="control-section">
-                <h3>⚙️ 參數控制</h3>
-                <!-- 滑桿 -->
-                <div class="control-row">
-                    <label>參數名稱 單位</label>
-                    <input type="range" id="xxxSlider" min="0" max="100" step="1" value="50">
-                    <span class="value-display" id="xxxValue">50</span>
-                </div>
-                <!-- 勾選框 -->
-                <div class="control-row">
-                    <label>選項名稱</label>
-                    <input type="checkbox" id="xxxToggle" checked>
-                </div>
-            </div>
-        </div>
-        <!-- 控制按鈕 -->
-        <div class="button-group">
-            <button class="btn btn-start" id="startBtn">▶ 開始模擬</button>
-            <button class="btn btn-pause" id="pauseBtn">⏸ 暫停</button>
-            <button class="btn btn-reset" id="resetBtn">🔄 重置</button>
-        </div>
-    </div>
-
-    <!-- 左側模擬區域 -->
-    <div class="sim-layout-right">
-        <div class="simulation-section">
-            <div class="canvas-wrapper">
-                <canvas id="simCanvas" width="900" height="480"></canvas>
-            </div>
-            <!-- 若需要 x-t / v-t / a-t 圖 -->
-            <div class="graphs-container">
-                <div class="graph-box">
-                    <h5>x-t 圖</h5>
-                    <canvas id="xtCanvas" width="280" height="200"></canvas>
-                </div>
-                <!-- ... -->
-            </div>
-        </div>
-    </div>
-</div>
-```
-
-> **注意**：`sim-layout-left` 是右側控制面板，`sim-layout-right` 是左側模擬區（CSS 以 flex-direction 反轉）。
-
----
-
-## JavaScript 類別結構
-
-### 標準模板
-
-```javascript
-class MySimulation {
-    constructor() {
-        // 1. 取得畫布
-        this.simCanvas = document.getElementById('simCanvas');
-        this.simCtx = this.simCanvas.getContext('2d');
-        // （若有多個畫布，逐一取得）
-
-        // 2. 高 DPI 縮放（必須）
-        this.dpr = window.devicePixelRatio || 1;
-        this.scaleCanvas(this.simCanvas, this.simCtx);
-        // 每個畫布都要 scaleCanvas
-
-        // 3. 物理參數初始值
-        this.param1 = 10;
-        this.param2 = 5.0;
-
-        // 4. 模擬狀態
-        this.isRunning = false;
-        this.time = 0;
-        this.animationId = null;
-        this.lastTimestamp = null;
-        this.history = [];
-
-        this.init();
-    }
-
-    // 高 DPI 縮放（必須實作）
-    scaleCanvas(canvas, ctx) {
-        const dpr = this.dpr;
-        const cssW = canvas.width, cssH = canvas.height;
-        canvas.width = Math.round(cssW * dpr);
-        canvas.height = Math.round(cssH * dpr);
-        canvas.style.width = cssW + 'px';
-        canvas.style.height = cssH + 'px';
-        ctx.scale(dpr, dpr);
-    }
-
-    init() {
-        this.bindControls();
-        this.reset();
-    }
-
-    bindControls() {
-        // 滑桿
-        document.getElementById('param1Slider').addEventListener('input', (e) => {
-            this.param1 = parseFloat(e.target.value);
-            document.getElementById('param1Value').textContent = this.param1.toFixed(1);
-            this.reset(); // 參數改變後立即重置
-        });
-        // 按鈕
-        document.getElementById('startBtn').addEventListener('click', () => this.start());
-        document.getElementById('pauseBtn').addEventListener('click', () => this.pause());
-        document.getElementById('resetBtn').addEventListener('click', () => this.reset());
-    }
-
-    start() {
-        if (this.isRunning) return;
-        this.isRunning = true;
-        this.lastTimestamp = null;
-        this.animationId = requestAnimationFrame((ts) => this.loop(ts));
-    }
-
-    pause() {
-        this.isRunning = false;
-        if (this.animationId) {
-            cancelAnimationFrame(this.animationId);
-            this.animationId = null;
-        }
-    }
-
-    reset() {
-        this.pause();
-        this.time = 0;
-        this.history = [];
-        this.draw();
-    }
-
-    loop(timestamp) {
-        if (!this.isRunning) return;
-        if (this.lastTimestamp !== null) {
-            const dt = Math.min((timestamp - this.lastTimestamp) / 1000, 0.05);
-            this.time += dt * this.playbackSpeed;
-            this.history.push({ t: this.time, /* 其他數據 */ });
-        }
-        this.lastTimestamp = timestamp;
-        this.draw();
-        this.animationId = requestAnimationFrame((ts) => this.loop(ts));
-    }
-
-    draw() {
-        // 使用 canvas.width / this.dpr 取得 CSS 邏輯尺寸
-        const W = this.simCanvas.width / this.dpr;
-        const H = this.simCanvas.height / this.dpr;
-        const ctx = this.simCtx;
-        ctx.clearRect(0, 0, W, H);
-        // ... 繪圖邏輯
-    }
-}
-
-window.addEventListener('DOMContentLoaded', () => {
-    new MySimulation();
-});
-```
-
----
-
-## 高 DPI 縮放規則（重要）
-
-- 每個 `<canvas>` 都**必須**呼叫 `scaleCanvas(canvas, ctx)`
-- 繪圖方法中取尺寸時一律用 `canvas.width / this.dpr`，不直接用 `canvas.width`
-- 若有 `imageData` / `putImageData`（像素操作），應建立**離屏畫布**保持 CSS 像素尺寸，再用 `ctx.drawImage()` 縮放到主畫布
-
-```javascript
-// 離屏畫布範例（用於 imageData 像素操作）
-this.offscreenCanvas = document.createElement('canvas');
-this.offscreenCanvas.width = cssW;   // CSS 像素尺寸
-this.offscreenCanvas.height = cssH;
-this.offscreenCtx = this.offscreenCanvas.getContext('2d');
-this.imageData = this.offscreenCtx.createImageData(cssW, cssH);
-// 繪圖後：
-this.offscreenCtx.putImageData(this.imageData, 0, 0);
-this.ctx.drawImage(this.offscreenCanvas, 0, 0, cssW, cssH); // 縮放到主畫布
-```
-
----
-
-## 數學公式顯示
-
-使用 **KaTeX**，語法：
-- 行內公式：`$...$`（例：`質量 $m$ 的物體`）
-- 獨立公式：`$$...$$`（例：`$$F = ma$$`）
-- 分數：`\dfrac{分子}{分母}`
-- 平方根：`\sqrt{...}`
-- 向量：`\mathbf{F}`
-- 垂直符號：`\perp`
-
-物理原理說明區標準寫法：
-```html
-<div class="info-box physics-principle">
-    <h4>📚 物理原理與公式</h4>
-    <p>
-        • <strong>概念名稱：</strong>說明文字，含行內公式 $x = A\cos(\omega t)$<br>
-        • <strong>重要公式：</strong>$T = 2\pi\sqrt{\dfrac{m}{k}}$<br>
-    </p>
-</div>
-```
-
----
-
-## 畫布繪圖風格慣例
-
-| 用途 | 顏色 |
-|------|------|
-| 背景（主模擬） | `#0d1117` |
-| 背景（圖表） | `#0a0a1a` |
-| 位移 x | 淡藍 `#74c0fc` |
-| 速度 v | 淡綠 `#69db7c` |
-| 加速度 a | 橘黃 `#f39c12` |
-| 力 F（箭頭） | 紫色 `#a855f7` |
-| 圓周速度箭頭 | 紅色 `#e74c3c` |
-| 向心加速度箭頭 | 橘色 `#f39c12` |
-| 軌跡點 | 同對應物理量顏色，帶透明度漸變 |
-| 文字主色 | `#ecf0f1` |
-| 網格線 | `#1a2a3a` |
-
-### 即時數據面板（畫在 canvas 底部橫欄）
-
-```javascript
-// 在主畫布底部繪製數據橫欄
-const barH = 36;
-const barY = H - barH;
-ctx.fillStyle = 'rgba(10,10,26,0.85)';
-ctx.fillRect(0, barY, W, barH);
-// 各數據項均分排列
-const items = [
-    { label: 'ω', value: omega.toFixed(2), unit: 'rad/s' },
-    { label: 'T', value: period.toFixed(2), unit: 's' },
-    // ...
-];
-```
-
-### 數據圖 Y 軸刻度規則
-
-- **所有數據圖（x-t、v-t、a-t 等）的 Y 軸刻度必須使用整數**，方便學生讀值
-- 計算刻度步距時，先求出合適的步距後無條件進位至整數，再產生刻度標籤
-- 標準作法：根據資料範圍算出 `step`，確保 `step = Math.ceil(step)` 或 `Math.round(step)` 為整數
-- Y 軸最大值與最小值也應對齊整數刻度，避免頂端或底部出現非整數邊界
-
-```javascript
-// 範例：計算整數刻度的通用函式
-function calcIntegerTicks(minVal, maxVal, tickCount = 5) {
-    const range = maxVal - minVal || 1;
-    const rawStep = range / (tickCount - 1);
-    const step = Math.ceil(rawStep);           // 步距無條件進位至整數
-    const niceMin = Math.floor(minVal / step) * step;
-    const niceMax = Math.ceil(maxVal / step) * step;
-    const ticks = [];
-    for (let v = niceMin; v <= niceMax + step * 0.01; v += step) {
-        ticks.push(Math.round(v));             // 確保整數，消除浮點誤差
-    }
-    return { ticks, niceMin, niceMax };
-}
-```
-
----
-
-## 參數控制行為
-
-- **任何滑桿改變後，立即呼叫 `this.reset()`**（不論模擬是否正在執行）
-- 不要有 `if (!this.isRunning)` 來防止重置，讓使用者隨時能調整參數
-
----
-
-## 軌跡系統（選用）
-
-若需要顯示運動軌跡：
-```javascript
-// 初始化
-this.trailPoints = [];
-this.trailInterval = 0.05; // 每 0.05s 記錄一點
-this.lastTrailTime = -1;
-this.maxTrailPoints = 120; // 最多保留 120 點
-
-// 每幀更新中記錄
-if (this.time - this.lastTrailTime >= this.trailInterval) {
-    this.trailPoints.push({ x: currentX, y: currentY });
-    if (this.trailPoints.length > this.maxTrailPoints) this.trailPoints.shift();
-    this.lastTrailTime = this.time;
-}
-
-// 繪製（帶淡化效果）
-this.trailPoints.forEach((pt, i) => {
-    const age = i / this.trailPoints.length; // 0 = 最舊, 1 = 最新
-    const alpha = 0.05 + 0.7 * age;
-    const r = 1.2 + 1.8 * age;
-    ctx.globalAlpha = alpha;
-    ctx.beginPath();
-    ctx.arc(pt.x, pt.y, r, 0, Math.PI * 2);
-    ctx.fill();
-});
-ctx.globalAlpha = 1;
-```
-
----
-
-## 更新 physics-simulations.html
-
-每新增一個模擬，在 `physics-simulations.html` 的對應章節加入連結。在開發者工具或搜尋對應的 `<li>` 或分類 section 後插入：
-
-```html
-<a href="simulations/<資料夾名>/index.html" class="simulation-link">🔬 模擬標題</a>
-```
-
----
-
-## 生成新模擬的工作清單
-
-1. [ ] 讀取 `simulations/template/index.html` 作為 HTML 骨架起點
-2. [ ] 讀取 `simulations/spring-shm/index.html` 作為最完整的 JS 架構參考
-3. [ ] 建立 `simulations/<英文名稱>/index.html`
-4. [ ] `<head>` 包含所有標準 CSS 連結；若有公式加入 KaTeX
-5. [ ] 物理原理說明用 KaTeX 格式撰寫公式
-6. [ ] 使用 `sim-layout` 版型（控制面板在右側的 `sim-layout-left`）
-7. [ ] JavaScript 類別實作 `scaleCanvas` 高 DPI 縮放
-8. [ ] 所有繪圖方法的尺寸讀取用 `canvas.width / this.dpr`
-9. [ ] 任何滑桿調整皆呼叫 `this.reset()` 重置模擬
-10. [ ] 所有數據圖 Y 軸刻度使用整數（參考「數據圖 Y 軸刻度規則」段落）
-11. [ ] 在 `physics-simulations.html` 加入連結
+# 物理模擬生成指引：平板操作與課堂投影版
+
+你是一位熟悉台灣高中物理、課堂教學與觸控網頁開發的工程師。
+請依照本專案的 template，製作或改善指定的互動式物理模擬。
+
+## 本次任務
+
+- 實驗主題：[填入主題]
+- 適用年級／章節：[填入]
+- 學生應理解的核心概念：[最多 3 項]
+- 希望透過演示釐清的迷思：[填入]
+- 本次修改範圍：[新建模擬／改善指定模擬／更新共用模板]
+
+## 使用情境與優先順序
+
+老師使用平板操作網頁，將同一畫面鏡像投影到教室電視，學生從座位觀看，老師會隨時暫停、提問、調整參數與重播。
+
+設計優先順序：
+
+1. 物理模型正確。
+2. 主現象、關鍵標示與數據從遠處容易辨識。
+3. 老師能用手指快速操作。
+4. 支援預測、觀察、比較與解釋的教學流程。
+5. 保留學生自學所需的詳細原理。
+
+## 先閱讀專案
+
+閱讀：
+
+- `simulations/template/index.html`
+- `simulations/template/SIMULATION_PROMPT.md`
+- `css/simulations.css`
+- `simulations/spring-shm/index.html`
+- 本次指定的既有模擬（若有）
+
+先確認 HTML、CSS 與 prompt 是否存在衝突。本次課堂演示需求優先於舊模板中衝突的規則，不直接複製已知問題。
+
+維持純 HTML、CSS、JavaScript 與 Canvas 2D 架構，介面使用繁體中文，程式識別字使用英文。
+引用共用 `simulations.css`，新增樣式應限定作用範圍。
+新模擬使用 `simulations/<小寫連字號名稱>/index.html`，並在 `physics-simulations.html` 的適當分類加入連結。
+
+## 畫面與投影
+
+提供「課堂演示」與「詳細說明」兩種顯示模式。
+
+課堂演示模式：
+
+- 收起網站導覽、大型標題、長篇原理與非必要資訊。
+- 主模擬區優先占用空間；控制面板可收合。
+- 播放／暫停、重播、速度與開啟控制面板始終容易找到。
+- 平板橫向時，主要操作不需要捲動整頁。
+- 空間不足時，收合次要資訊或切換圖表，不以縮小全部文字解決。
+- 支援 4:3 與 16:10 平板比例，也檢查 16:9 視窗。
+- 保持物理圖形比例，不能為填滿電視而拉伸。
+- 以同畫面鏡像為前提，不假設老師有獨立隱藏控制畫面。
+
+以下尺寸作為初始設計目標，並提供大字切換：
+
+- 操作文字至少 18 CSS px。
+- 主畫面關鍵標示至少 24 CSS px。
+- 核心數值至少 32 CSS px。
+- 點擊區至少 48 × 48 CSS px。
+
+上述文字大小包含 Canvas 最終顯示尺寸；不能在高解析度畫布中畫大字，再縮成難以閱讀的小字。
+
+物理量沿用專案既有配色，同時搭配文字、箭頭或線型區分。
+重要線條、粒子與箭頭需清楚，避免過細或過淡。
+核心數據預設只顯示 2–4 項，數值皆附單位。
+
+全螢幕由老師點擊啟用；不支援或請求失敗時，仍可正常使用課堂演示模式，並保留明確退出按鈕。
+
+## 觸控操作
+
+所有功能皆可用單指完成，不依賴 hover、右鍵或鍵盤。
+滑桿顯示名稱、目前數值、單位及合理範圍，並提供加／減按鈕，方便精確調整。
+
+若需要拖曳物件：
+
+- 使用 Pointer Events，處理拖曳取消與手指離開物件的情況。
+- 正確換算觸控位置與畫布座標。
+- 避免拖曳實驗物件時造成頁面捲動。
+- 不在整個頁面停用瀏覽器縮放手勢。
+
+## 播放與參數行為
+
+明確區分：
+
+- 播放／暫停：保留時間與目前狀態。
+- 重播本次實驗：保留目前參數，回到初始狀態並暫停。
+- 恢復預設：恢復參數、顯示選項與初始狀態。
+- 單步：暫停時前進明確的模擬時間間隔。
+- 播放速度：至少提供 0.25×、0.5×、1×。
+
+參數依用途決定行為：
+
+- 初始條件：修改後回到 t = 0，保留新值並暫停。
+- 播放速度、標示、向量與圖表開關：立即更新，不重置實驗。
+- 若教學需要在運行中改變物理參數，明確定義其物理意義，並標示改變發生的位置或時間，不能混成同一組固定條件資料。
+
+## 教學流程
+
+每個實驗提供 3 組有明確目的的預設情境：
+
+1. 基本現象。
+2. 與基準比較，原則上只改變一個自變量。
+3. 用於釐清迷思或觀察邊界情況。
+
+每個情境包含：
+
+- 一句簡短的預測問題。
+- 建議觀察的現象。
+- 老師可主動揭示的一句結論。
+
+預設不提前顯示預測題答案。
+公式、向量、軌跡與圖表依教學需要逐步開啟。
+預設只顯示最有幫助的一張圖表，其他可切換。
+
+若比較功能有助於本主題，提供 A／B 結果比較，清楚列出兩次的參數，並使用相同座標尺度。
+可依空間採疊圖或切換，不強制左右分割。
+
+## 物理與圖表
+
+實作前列出模型假設、公式、單位、參數範圍與適用限制。
+有解析解時優先使用；需要數值積分時，選擇適當方法與時間步長。
+物理狀態、動畫、數值與圖表必須來自同一份資料。
+
+視覺放大的位移、箭頭或粒子大小，應標示為示意；播放速度不能改變物理參數或圖表中的物理關係。
+
+圖表要求：
+
+- 座標軸標示物理量與單位。
+- 採用 1、2、5 × 10^n 等易讀刻度，允許合理小數。
+- 小量級數值可調整顯示單位或使用科學記號。
+- 同組比較保持一致尺度，避免自動縮放造成誤判。
+- 若改變尺度，應有清楚提示。
+
+## 動畫、畫布與穩定性
+
+使用 `requestAnimationFrame` 的時間戳計算經過時間，不能以每幀固定增加時間決定模擬速度。
+若使用固定物理步長，將物理更新與畫面更新分開。
+
+任何時候只保留一個動畫循環。
+暫停、重播與恢復預設須正確取消動畫。
+頁面切到背景時暫停，返回後等待老師繼續，不突然跳過過程。
+
+畫布依容器實際可用尺寸與 `devicePixelRatio` 配置，分開管理物理座標、CSS 顯示尺寸與實際像素尺寸。
+重新配置時重設 transform，避免重複累積縮放。
+
+旋轉平板、收合控制面板、切換演示模式與全螢幕後，重新配置並繪製畫布，保留物理狀態。
+不得沿用固定 1200 × 900px 導致溢出的樣式。
+
+限制軌跡與歷史資料長度。
+計算密集的波場可降低內部計算解析度，但文字、控制項與關鍵標示需維持清晰。
+外部字型或公式資源失敗時，核心模擬仍需可操作。
+
+## 驗收與交付
+
+至少檢查：
+
+- [ ] 1024 × 768、1180 × 820、1366 × 768 與直向視窗。
+- [ ] 演示模式下，主畫面與主要操作可見且無橫向捲動。
+- [ ] 觸控操作不依賴 hover。
+- [ ] 連續播放、暫停、重播不產生加速或多重動畫循環。
+- [ ] 調整速度與顯示選項不清除進度。
+- [ ] 改初始條件後保留新參數並回到起點。
+- [ ] 旋轉與改變尺寸不拉伸圖形、不重置實驗。
+- [ ] 預設值、參數極值與至少一個可手算案例符合模型。
+- [ ] 暫停時，動畫位置、數據與圖表互相一致。
+
+交付時簡述：
+
+1. 修改的檔案與行為。
+2. 三組預設情境及其教學目的。
+3. 已完成的驗證與尚未驗證的項目。
+4. 模型假設與限制。
+
+瀏覽器尺寸模擬不能代替真實平板與電視投影測試；若未實測，明確標記「平板觸控／電視遠距可讀性待實機確認」。

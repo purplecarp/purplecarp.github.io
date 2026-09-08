@@ -1,0 +1,81 @@
+﻿.secant-page { color: #20334a; background: #eef3f7; font-size: 18px; line-height: 1.65; }
+.secant-page [hidden] { display: none !important; }
+.secant-page button, .secant-page select { font: inherit; color: inherit; min-height: 48px; border: 1px solid #c2cfdb; border-radius: 8px; background: #fff; padding: 8px 12px; cursor: pointer; }
+.secant-page button:hover { background: #e7eef8; }
+.secant-page :focus-visible { outline: 3px solid #2267d0; outline-offset: 3px; }
+.secant-page button:disabled { opacity: .5; cursor: default; }
+.secant-page .st-primary { color: #fff; background: #275bc4; border-color: #275bc4; }
+.secant-page .st-primary:hover { background: #194698; }
+.secant-page .btn-back { font-size: 18px; min-height: 48px; text-transform: none; }
+.secant-page .st-main { max-width: 1500px; margin: auto; padding: 24px; }
+.secant-page .st-heading { margin: 0 0 24px; }
+.secant-page h1 { font-size: clamp(26px, 3vw, 38px); line-height: 1.35; margin: 6px 0 10px; }
+.secant-page h2 { font-size: 24px; }
+.secant-page h3 { font-size: 21px; margin-bottom: 10px; }
+.secant-page .st-eyebrow { color: #4e6792; font-weight: 700; }
+.secant-page .st-toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-bottom: 14px; }
+.secant-page .st-toolbar label { display: flex; gap: 6px; align-items: center; }
+.secant-page .st-workspace { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 16px; align-items: start; }
+.secant-page .st-workspace:has(.st-panel[hidden]) { grid-template-columns: minmax(0, 1fr); }
+.secant-page .st-visual { background: #fff; border: 1px solid #d6e0ea; border-radius: 14px; overflow: hidden; min-width: 0; }
+.secant-page .st-legend { display: flex; flex-wrap: wrap; gap: 6px 20px; padding: 12px 18px; font-weight: 600; }
+.secant-page .st-curve { color: #2463c2; }
+.secant-page .st-secant { color: #af520b; }
+.secant-page .st-tangent { color: #7c3fc0; }
+.secant-page .st-plot { height: 430px; position: relative; }
+.secant-page #graph { display: block; width: 100%; height: 100%; max-width: none; border: 0; border-radius: 0; background: #fff; }
+.secant-page .st-metrics { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid #d6e0ea; }
+.secant-page .st-metrics > div { padding: 12px 14px; background: #f7f9fc; }
+.secant-page .st-metrics span { display: block; font-size: 18px; }
+.secant-page .st-metrics strong { display: block; font-size: 32px; font-variant-numeric: tabular-nums; line-height: 1.4; }
+.secant-page .st-status { min-height: 66px; padding: 10px 16px; background: #edf3ff; }
+.secant-page .st-panel { padding: 18px; background: #fff; border: 1px solid #d6e0ea; border-radius: 14px; }
+.secant-page .st-panel > label { display: block; font-weight: 600; margin-top: 14px; }
+.secant-page .st-panel select { width: 100%; }
+.secant-page .st-panel p { margin: 10px 0; }
+.secant-page .st-question { font-weight: 700; color: #244e96; }
+.secant-page .st-panel hr { border: 0; border-top: 1px solid #d6e0ea; margin: 18px 0; }
+.secant-page .st-slider { display: flex; gap: 8px; align-items: center; }
+.secant-page .st-slider button { flex: 0 0 48px; }
+.secant-page .st-slider input { min-width: 0; width: 100%; height: 48px; accent-color: #275bc4; }
+.secant-page .st-hint { color: #58697b; }
+.secant-page .st-check { min-height: 48px; display: flex !important; align-items: center; gap: 12px; }
+.secant-page input[type="checkbox"] { width: 24px; height: 24px; accent-color: #275bc4; }
+.secant-page .st-explanation { margin-top: 24px; padding: 26px; background: #fff; border-radius: 14px; }
+.secant-page .st-reading-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 28px; margin: 22px 0; }
+.secant-page .st-explanation p { margin-bottom: 14px; }
+.secant-page .st-formula { background: #eef3fa; padding: 14px; border-radius: 8px; overflow-wrap: anywhere; }
+.secant-page .st-example { border-top: 1px solid #d6e0ea; padding-top: 20px; }
+.secant-page summary { cursor: pointer; padding: 12px 0; font-weight: 700; }
+.secant-page .st-table-wrap { overflow-x: auto; }
+.secant-page table { border-collapse: collapse; width: 100%; margin-bottom: 16px; font-variant-numeric: tabular-nums; }
+.secant-page td, .secant-page th { padding: 10px; text-align: center; border-bottom: 1px solid #d6e0ea; }
+.secant-page.st-large { font-size: 21px; }
+.secant-page.st-large .st-metrics span { font-size: 21px; }
+.secant-page.st-large .st-metrics strong { font-size: 38px; }
+.secant-page.st-demo .top-nav, .secant-page.st-demo .st-heading, .secant-page.st-demo .st-explanation { display: none; }
+.secant-page.st-demo .st-main { max-width: none; height: 100dvh; padding: 12px; display: flex; flex-direction: column; }
+.secant-page.st-demo .st-workspace { flex: 1; min-height: 0; align-items: stretch; }
+.secant-page.st-demo .st-panel { overflow-y: auto; }
+.secant-page.st-demo .st-visual { display: flex; flex-direction: column; }
+.secant-page.st-demo .st-plot { flex: 1; min-height: 180px; height: auto; }
+@media (max-width: 760px) {
+  .secant-page .st-main { padding: 12px; }
+  .secant-page .nav-brand h2 { font-size: 18px; }
+  .secant-page .top-nav .container-nav { padding: 0 12px; gap: 8px; }
+  .secant-page .btn-back { padding: 8px 12px; }
+  .secant-page .st-workspace { grid-template-columns: minmax(0, 1fr); }
+  .secant-page .st-reading-grid { grid-template-columns: minmax(0, 1fr); }
+  .secant-page .st-metrics { grid-template-columns: minmax(0, 1fr); }
+  .secant-page .st-metrics > div { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 14px; }
+  .secant-page .st-plot { height: 350px; }
+  .secant-page.st-demo .st-main { height: auto; min-height: 100dvh; }
+  .secant-page.st-demo .st-plot { flex: auto; height: 350px; }
+  .secant-page.st-demo .st-panel { max-height: 60vh; }
+}
+/* Keep the three values aligned, including when projection text is enlarged. */
+.secant-page .st-metrics span { min-height: 3.3em; }
+.secant-page .st-legend { font-size: 24px; line-height: 1.4; }
+@media (max-width: 760px) {
+  .secant-page .st-metrics span { min-height: 0; }
+}
