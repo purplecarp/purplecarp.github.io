@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>電位地形：點電荷與無限大帶電平板 - 物鯉魚教學模擬</title>
+    <link href="../../images/fish.png" rel="icon">
+    <link href="../../css/simulations.css" rel="stylesheet">
+    <link href="style.css" rel="stylesheet">
+    <script defer src="physics.js"></script>
+    <script defer src="simulation.js"></script>
+</head>
+<body class="potential-app classroom">
+    <nav class="ep-nav"><a href="../../index.html"><img src="../../images/fish.png" alt="物鯉魚">物鯉魚教學模擬</a><a href="../../physics-simulations.html">← 返回模擬列表</a></nav>
+    <header class="ep-heading"><h1>電位地形：看見電場的坡度</h1><p>選修物理 IV · 電位、等位線與電場疊加</p></header>
+    <main class="ep-shell">
+        <div class="ep-toolbar" aria-label="演示工具列">
+            <strong class="ep-title">電位地形</strong>
+            <button id="modeBtn">詳細說明</button>
+            <button id="largeBtn" aria-pressed="false">大字</button>
+            <button id="fullBtn">全螢幕</button>
+            <button id="panelBtn" aria-expanded="true" aria-controls="controlPanel">收合控制</button>
+        </div>
+        <div class="ep-lesson">
+            <label class="ep-sr" for="preset">教學情境</label>
+            <select id="preset"><option value="single">① 單一正電荷</option><option value="double">② 電量加倍</option><option value="capacitor">③ 平行異號平板</option><option value="custom" disabled>自由配置</option></select>
+            <p id="prediction"></p><button id="revealBtn" aria-expanded="false">揭示結論</button>
+            <p id="conclusion" hidden></p>
+        </div>
+        <div class="ep-workspace">
+            <section class="ep-stage" aria-label="電位與電場視覺化">
+                <div class="ep-viewbar">
+                    <button id="terrainBtn" class="active" aria-pressed="true">立體地形</button>
+                    <button id="mapBtn" aria-pressed="false">俯視配置</button>
+                    <button id="homeBtn">視角歸位</button>
+                    <span id="viewCaption">高度 = 電位 V</span>
+                </div>
+                <div class="ep-canvasbox"><canvas id="potentialCanvas" aria-label="可旋轉的電位地形。切換俯視配置後可點選或拖曳電荷；也可用控制面板輸入座標。"></canvas></div>
+                <div class="ep-legend"><span>低電位</span><span class="ep-gradient"></span><span>高電位</span><span id="scaleLabel">−20 ～ +20 V</span></div>
+                <p class="ep-hint" id="gestureHint">單指拖曳旋轉；切換「俯視配置」放置電荷、平板或探針。</p>
+                <div class="ep-readings" aria-label="探針即時數據">
+                    <div><span>探針電位</span><strong id="probeV">— V</strong></div>
+                    <div><span>完整電場大小</span><strong id="probeE">— N/C</strong></div>
+                    <div><span>垂直切面分量 E_z</span><strong id="probeEz">— N/C</strong></div>
+                </div>
+            </section>
+            <aside class="ep-panel" id="controlPanel" aria-label="參數控制">
+                <details open><summary>放置與編輯</summary>
+                    <div class="ep-add"><button data-add="point">＋ 點電荷</button><button data-add="sheet">＋ 無限平板</button></div>
+                    <label for="editTool">俯視圖操作</label><select id="editTool"><option value="select">選取／拖曳物件</option><option value="point">點一下放點電荷</option><option value="sheet">點一下放平板</option><option value="probe">移動探針</option></select>
+                    <p class="ep-small">新增按鈕會在中心加入物件。平板以與切面的交線表示，虛線十字為定位點。</p>
+                    <label for="sourceList">選取物件</label><select id="sourceList"></select>
+                    <div id="sourceEditor"></div>
+                    <div class="ep-pair"><button id="removeBtn">刪除選取</button><button id="clearBtn">清空配置</button></div>
+                </details>
+                <details open><summary>顯示圖層</summary>
+                    <label class="ep-check"><input id="surfaceToggle" type="checkbox" checked>電位曲面／色圖</label>
+                    <label class="ep-check"><input id="contourToggle" type="checkbox" checked>等位線</label>
+                    <label class="ep-check"><input id="fieldToggle" type="checkbox">電力線與方向箭頭</label>
+                    <label class="ep-check"><input id="sourceToggle" type="checkbox" checked>電荷與平板標記</label>
+                    <p class="ep-small" id="fieldNote">箭頭由高電位指向低電位；線數僅示意。</p>
+                    <div id="displayControls"></div>
+                </details>
+                <details><summary>切面、視角與探針</summary><div id="viewControls"></div>
+                    <button id="probeBtn">在俯視圖移動探針</button>
+                    <p class="ep-small" id="probePosition"></p>
+                    <p class="ep-small">水平座標為 x、y；地形的豎直方向為電位，並非空間 z。點電荷標記顯示其 x、y 投影。</p>
+                </details>
+                <details><summary>A／B 配置比較</summary>
+                    <div class="ep-pair"><button id="saveABtn">儲存為 A</button><button id="compareBtn" disabled>查看 A</button></div>
+                    <p class="ep-small" id="compareInfo">儲存基準 A，再調整 B。切換時共用切面、座標範圍與電位尺度。</p>
+                </details>
+                <details><summary>操作與觀察</summary><p id="observation"></p><p>先預測，再改變單一電量或面電荷密度；逐步開啟等位線與電力線，觀察坡度和場強的關係。</p><button id="defaultsBtn">恢復全部預設</button></details>
+            </aside>
+        </div>
+        <div class="ep-playbar" aria-label="場線示意動畫控制">
+            <button id="playBtn">▶ 播放示意</button><button id="replayBtn">重播</button><button id="stepBtn">單步 0.1 s</button>
+            <label for="speed">速度</label><select id="speed"><option value="0.25">0.25×</option><option value="0.5">0.5×</option><option value="1" selected>1×</option></select>
+            <span id="animationStatus">場線光點示意 · 0.0 s</span>
+        </div>
+    </main>
+    <section class="ep-explanation info-box">
+        <h2>物理原理與模型</h2>
+        <p>本模擬計算真空中固定點電荷與均勻、無限大、非導體薄平板的靜電場；各電荷分布保持固定，不模擬導體感應或電荷運動。計算任意水平切面 z = 常數上的電位，以曲面高度呈現 V(x, y, z)。</p>
+        <p class="formula">點電荷：V = kq/r；E = kq(r − r₀)/|r − r₀|³<br>無限平板：d = n · (r − r₀)，V = −σ|d|/(2ε₀)，E = σ sign(d)n/(2ε₀)<br>疊加：V = ΣVᵢ，E = ΣEᵢ = −∇V；k = 1/(4πε₀)，ε₀ ≈ 8.854 × 10⁻¹² F/m</p>
+        <p><strong>電位零點：</strong>每個點電荷項取無限遠為零；每個平板項取該平板上為零，再將各項相加。含無限平板的系統不能取無限遠為總電位零點。電位的加法常數不影響電場；比較不同平板配置時，應比較電位差與坡度。</p>
+        <p><strong>等位線與電力線：</strong>等位線為切面上的 V = 常數。若電場位於切面中，箭頭曲線即電力線；若有 E_z，顯示的是切面內電場分量 (E_x, E_y) 的積分曲線，並非完整三維電力線的投影。完整三維電場大小與 E_z 仍可用探針讀取。曲線以 Runge–Kutta 四階方法積分，遇電荷鄰域、平板或畫面邊界停止。</p>
+        <p><strong>奇異點與顯示限制：</strong>理想點電荷處 V 與 E 未定義；曲面略去距離點電荷 0.12 m 內的區域。高度與色階超出設定範圍時截頂／截底，實際探針數值不截斷；此處畫面坡度不代表場強。平板上的法向電場不連續，探針標示「不定義」。平板標記僅顯示視窗內交線，計算仍為無限大平板。</p>
+        <p><strong>範圍與單位：</strong>位置 −20～20 m；q 為 −20～20 nC；σ 為 −2～2 nC/m²；平板法向方位角 −180～180°、仰角 −90～90°；切面 z 為 −10～10 m；視野半寬 2～10 m。電位尺度可選 20、50、100、200、500 V，等位線間距可選 1、2、5、10、20、50 V，線條過多時會提示調整。點電荷／平板可反覆新增，效能隨物件數增加而下降。</p>
+        <h2>教學使用指引</h2>
+        <ol><li><strong>單一正電荷：</strong>比較距離 1 m 與 2 m 的電位及電場，認識電位山峰與徑向場。</li><li><strong>電量加倍：</strong>只將 q 由 +1 改為 +2 nC，在相同尺度、同一位置比較 V 和 E。</li><li><strong>平行異號平板：</strong>用等量異號平板展示板間均勻電場、板外抵銷。改變一片平板的密度，檢驗抵銷的條件。</li></ol>
+        <p>播放僅讓光點沿場線指向前進，以示意方向；光點速度不是帶電粒子速度。暫停保留示意時間；重播保留參數並回到 0 s、暫停；單步增加 0.1 s。修改電荷、平板或切面後，示意時間歸零並暫停。改變顯示選項與播放速度不重設時間。</p>
+        <p>試著建立一對等量異號點電荷：中垂面上的電位為零，電場也一定為零嗎？利用探針驗證。</p>
+        <p><a href="../../physics-simulations.html">← 返回高中物理內容</a></p>
+    </section>
+    <div id="notice" role="status" aria-live="polite"></div>
+</body>
+</html>

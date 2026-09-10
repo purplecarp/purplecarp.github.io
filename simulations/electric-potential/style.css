@@ -1,0 +1,75 @@
+﻿.potential-app { --ink:#193047; --muted:#536777; --accent:#176e9b; --line:#ccdae2; --text:18px; color:var(--ink); background:#eaf0f3; font-size:var(--text); line-height:1.5; }
+.potential-app.large { --text:22px; }
+.potential-app button,.potential-app select,.potential-app input { font:inherit; color:inherit; }
+.potential-app button,.potential-app select { min-height:48px; border:1px solid var(--line); border-radius:8px; background:#fff; padding:8px 12px; cursor:pointer; }
+.potential-app button { min-width:48px; font-weight:600; touch-action:manipulation; }
+.potential-app button:hover { background:#e9f4fb; }
+.potential-app button.active,.potential-app button[aria-pressed="true"] { color:#fff; background:#176e9b; border-color:#176e9b; }
+.potential-app button:disabled { cursor:default; opacity:.45; }
+.potential-app :focus-visible { outline:3px solid #e59b24; outline-offset:2px; }
+.potential-app [hidden] { display:none !important; }
+.potential-app .ep-nav { display:flex; align-items:center; justify-content:space-between; padding:16px 24px; background:#fff; gap:20px; }
+.potential-app a { color:#176e9b; }
+.potential-app .ep-nav a { display:flex; gap:12px; align-items:center; text-decoration:none; }
+.potential-app .ep-nav img { width:40px; height:40px; }
+.potential-app .ep-heading { text-align:center; padding:24px; }
+.potential-app .ep-heading h1 { font-size:32px; }
+.potential-app .ep-shell { max-width:1700px; margin:auto; padding:10px; display:flex; flex-direction:column; gap:8px; }
+.potential-app.classroom .ep-shell { height:100vh; height:100dvh; }
+.potential-app.classroom .ep-nav,.potential-app.classroom .ep-heading,.potential-app.classroom .ep-explanation { display:none; }
+.potential-app .ep-toolbar,.potential-app .ep-playbar { display:flex; flex-wrap:wrap; gap:8px; align-items:center; flex-shrink:0; }
+.potential-app .ep-title { font-size:24px; margin-right:auto; }
+.potential-app .ep-lesson { display:flex; align-items:center; flex-wrap:wrap; gap:8px 14px; padding:8px 12px; background:#fff; border-radius:10px; border-left:4px solid #e5a334; flex-shrink:0; }
+.potential-app .ep-lesson p { margin:0; flex:1; min-width:180px; }
+.potential-app .ep-lesson #conclusion { flex-basis:100%; color:#18653b; }
+.potential-app .ep-workspace { display:grid; grid-template-columns:minmax(0,1fr) 330px; gap:10px; flex:1; min-height:0; }
+.potential-app.panel-hidden .ep-workspace { grid-template-columns:minmax(0,1fr); }
+.potential-app .ep-stage { background:#102131; color:#f2f7fa; border-radius:12px; display:flex; flex-direction:column; overflow:hidden; min-width:0; min-height:0; }
+.potential-app .ep-viewbar { display:flex; flex-wrap:wrap; align-items:center; gap:6px; padding:8px; }
+.potential-app .ep-viewbar button { background:#203a50; color:#fff; border-color:#456076; }
+.potential-app .ep-viewbar button.active { background:#176e9b; border-color:#5bb8e0; }
+.potential-app #viewCaption { margin-left:auto; padding:0 6px; }
+.potential-app .ep-canvasbox { flex:1; min-height:100px; position:relative; }
+.potential-app #potentialCanvas { display:block; width:100%; height:100%; position:absolute; inset:0; touch-action:none; }
+.potential-app .ep-legend { display:flex; flex-wrap:wrap; align-items:center; justify-content:center; gap:10px; padding:3px 12px; }
+.potential-app .ep-gradient { width:100px; height:14px; background:linear-gradient(90deg,#377adc,#c6e6e5,#ed694c); border-radius:4px; }
+.potential-app .ep-hint { padding:3px 12px; margin:0; color:#d3e4f0; }
+.potential-app .ep-readings { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1px; background:#365063; margin-top:5px; }
+.potential-app .ep-readings>div { background:#1b3246; padding:6px 12px; }
+.potential-app .ep-readings span { display:block; font-size:var(--text); }
+.potential-app .ep-readings strong { display:block; font-size:32px; font-variant-numeric:tabular-nums; line-height:1.3; overflow-wrap:anywhere; }
+.potential-app.large .ep-readings strong { font-size:36px; }
+.potential-app .ep-panel { min-width:0; overflow-y:auto; overscroll-behavior:contain; background:#fff; border-radius:10px; padding:8px 14px; }
+.potential-app .ep-panel details { border-bottom:1px solid var(--line); padding:8px 0 14px; }
+.potential-app summary { cursor:pointer; font-weight:700; padding:10px 0; min-height:48px; }
+.potential-app .ep-panel select { width:100%; margin:4px 0 10px; }
+.potential-app .ep-small { font-size:var(--text); color:var(--muted); margin:8px 0; }
+.potential-app .ep-add,.potential-app .ep-pair { display:flex; gap:8px; margin:8px 0; }
+.potential-app .ep-pair>* { flex:1; }
+.potential-app .ep-check { display:flex; align-items:center; gap:12px; cursor:pointer; min-height:48px; }
+.potential-app input[type="checkbox"] { width:24px; height:24px; accent-color:var(--accent); }
+.potential-app .ep-param { margin:12px 0; }
+.potential-app .ep-param>label { display:flex; justify-content:space-between; gap:8px; font-weight:600; }
+.potential-app .ep-stepper { display:grid; grid-template-columns:48px minmax(0,1fr) 48px; gap:6px; align-items:center; margin-top:4px; }
+.potential-app .ep-stepper input { width:100%; min-width:0; height:48px; border:1px solid var(--line); border-radius:6px; text-align:center; background:#f5f9fb; }
+.potential-app .ep-param input[type="range"] { width:100%; height:48px; accent-color:var(--accent); cursor:pointer; }
+.potential-app .ep-range-note { color:var(--muted); font-size:var(--text); }
+.potential-app .ep-playbar { padding:4px 0; }
+.potential-app #playBtn { background:#207b50; color:white; border-color:#207b50; }
+.potential-app #animationStatus { margin-left:auto; }
+.potential-app:not(.classroom) .ep-workspace { height:720px; flex:auto; }
+.potential-app .ep-explanation { max-width:1200px; margin:24px auto; padding:24px; }
+.potential-app .ep-explanation h2 { font-size:26px; margin:16px 0; }
+.potential-app .ep-explanation p,.potential-app .ep-explanation li,.potential-app .ep-explanation .formula { font-size:var(--text); line-height:1.9; color:var(--ink); }
+.potential-app .ep-explanation ol { padding-left:26px; }
+.potential-app #notice { position:fixed; bottom:80px; left:50%; transform:translateX(-50%); background:#fff5d6; color:#493711; padding:12px 20px; border-radius:8px; box-shadow:0 4px 25px #0004; z-index:30; max-width:90vw; pointer-events:none; }
+.potential-app #notice:empty { display:none; }
+.potential-app .ep-sr { position:absolute; width:1px; height:1px; overflow:hidden; clip-path:inset(50%); }
+@media(max-width:1100px) { .potential-app .ep-workspace { grid-template-columns:minmax(0,1fr) 304px; } .potential-app #viewCaption { width:100%; text-align:center; } .potential-app #animationStatus { font-size:18px; } }
+@media(max-width:760px),(orientation:portrait) { .potential-app .ep-workspace { position:relative; grid-template-columns:minmax(0,1fr); } .potential-app .ep-panel { position:absolute; top:0; right:0; bottom:0; z-index:5; width:min(360px,95%); box-shadow:-8px 0 30px #0005; } .potential-app .ep-title { width:100%; } .potential-app .ep-readings { grid-template-columns:repeat(2,minmax(0,1fr)); } .potential-app .ep-readings>div:last-child { display:none; } .potential-app .ep-lesson select { max-width:100%; } .potential-app .ep-lesson p { min-width:120px; } .potential-app #animationStatus { display:none; } .potential-app .ep-hint { display:none; } .potential-app .ep-viewbar { gap:4px; } .potential-app .ep-viewbar button { padding:8px; } .potential-app #viewCaption { display:none; } .potential-app .ep-nav { flex-wrap:wrap; } }
+@media(max-height:650px) { .potential-app.classroom .ep-legend,.potential-app.classroom .ep-hint { display:none; } .potential-app.classroom .ep-readings span { font-size:18px; } }
+/* Reserve classroom space for the phenomenon; detailed operation hints stay in the panel. */
+.potential-app.classroom .ep-hint { display:none; }
+.potential-app .ep-add { flex-wrap:wrap; }
+.potential-app .ep-add button { flex:1; min-width:136px; }
+@media(max-width:1100px) { .potential-app #viewCaption { display:none; } }
