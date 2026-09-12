@@ -1,0 +1,104 @@
+/* 此頁專用：課堂投影與觸控操作布局。 */
+html, body { height: auto; min-height: 100%; overflow: visible; }
+.header { position: relative; z-index: 1100; }
+.top-nav .container::before, .top-nav .container::after { display: none; }
+body { background: #edf1f5; color: #26384b; }
+.for-sticky { display: none; }
+.menu-button { top: 0; margin-top: 12px; margin-right: 20px; width: 28px; height: 28px; }
+.top-nav { position: relative; padding: 8px 0; box-shadow: none; border-bottom: 1px solid #d6dee7; }
+.top-nav .container { width: 100%; max-width: 1920px; padding: 0 68px 0 20px; }
+.nav-brand { gap: 8px; }
+.nav-brand img { width: 32px; height: 32px; }
+.nav-brand h2 { font-size: 18px; font-family: inherit; }
+.btn-back { padding: 7px 14px; font-size: 14px; background: #526477; box-shadow: none; }
+.main-container { max-width: 1920px; padding: 12px 20px 20px; }
+.page-header { margin: 0 0 12px; padding: 0; text-align: left; border: 0; background: none; box-shadow: none; }
+.page-header h1 { margin: 0 0 4px; font: 700 clamp(24px, 2.2vw, 32px)/1.3 'Microsoft JhengHei', sans-serif; }
+.page-header .subtitle { margin: 0; color: #526477; font-size: 15px; }
+.sim-layout { gap: 16px; margin-bottom: 12px; align-items: stretch; }
+.sim-layout-left { width: 320px; min-width: 320px; }
+.sim-layout-right { min-width: 0; }
+.simulation-section { padding: 12px; border: 1px solid #d6dee7; }
+.stage-toolbar { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+.stage-toolbar h2 { margin: 0; font: 700 18px/1.4 'Microsoft JhengHei', sans-serif; white-space: nowrap; }
+.button-group { display: flex; flex-wrap: nowrap; gap: 8px; margin: 0; padding: 0; box-shadow: none; }
+.button-group .btn { width: auto; max-width: none; min-height: 42px; padding: 8px 14px; font-size: 16px; letter-spacing: 0; }
+.btn-start { background: #187b43; }
+.btn-pause { background: #a6500c; }
+.btn-reset { background: #226faa; }
+.canvas-wrapper { margin: 0; padding: 0; overflow: hidden; background: #0d1117; }
+#simCanvas { display: block; width: 100%; height: clamp(180px, 25vh, 270px); border-radius: 6px; background: #0d1117; }
+.live-data { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; margin: 10px 0; }
+.data-item { min-width: 0; padding: 7px 10px; border: 1px solid #d9e2eb; border-top: 3px solid #526477; border-radius: 6px; background: #f5f8fb; }
+.data-item > span { display: block; color: #405367; font-size: 15px; font-weight: 600; }
+.data-item small { font-size: 12px; font-weight: 400; white-space: nowrap; }
+.data-item strong { display: block; font: 700 clamp(22px, 2vw, 30px)/1.3 Consolas, monospace; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.position-data { border-top-color: #2980b9; }
+.position-data strong { color: #19659a; }
+.velocity-data { border-top-color: #e74c3c; }
+.velocity-data strong { color: #b93629; }
+.acceleration-data { border-top-color: #f39c12; }
+.acceleration-data strong { color: #935b00; }
+.graphs-container { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+.graph-box { min-width: 0; padding: 10px 4px 4px; border-radius: 8px; background: #1a1a2e; text-align: center; }
+.graph-box h5 { margin: 0 0 8px; font-size: 16px; font-weight: 600; color: #ecf0f1; }
+.graph-box canvas { display: block; width: 100%; height: clamp(190px, 26vh, 290px); border-radius: 4px; background: #0a0a1a; }
+.sim-layout-left .controls { padding: 12px; border: 1px solid #d6dee7; }
+.sim-layout-left .control-section h3 { margin: 0 0 8px; padding-bottom: 8px; font-size: 18px; }
+.sim-layout-left .control-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 2px 8px; margin: 0 0 6px; padding: 5px 9px; }
+.sim-layout-left .control-row label { min-width: 0; margin: 0; font-size: 16px; line-height: 1.3; }
+.sim-layout-left .control-row input[type="range"] { grid-column: 1 / -1; grid-row: 2; height: 8px; margin: 5px 0; }
+.sim-layout-left .value-display { grid-column: 2; grid-row: 1; min-width: 0; padding: 0; background: none; text-align: right; font-size: 20px; line-height: 1.2; color: #19659a; font-variant-numeric: tabular-nums; }
+.sim-layout-left .control-options { display: flex; flex-direction: column; align-items: stretch; gap: 7px; }
+.view-toggle { display: flex; border: 1px solid #226faa; border-radius: 6px; overflow: hidden; }
+.view-toggle button { flex: 1; min-height: 40px; padding: 7px; border: 0; background: #fff; color: #34495e; font-size: 15px; font-weight: 600; cursor: pointer; }
+.view-toggle button.active { background: #226faa; color: #fff; }
+.preset-group { display: grid; gap: 6px; }
+.preset-btn { width: 100%; min-height: 36px; padding: 5px 9px; border: 1px solid #b8c7d6; border-radius: 6px; background: #fff; color: #34495e; font-size: 14px; font-weight: 600; line-height: 1.5; text-align: left; cursor: pointer; }
+.preset-btn:hover, .view-toggle button:hover:not(.active) { background: #e5eff8; }
+.preset-btn.active { background: #226faa; border-color: #226faa; color: #fff; }
+button:focus-visible, a:focus-visible, summary:focus-visible, .control-row input[type="range"]:focus-visible { outline: 3px solid #b86500; outline-offset: 3px; }
+.lesson-notes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; gap: 12px; }
+.lesson-notes .info-box { margin: 0; padding: 0; }
+.lesson-notes summary { display: list-item; padding: 12px 16px; color: #34495e; font-size: 16px; font-weight: 700; cursor: pointer; }
+.lesson-notes p { margin: 0; padding: 0 16px 16px; font-size: 16px; }
+@media (min-width: 1500px) {
+    .sim-layout-left { width: 360px; min-width: 360px; }
+    .sim-layout-left .control-row { padding: 10px; margin-bottom: 10px; }
+    .preset-btn { font-size: 16px; }
+}
+@media (max-width: 1100px) and (min-width: 901px) {
+    .main-container { padding-left: 12px; padding-right: 12px; }
+    .sim-layout { gap: 12px; }
+    .sim-layout-left { width: 290px; min-width: 290px; }
+    .stage-toolbar h2 { font-size: 16px; }
+    .button-group .btn { padding: 8px 10px; font-size: 15px; }
+    .graph-box h5 { font-size: 13px; }
+    .data-item { padding: 7px; }
+    .data-item > span { font-size: 13px; }
+}
+@media (max-width: 900px) {
+    .sim-layout { flex-direction: column; }
+    .sim-layout-left { width: 100%; min-width: 0; }
+    .sim-layout-left .control-section { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+    .sim-layout-left .control-section h3 { grid-column: 1 / -1; }
+    .sim-layout-left .control-row { margin: 0; }
+    .lesson-notes { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+    .main-container { padding: 12px 10px; }
+    .top-nav .container { padding-left: 10px; padding-right: 52px; }
+    .nav-brand h2 { font-size: 14px; }
+    .nav-brand img { width: 26px; height: 26px; }
+    .btn-back { padding: 7px 8px; font-size: 12px; }
+    .menu-button { margin-right: 12px; width: 24px; }
+    .page-header h1 { font-size: 24px; }
+    .page-header .subtitle { font-size: 14px; }
+    .stage-toolbar { flex-wrap: wrap; gap: 8px; }
+    .button-group { width: 100%; }
+    .button-group .btn { flex: 1; padding: 8px; font-size: 15px; }
+    .live-data { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .graphs-container { grid-template-columns: 1fr; }
+    .graph-box canvas { height: 230px; }
+    .sim-layout-left .control-section { grid-template-columns: 1fr; }
+}

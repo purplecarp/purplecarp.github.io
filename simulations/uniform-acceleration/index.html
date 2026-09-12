@@ -16,93 +16,7 @@
     <link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700' rel='stylesheet' type='text/css'>
     <link href='https://fonts.googleapis.com/css?family=Roboto:400,300,500,700' rel='stylesheet' type='text/css'>
 
-    <style>
-        .graphs-container {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 10px;
-            margin-top: 10px;
-        }
-        .graph-box {
-            background: #1a1a2e;
-            border-radius: 8px;
-            padding: 10px;
-            text-align: center;
-        }
-        .graph-box h5 {
-            color: #ecf0f1;
-            margin: 0 0 6px 0;
-            font-size: 14px;
-            font-weight: 600;
-        }
-        .graph-box canvas {
-            width: 100%;
-            border-radius: 4px;
-            background: #0a0a1a;
-        }
-        #simCanvas {
-            width: 100%;
-            border-radius: 6px;
-            background: #0d1117;
-        }
-        .view-toggle {
-            display: flex;
-            gap: 0;
-            border-radius: 6px;
-            overflow: hidden;
-            border: 2px solid #3498db;
-        }
-        .view-toggle button {
-            flex: 1;
-            padding: 7px 10px;
-            border: none;
-            background: #f8f9fa;
-            color: #555;
-            font-size: 12px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .view-toggle button.active {
-            background: #3498db;
-            color: #fff;
-        }
-        .preset-group {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-        }
-        .preset-btn {
-            width: 100%;
-            padding: 7px 10px;
-            border: 1.5px solid #555;
-            border-radius: 6px;
-            background: #f8f9fa;
-            color: #444;
-            font-size: 11px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            text-align: left;
-        }
-        .preset-btn:hover {
-            border-color: #3498db;
-            background: #eaf4fc;
-        }
-        .preset-btn.active {
-            border-color: #3498db;
-            background: #3498db;
-            color: #fff;
-        }
-        .view-toggle button:hover:not(.active) {
-            background: #e0e0e0;
-        }
-        @media (max-width: 768px) {
-            .graphs-container {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+    <link href="classroom.css" rel="stylesheet">
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
     <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
@@ -160,87 +74,30 @@
             <p class="subtitle">控制初速度與加速度，即時觀察 x-t、v-t、a-t 圖 | 選修物理 I - 力學</p>
         </div>
         
-        <!-- 物理原理說明 -->
-        <div class="info-box physics-principle">
-            <h4>📚 物理原理與公式</h4>
-            <p>
-                • <strong>等加速度運動：</strong>物體在固定加速度下的運動，速度隨時間均勻變化<br>
-                • <strong>位移公式：</strong>$x(t) = x_0 + v_0 t + \dfrac{1}{2}at^2$<br>
-                • <strong>速度公式：</strong>$v(t) = v_0 + at$<br>
-                • <strong>加速度：</strong>$a =$ 常數<br>
-                • <strong>圖形特徵：</strong>x-t 圖為拋物線、v-t 圖為直線、a-t 圖為水平線
-            </p>
-        </div>
-        
         <!-- 模擬與控制面板並排 -->
         <div class="sim-layout">
-            <!-- 右側控制面板 -->
-            <div class="sim-layout-left">
-                <div class="controls">
-                    <div class="control-section">
-                        <h3>⚙️ 運動參數</h3>
-                        
-                        <div class="control-row">
-                            <label>初速度 v₀ (m/s)</label>
-                            <input type="range" id="v0Slider" min="-20" max="20" step="0.5" value="5">
-                            <span class="value-display" id="v0Value">5.0</span>
-                        </div>
-                        
-                        <div class="control-row">
-                            <label>加速度 a (m/s²)</label>
-                            <input type="range" id="aSlider" min="-10" max="10" step="0.5" value="2">
-                            <span class="value-display" id="aValue">2.0</span>
-                        </div>
-
-                        <div class="control-row">
-                            <label>模擬時間 (s)</label>
-                            <input type="range" id="maxTimeSlider" min="5" max="30" step="1" value="10">
-                            <span class="value-display" id="maxTimeValue">10</span>
-                        </div>
-
-                        <div class="control-row">
-                            <label>播放速度</label>
-                            <input type="range" id="speedSlider" min="0.25" max="3" step="0.25" value="1">
-                            <span class="value-display" id="speedValue">1.0x</span>
-                        </div>
-
-                        <div class="control-row" style="flex-direction: column; align-items: stretch;">
-                            <label>座標軸視角</label>
-                            <div class="view-toggle">
-                                <button id="viewFixed" class="active">📌 固定視角</button>
-                                <button id="viewFollow">🎯 跟隨視角</button>
-                            </div>
-                        </div>
-
-                        <div class="control-row" style="flex-direction: column; align-items: stretch;">
-                            <label>🎬 預設模式</label>
-                            <div class="preset-group">
-                                <button class="preset-btn" id="preset1">① 減速再反向：v₀=10, a=−2</button>
-                                <button class="preset-btn" id="preset2">② 反向加速：v₀=−10, a=2</button>
-                                <button class="preset-btn" id="preset3">③ 先加速後減速：v₀=0, a=5→−5</button>
-                                <button class="preset-btn" id="preset4">④ 三階段：a=5→0~5s, −5→5~15s, 5→15~20s</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- 控制按鈕 -->
-                <div class="button-group">
-                    <button class="btn btn-start" id="startBtn">▶ 開始模擬</button>
-                    <button class="btn btn-pause" id="pauseBtn">⏸ 暫停</button>
-                    <button class="btn btn-reset" id="resetBtn">🔄 重置</button>
-                </div>
-
-
-            </div>
-            
             <!-- 左側模擬區域 + 圖表 -->
             <div class="sim-layout-right">
                 <div class="simulation-section">
+                    <div class="stage-toolbar">
+                        <h2>運動演示</h2>
+                        <!-- 控制按鈕 -->
+                        <div class="button-group">
+                            <button class="btn btn-start" id="startBtn">▶ 開始模擬</button>
+                            <button class="btn btn-pause" id="pauseBtn">⏸ 暫停</button>
+                            <button class="btn btn-reset" id="resetBtn">🔄 重置</button>
+                        </div>
+                    </div>
                     <div class="canvas-wrapper">
                         <canvas id="simCanvas" width="900" height="304"></canvas>
                     </div>
-                    
+
+                    <div class="live-data" role="group" aria-label="即時運動數據">
+                        <div class="data-item"><span>時間 t <small>(s)</small></span><strong id="timeReadout">0.00</strong></div>
+                        <div class="data-item position-data"><span>位置 x <small>(m)</small></span><strong id="positionReadout">0.00</strong></div>
+                        <div class="data-item velocity-data"><span>速度 v <small>(m/s)</small></span><strong id="velocityReadout">5.00</strong></div>
+                        <div class="data-item acceleration-data"><span>加速度 a <small>(m/s²)</small></span><strong id="accelerationReadout">2.00</strong></div>
+                    </div>
                     <!-- x-t, v-t, a-t 圖 -->
                     <div class="graphs-container">
                         <div class="graph-box">
@@ -258,18 +115,81 @@
                     </div>
                 </div>
             </div>
+            <!-- 右側控制面板 -->
+            <div class="sim-layout-left">
+                <div class="controls">
+                    <div class="control-section">
+                        <h3>⚙️ 運動參數</h3>
+                        
+                        <div class="control-row">
+                            <label for="v0Slider">初速度 v₀ (m/s)</label>
+                            <input type="range" id="v0Slider" min="-20" max="20" step="0.5" value="5">
+                            <span class="value-display" id="v0Value">5.0</span>
+                        </div>
+                        
+                        <div class="control-row">
+                            <label for="aSlider">加速度 a (m/s²)</label>
+                            <input type="range" id="aSlider" min="-10" max="10" step="0.5" value="2">
+                            <span class="value-display" id="aValue">2.0</span>
+                        </div>
+
+                        <div class="control-row">
+                            <label for="maxTimeSlider">模擬時間 (s)</label>
+                            <input type="range" id="maxTimeSlider" min="5" max="30" step="1" value="10">
+                            <span class="value-display" id="maxTimeValue">10</span>
+                        </div>
+
+                        <div class="control-row">
+                            <label for="speedSlider">播放速度</label>
+                            <input type="range" id="speedSlider" min="0.25" max="3" step="0.25" value="1">
+                            <span class="value-display" id="speedValue">1.0x</span>
+                        </div>
+
+                        <div class="control-row control-options">
+                            <label>座標軸視角</label>
+                            <div class="view-toggle">
+                                <button id="viewFixed" class="active">📌 固定視角</button>
+                                <button id="viewFollow">🎯 跟隨視角</button>
+                            </div>
+                        </div>
+
+                        <div class="control-row control-options">
+                            <label>🎬 預設模式</label>
+                            <div class="preset-group">
+                                <button class="preset-btn" id="preset1">① 減速再反向：v₀=10, a=−2</button>
+                                <button class="preset-btn" id="preset2">② 反向加速：v₀=−10, a=2</button>
+                                <button class="preset-btn" id="preset3">③ 先加速後減速：v₀=0, a=5→−5</button>
+                                <button class="preset-btn" id="preset4">④ 三階段：a=5→0~5s, −5→5~15s, 5→15~20s</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
         
-        <!-- 教學指引 -->
-        <div class="info-box teaching-note">
-            <h4>💡 教學使用指引</h4>
-            <p>
-                • <strong>觀察重點 1：</strong>調整初速度為正、加速度為負，觀察物體先前進再後退的運動（減速→靜止→反向加速）<br>
-                • <strong>觀察重點 2：</strong>觀察 v-t 圖的斜率即為加速度，v-t 圖下方面積即為位移<br>
-                • <strong>視角切換：</strong>「固定視角」可觀察物體在全域的位移變化；「跟隨視角」讓畫面隨物體移動，方便觀察物體附近的相對運動<br>
-                • <strong>思考問題：</strong>當 v₀ 與 a 方向相反時，物體何時速度為零？x-t 圖的極值出現在何處？<br>
-                • <strong>延伸應用：</strong>自由落體即為 v₀ = 0、a = 9.8 m/s² 的等加速度運動
-            </p>
+        <div class="lesson-notes">
+            <!-- 物理原理說明 -->
+            <details class="info-box physics-principle">
+                <summary>📚 物理原理與公式</summary>
+                <p>
+                    • <strong>等加速度運動：</strong>物體在固定加速度下的運動，速度隨時間均勻變化<br>
+                    • <strong>位移公式：</strong>$x(t) = x_0 + v_0 t + \dfrac{1}{2}at^2$<br>
+                    • <strong>速度公式：</strong>$v(t) = v_0 + at$<br>
+                    • <strong>加速度：</strong>$a =$ 常數<br>
+                    • <strong>圖形特徵：</strong>x-t 圖為拋物線、v-t 圖為直線、a-t 圖為水平線
+                </p>
+            </details>
+            <!-- 教學指引 -->
+            <details class="info-box teaching-note">
+                <summary>💡 教學使用指引</summary>
+                <p>
+                    • <strong>觀察重點 1：</strong>調整初速度為正、加速度為負，觀察物體先前進再後退的運動（減速→靜止→反向加速）<br>
+                    • <strong>觀察重點 2：</strong>觀察 v-t 圖的斜率即為加速度，v-t 圖下方面積即為位移<br>
+                    • <strong>視角切換：</strong>「固定視角」可觀察物體在全域的位移變化；「跟隨視角」讓畫面隨物體移動，方便觀察物體附近的相對運動<br>
+                    • <strong>思考問題：</strong>當 v₀ 與 a 方向相反時，物體何時速度為零？x-t 圖的極值出現在何處？<br>
+                    • <strong>延伸應用：</strong>自由落體即為 v₀ = 0、a = 9.8 m/s² 的等加速度運動
+                </p>
+            </details>
         </div>
     </div>
 
@@ -310,16 +230,25 @@
             this.history = [];
 
             this.init();
+            // 只依容器大小重繪；調整視窗時保留播放進度。
+            this.resizeObserver = new ResizeObserver(() => {
+                this.dpr = window.devicePixelRatio || 1;
+                this.scaleCanvas(this.simCanvas, this.simCtx);
+                this.scaleCanvas(this.xtCanvas, this.xtCtx);
+                this.scaleCanvas(this.vtCanvas, this.vtCtx);
+                this.scaleCanvas(this.atCanvas, this.atCtx);
+                this.drawAll();
+            });
+            this.resizeObserver.observe(document.querySelector('.simulation-section'));
         }
 
         scaleCanvas(canvas, ctx) {
             const dpr = this.dpr;
-            const cssW = canvas.width, cssH = canvas.height;
+            const rect = canvas.getBoundingClientRect();
+            const cssW = rect.width, cssH = rect.height;
             canvas.width = Math.round(cssW * dpr);
             canvas.height = Math.round(cssH * dpr);
-            canvas.style.width = cssW + 'px';
-            canvas.style.height = cssH + 'px';
-            ctx.scale(dpr, dpr);
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
         }
 
         init() {
@@ -550,7 +479,10 @@
         }
 
         updateDataDisplay() {
-            // 數據直接顯示在模擬畫面上，不需額外 DOM 更新
+            document.getElementById('timeReadout').textContent = this.time.toFixed(2);
+            document.getElementById('positionReadout').textContent = this.getX(this.time).toFixed(2);
+            document.getElementById('velocityReadout').textContent = this.getV(this.time).toFixed(2);
+            document.getElementById('accelerationReadout').textContent = this.getA(this.time).toFixed(2);
         }
 
         drawAll() {
@@ -596,7 +528,7 @@
             else if (xSpan > 20) tickStep = 5;
             else if (xSpan > 10) tickStep = 2;
 
-            ctx.fillStyle = '#666';
+            ctx.fillStyle = '#b6c2cf';
             ctx.font = '14px Roboto, sans-serif';
             ctx.textAlign = 'center';
 
@@ -609,12 +541,12 @@
                 ctx.moveTo(px, trackY - 8);
                 ctx.lineTo(px, trackY + 8);
                 ctx.stroke();
-                ctx.fillStyle = '#666';
+                ctx.fillStyle = '#b6c2cf';
                 ctx.fillText(xVal.toFixed(0), px, trackY + 22);
             }
 
             // x 軸標籤
-            ctx.fillStyle = '#888';
+            ctx.fillStyle = '#b6c2cf';
             ctx.font = '16px Roboto, sans-serif';
             ctx.fillText('x (m)', W / 2, trackY + 42);
 
@@ -632,7 +564,7 @@
                 ctx.fillStyle = '#999';
                 ctx.font = 'bold 15px Roboto, sans-serif';
                 ctx.textAlign = 'center';
-                ctx.fillText('原點', opx, 15);
+                ctx.fillText('原點', opx, W < 600 ? H - 12 : 15);
             }
 
             // 軌跡記錄點
@@ -700,7 +632,7 @@
             // 加速度箭頭
             if (Math.abs(curA) > 0.05) {
                 const aLen = Math.min(Math.abs(curA) * 6, 60) * Math.sign(curA);
-                const aY = objY + 34;
+                const aY = trackY + 60;
                 ctx.strokeStyle = '#f39c12';
                 ctx.lineWidth = 2;
                 ctx.setLineDash([4, 3]);
@@ -741,24 +673,10 @@
             ctx.fillText('加速度 a', W - 148, 41);
 
             // 視角標示
-            ctx.fillStyle = '#555';
+            ctx.fillStyle = '#b6c2cf';
             ctx.font = '14px Roboto, sans-serif';
             ctx.textAlign = 'left';
             ctx.fillText(this.viewMode === 'fixed' ? '📌 固定視角' : '🎯 跟隨視角', 10, 19);
-
-            // 即時數據顯示在畫面上
-            const curXVal = this.getX(this.time);
-            const curVVal = this.getV(this.time);
-            ctx.font = 'bold 16px Roboto Mono, monospace';
-            ctx.textAlign = 'left';
-            ctx.fillStyle = '#aaa';
-            ctx.fillText(`t = ${this.time.toFixed(2)} s`, 10, H - 10);
-            ctx.fillStyle = '#3498db';
-            ctx.fillText(`x = ${curXVal.toFixed(2)} m`, 170, H - 10);
-            ctx.fillStyle = '#e74c3c';
-            ctx.fillText(`v = ${curVVal.toFixed(2)} m/s`, 370, H - 10);
-            ctx.fillStyle = '#f39c12';
-            ctx.fillText(`a = ${this.getA(this.time).toFixed(2)} m/s²`, 580, H - 10);
         }
 
         // ===================== 圖表繪製 =====================
@@ -793,7 +711,7 @@
             ctx.fillStyle = '#0a0a1a';
             ctx.fillRect(0, 0, W, H);
 
-            const m = { top: 15, right: 15, bottom: 30, left: 48 };
+            const m = { top: 18, right: 18, bottom: 36, left: 56 };
             const pW = W - m.left - m.right;
             const pH = H - m.top - m.bottom;
             const tMax = this.maxTime;
@@ -814,8 +732,8 @@
             else if (ySpan > 20) yTickStep = 5;
             else if (ySpan > 10) yTickStep = 2;
 
-            ctx.fillStyle = '#556';
-            ctx.font = '10px Roboto, sans-serif';
+            ctx.fillStyle = '#b6c2cf';
+            ctx.font = '13px Roboto, sans-serif';
             ctx.textAlign = 'right';
             const firstYTick = Math.ceil(yMin / yTickStep) * yTickStep;
             for (let yVal = firstYTick; yVal <= yMax; yVal += yTickStep) {
@@ -854,8 +772,8 @@
             }
 
             // 軸標籤
-            ctx.fillStyle = '#888';
-            ctx.font = '11px Roboto, sans-serif';
+            ctx.fillStyle = '#b6c2cf';
+            ctx.font = '13px Roboto, sans-serif';
             ctx.textAlign = 'center';
             ctx.fillText('t (s)', W / 2, H - 3);
             ctx.save();

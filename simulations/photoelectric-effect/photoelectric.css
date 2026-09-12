@@ -1,0 +1,22 @@
+/* One energy chart alongside the electron scene, sharing its clock and controls. */
+.classroom.photoelectric .comparisons-side .comparison-canvas-box {
+  height:clamp(380px,54vh,580px);
+}
+.classroom.photoelectric .comparisons-side .comparison-chart h3 {
+  color:#526477;
+  font-size:14px;
+  font-weight:400;
+}
+@media(min-width:1001px) {
+  .classroom.photoelectric.is-presenting .comparisons-side .comparison-grid {
+    grid-template-rows:minmax(0,1fr);
+  }
+  .classroom.photoelectric.is-presenting .comparisons-side .comparison-canvas-box {
+    height:auto;
+  }
+}
+@media(max-width:1000px) {
+  .classroom.photoelectric .comparisons-side .comparison-canvas-box {
+    height:360px;
+  }
+}

@@ -22,6 +22,14 @@
         onload="renderMathInElement(document.body, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
 
     <style>
+        .rope-wave .physics-principle { min-width: 0; }
+        .rope-wave .physics-principle .katex-display {
+            max-width: 100%;
+            overflow-x: auto;
+            overflow-y: hidden;
+            padding: 6px 12px;
+            color: #34495e;
+        }
         #simCanvas {
             width: 100%;
             border-radius: 6px;
@@ -77,8 +85,10 @@
             background: #0d1a26;
         }
     </style>
+    <link href="../../css/wave-classroom.css" rel="stylesheet">
+    <script defer src="../../js/wave-classroom.js"></script>
 </head>
-<body>
+<body class="wave-classroom rope-wave">
     <!--HEADER -->
     <div class="header">
       <div class="for-sticky">
@@ -123,94 +133,102 @@
 
     <!-- 主容器 -->
     <div class="main-container">
-        <!-- 頁面標題 -->
-        <div class="page-header">
+<div class="page-header">
             <h1>🌊 繩波傳遞與反射</h1>
-            <p class="subtitle">觀察波在不同密度繩子與邊界條件下的反射及透射行為 | 選修物理 II - 波動</p>
+            <p class="subtitle">觀察波在不同密度繩子與邊界條件下的反射及透射行為 | 選修物理3 · 第1章 波動</p>
         </div>
-
-        <!-- 物理原理說明 -->
-        <div class="info-box physics-principle">
-            <h4>📚 物理原理與公式</h4>
-            <p>
-                • <strong>繩波速度：</strong>$v = \sqrt{T/\mu}$，$T$ 為張力（各段相同），$\mu$ 為<strong>線密度</strong>（每公尺繩的質量，g/m）；$\mu$ 越大（越重）波速越慢<br>
-                • <strong>反射係數：</strong>$r = \dfrac{v_2 - v_1}{v_2 + v_1}$　　$r > 0$：反射波與入射波<strong>同相</strong>（不倒相）；$r < 0$：<strong>反相</strong>（倒相）<br>
-                • <strong>透射係數：</strong>$t = \dfrac{2v_2}{v_2 + v_1}$，透射波振幅 $= t \times A_i$<br>
-                • <strong>固定端</strong>（$v_2 = 0$）：$r = -1$（完全倒相反射），無透射<br>
-                • <strong>活動端</strong>（$v_2 \to \infty$）：$r = +1$（完全同相反射），無透射<br>
-                • <strong>能量守恆：</strong>反射能量 + 透射能量 = 入射能量，即 $r^2 + \dfrac{v_1}{v_2} t^2 = 1$
-            </p>
-        </div>
-
-        <!-- 模擬與控制面板並排 -->
-        <div class="sim-layout">
+<div class="sim-layout">
             <!-- 右側控制面板 -->
-            <div class="sim-layout-left">
+
+
+            <!-- 左側模擬區域 -->
+            <div class="sim-layout-right">
+                <div class="simulation-section">
+<div class="stage-toolbar"><h2>四種反射與透射情境</h2><div class="button-group">
+                    <button class="btn btn-start" id="startBtn">▶ 開始模擬</button>
+                    <button class="btn btn-pause" id="pauseBtn">⏸ 暫停</button>
+                    <button class="btn btn-reset" id="resetBtn">🔄 重置</button>
+                </div></div>
+                    <div class="canvas-wrapper">
+                        <canvas id="simCanvas" width="900" height="480"></canvas>
+                    </div>
+                </div>
+            </div>
+<div class="sim-layout-left">
                 <div class="controls">
                     <div class="control-section">
                         <h3>⚙️ 波源設定</h3>
 
                         <div class="control-row">
-                            <label>波形種類</label>
+                            <label for="waveTypeSelect">波形種類</label>
                             <select id="waveTypeSelect">
                                 <option value="sine">週期波（正弦）</option>
-                                <option value="pulse">脈衝波（高斯包）</option>
+                                <option value="pulse">脈衝波（平滑單脈衝）</option>
                             </select>
                         </div>
 
                         <div class="control-row">
-                            <label>振幅 A（格）</label>
+                            <label for="ampSlider">振幅 A（相對值）</label>
                             <input type="range" id="ampSlider" min="5" max="35" step="1" value="20">
                             <span class="value-display" id="ampValue">20</span>
                         </div>
 
                         <div class="control-row">
-                            <label id="freqLabel">頻率（相對值）</label>
+                            <label id="freqLabel" for="freqSlider">頻率（相對值）</label>
                             <input type="range" id="freqSlider" min="1" max="5" step="1" value="3">
                             <span class="value-display" id="freqValue">3</span>
                         </div>
 
                         <div class="control-row">
-                            <label>播放速度</label>
+                            <label for="speedSlider">播放速度</label>
                             <input type="range" id="speedSlider" min="0.5" max="3" step="0.5" value="1">
                             <span class="value-display" id="speedValue">1.0x</span>
                         </div>
 
                         <div class="control-row">
-                            <label>顯示係數標記</label>
+                            <label for="showCoeffToggle">顯示係數標記</label>
                             <input type="checkbox" id="showCoeffToggle" checked>
                         </div>
                     </div>
 
+                    <p id="waveModeHint" style="font-size:13px;line-height:1.7;color:#5d6d7e;"></p>
                     <div class="control-section">
                         <h3>⚙️ 繩子材質</h3>
 
                         <div class="control-row">
-                            <label>重繩線密度 μ₁ (g/m)</label>
+                            <label for="mu1Slider">重繩線密度 μ₁ (g/m)</label>
                             <input type="range" id="mu1Slider" min="2" max="16" step="1" value="4">
                             <span class="value-display" id="mu1Value">4</span>
                         </div>
 
                         <div class="control-row">
-                            <label>輕繩線密度 μ₂ (g/m)</label>
+                            <label for="mu2Slider">輕繩線密度 μ₂ (g/m)</label>
                             <input type="range" id="mu2Slider" min="1" max="15" step="1" value="1">
                             <span class="value-display" id="mu2Value">1</span>
                         </div>
 
                         <div class="wave-info" style="margin-top:10px;">
                             <div class="wave-info-item">
-                                <div class="wave-info-label">v₁（重繩）</div>
+                                <div class="wave-info-label">v₁（重繩，m/s）</div>
                                 <div class="wave-info-value" id="v1Display">2.00</div>
                             </div>
                             <div class="wave-info-item">
-                                <div class="wave-info-label">v₂（輕繩）</div>
+                                <div class="wave-info-label">v₂（輕繩，m/s）</div>
                                 <div class="wave-info-value" id="v2Display">4.00</div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="control-section">
-                        <h3>📊 理論反射/透射係數</h3>
+
+                </div>
+
+                <!-- 控制按鈕 -->
+
+            </div>
+</div>
+<div class="lesson-notes">
+<details class="info-box coefficient-note">
+                        <summary>📊 理論反射／透射係數</summary>
                         <table class="coeff-table">
                             <thead>
                                 <tr><th>情境</th><th>r</th><th>t</th></tr>
@@ -253,45 +271,57 @@
                                 <div class="legend-dot" style="background:#cc5de8;"></div>活動端
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <!-- 控制按鈕 -->
-                <div class="button-group">
-                    <button class="btn btn-start" id="startBtn">▶ 開始模擬</button>
-                    <button class="btn btn-pause" id="pauseBtn">⏸ 暫停</button>
-                    <button class="btn btn-reset" id="resetBtn">🔄 重置</button>
-                </div>
-            </div>
-
-            <!-- 左側模擬區域 -->
-            <div class="sim-layout-right">
-                <div class="simulation-section">
-                    <div class="canvas-wrapper">
-                        <canvas id="simCanvas" width="900" height="480"></canvas>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- 教學指引 -->
-        <div class="info-box teaching-note">
-            <h4>💡 教學使用指引</h4>
+                    </details>
+<details class="info-box physics-principle">
+            <summary>📚 數學方法：行進波、脈衝與邊界條件</summary>
+            <p>假設繩子無耗散、各段張力相同，且橫向位移足夠小。每段滿足
+                $\partial_t^2 y=v^2\partial_x^2 y$，$v=\sqrt{T/\mu}$。
+                本模擬用行進波解析式直接求每一時刻的位移；畫面上的取樣點只用於繪圖。</p>
+            <p><strong>單一平滑脈衝：</strong>令 $\Delta$ 為波源持續時間，單位振幅的波源為</p>
+            $$q(s)=\begin{cases}\sin^2(\pi s/\Delta),&amp;0&lt;s&lt;\Delta,\\0,&amp;\text{其他時間}.\end{cases}$$
+            <p>這是升餘弦脈衝，起點與終點的位移及速度皆為零，中點達到峰值 1。
+                它只產生一個凸起；寬度滑桿越大，$\Delta$ 越長，並非頻率越高。
+                週期波則使用 $q(s)=\sin(2\pi fs)$（$s&gt;0$），開始前為零。</p>
+            <p><strong>傳遞與接面：</strong>以左緣為 $x=0$、接面為 $x=b$，$v_i$、$v_t$ 分別為入射段、透射段波速。
+                $A$ 為入射振幅，$t$ 為模擬時間，$\tau$ 為位移透射係數。</p>
+            $$y_i(x,t)=Aq\left(t-\frac{x}{v_i}\right),\qquad
+              y_r(x,t)=rAq\left(t-\frac{2b-x}{v_i}\right)$$
+            $$y_t(x,t)=\tau A q\left(t-\frac{b}{v_i}-\frac{x-b}{v_t}\right)$$
+            <p>接面左側顯示 $y_i+y_r$，右側顯示 $y_t$。延遲時間由實際路程及各段波速決定，因此波尚未到達時，該處位移為零。</p>
+            $$r=\frac{v_t-v_i}{v_t+v_i},\qquad \tau=1+r=\frac{2v_t}{v_t+v_i}$$
+            <p>這兩個係數使接面位移連續、橫向張力連續。$r&gt;0$ 不倒相；$r&lt;0$ 倒相。
+                表格中的「t」代表此處的 $\tau$。脈衝的空間全寬為 $w_i=v_i\Delta$、$w_t=v_t\Delta$，
+                所以傳入快繩會變寬、傳入慢繩會變窄；各位置經歷脈衝的持續時間仍是 $\Delta$（半高全寬為全寬的一半）。</p>
+            <p><strong>端點：</strong>固定端取 $b=L,r=-1$，使 $y(L,t)=0$；
+                活動端取 $b=L,r=+1$，使 $\partial_x y(L,t)=0$。兩者皆無透射。
+                活動端在入射與反射脈衝的峰值重合時，總位移可達 $2A$。</p>
+            <p><strong>能量：</strong>位移係數不等於能量比例。反射與透射的能量比例分別是
+                $R_E=r^2$、$T_E=(v_i/v_t)\tau^2$，且 $R_E+T_E=1$，所以透射振幅大於入射振幅並不違反能量守恆。</p>
+            <p><strong>模擬範圍：</strong>左緣是入射波輸入及反射波離開的開放邊界；雙繩情境的右緣也開放，不產生額外反射。
+                因此本頁展示一次接面／端點散射，不是兩端封閉繩子的多次往返。
+                計算取 $L=128\,\mathrm{m}$、雙繩接面 $b=64\,\mathrm{m}$、$T=0.016\,\mathrm{N}$，
+                密度由 g/m 換成 kg/m。振幅以相對值放大顯示，水平與垂直繪圖比例不同；1× 播放每秒推進 5 模擬秒。</p>
+            <p>公式參考：<a href="https://bpb-us-e1.wpmucdn.com/sites.harvard.edu/dist/0/550/files/2023/11/waves_transverse.pdf" target="_blank" rel="noopener">David Morin，Transverse waves on a string，§4.1–4.4</a>。</p>
+        </details>
+<details class="info-box teaching-note">
+            <summary>💡 教學使用指引</summary>
             <p>
-                • <strong>比較觀察：</strong>四種情境同時進行，重點觀察<strong>接面/端點右側</strong>的波形變化，以及反射波的相位（是否倒相）<br>
-                • <strong>重到輕（密→疏）：</strong>反射波<strong>不倒相</strong>，透射波振幅<strong>變大</strong>（$t > 1$）但能量仍守恆（傳入能量流減少）<br>
+                • <strong>比較觀察：</strong>四種情境同時進行，重點觀察<strong>接面兩側或端點附近</strong>的波形變化，以及反射波的相位（是否倒相）<br>
+                • <strong>重到輕（密→疏）：</strong>反射波<strong>不倒相</strong>，透射波振幅<strong>變大</strong>（$t > 1$），透射脈衝也更寬；能量比例須乘上波阻抗比，仍符合能量守恆<br>
                 • <strong>輕到重（疏→密）：</strong>反射波<strong>倒相</strong>，透射波振幅<strong>變小</strong>（$t < 1$）<br>
                 • <strong>固定端：</strong>完全反射且倒相，可觀察到接近<strong>駐波</strong>的干涉圖形<br>
-                • <strong>活動端：</strong>完全反射且不倒相，反射波振幅等於入射波振幅<br>
-                • <strong>脈衝波模式：</strong>切換為「脈衝波」可清楚看到入射脈衝、反射脈衝（相位是否翻轉）及透射脈衝（振幅大小）各自分開傳遞，不受疊加干擾<br>
+                • <strong>活動端：</strong>完全反射且不倒相，反射波振幅等於入射波振幅，端點的疊加位移最大可達 $2A$<br>
+                • <strong>脈衝波模式：</strong>切換為「脈衝波」可清楚看到入射脈衝、反射脈衝（相位是否翻轉）及透射脈衝（振幅大小）在遠離接面時各自分開傳遞；碰到接面時仍須依疊加原理觀察總位移<br>
                 • <strong>調整線密度：</strong>μ₁/μ₂ 比值越大，速度差異越大，r 值越接近 ±1，反射越強；比值趨近 1 時反射幾乎消失<br>
                 • <strong>思考問題：</strong>固定端與輕→重的反射波相位都是倒相，兩者有何不同？提示：觀察透射端<br>
-                • <strong>操作建議：</strong>先用脈衝波觀察反射行為，再切換週期波觀察穩態干涉與駐波條件
+                • <strong>操作建議：</strong>先用脈衝波觀察反射行為，再切換週期波觀察干涉；脈衝離開後按開始可重播
             </p>
-        </div>
-    </div>
+        </details>
+</div>
+</div>
 
     <!-- JavaScript 模擬程式碼 -->
+    <script src="model.js"></script>
     <script>
         class RopeWaveSimulation {
             constructor() {
@@ -300,14 +330,13 @@
                 this.dpr = window.devicePixelRatio || 1;
                 this.scaleCanvas(this.simCanvas, this.simCtx);
 
-                // 繩子材質：線密度 (g/m)，T_REF=16 使 μ=1→v=4, μ=4→v=2
-                this.T_REF = 16.0;
+                // 相同張力 0.016 N；密度由 g/m 換算為 kg/m。
                 this.mu1   = 4;   // 重繩線密度
                 this.mu2   = 1;   // 輕繩線密度
                 this.computeSpeeds();
 
                 // 物理參數
-                this.N = 130;
+                this.N = 1025; // 只控制繪圖取樣；中央取樣點恰好位於接面。
                 this.SIM_SPEED = 5;
 
                 // 波源設定
@@ -315,7 +344,6 @@
                 this.amplitude = 20;
                 this.freqLevel = 3;
                 this.frequency = 3 * 0.015;
-                // pulseHalfPeriod 由 get 屬性動態計算，無需儲存
 
                 this.playbackSpeed = 1.0;
                 this.showCoeff = true;
@@ -330,16 +358,22 @@
                 this.init();
             }
 
-            // 脈衝半週期：freqLevel 越大 → T_half 越大（脈衝越寬）
-            get pulseHalfPeriod() {
-                return this.freqLevel * 0.8;
+            // 寬度控制的是波源持續時間；空間全寬由各段波速決定。
+            get pulseDuration() {
+                return this.freqLevel * 2.4;
             }
 
-            // 由線密度計算波速與子步長
+            get sourceOptions() {
+                return { waveType: this.waveType, duration: this.pulseDuration, frequency: this.frequency };
+            }
+
+            get pulseEndTime() {
+                return Math.max(...this.scenarios.map(s => RopeWaveModel.pulseEndTime(s, this.pulseDuration)));
+            }
+
             computeSpeeds() {
-                this.v_slow = Math.sqrt(this.T_REF / this.mu1);
-                this.v_fast = Math.sqrt(this.T_REF / this.mu2);
-                this.DT_SUB = 0.8 / Math.max(this.v_slow, this.v_fast);
+                this.v_slow = RopeWaveModel.speed(this.mu1);
+                this.v_fast = RopeWaveModel.speed(this.mu2);
             }
 
             // 高 DPI 縮放（必須）
@@ -356,6 +390,7 @@
             init() {
                 this.resetScenarios();
                 this.bindControls();
+                this.updateSourceDisplay();
                 this.updateCoeffDisplay();
                 this.updateSpeedDisplay();
                 this.draw();
@@ -376,30 +411,20 @@
             }
 
             createScenario(type, label, N) {
-                const y      = new Float64Array(N); // 目前位移
-                const y_prev = new Float64Array(N); // 前一步位移
-                const v      = new Float64Array(N); // 各節點波速
+                return {
+                    ...RopeWaveModel.createScenario(type, this.v_slow, this.v_fast),
+                    label,
+                    y: new Float64Array(N)
+                };
+            }
 
-                // 設定各節點波速
-                for (let i = 0; i < N; i++) {
-                    if (type === 'heavy-to-light') {
-                        v[i] = i < N / 2 ? this.v_slow : this.v_fast;
-                    } else if (type === 'light-to-heavy') {
-                        v[i] = i < N / 2 ? this.v_fast : this.v_slow;
-                    } else {
-                        v[i] = this.v_slow; // 均勻繩
-                    }
-                }
-
-                // 接面節點使用能量加權有效速度，提升模擬精度
-                if (type === 'heavy-to-light' || type === 'light-to-heavy') {
-                    const mid = Math.floor(N / 2);
-                    const vs = this.v_slow, vf = this.v_fast;
-                    // v_eff = sqrt(2 * vs^2 * vf^2 / (vs^2 + vf^2))
-                    v[mid] = Math.sqrt(2 * vs * vs * vf * vf / (vs * vs + vf * vf));
-                }
-
-                return { type, label, y, y_prev, v };
+            updateSourceDisplay() {
+                const pulse = this.waveType === 'pulse';
+                document.getElementById('freqLabel').textContent = pulse ? '脈衝持續時間 Δ（模擬秒）' : '頻率（相對值）';
+                document.getElementById('freqValue').textContent = pulse ? this.pulseDuration.toFixed(1) : this.freqLevel;
+                document.getElementById('waveModeHint').textContent = pulse
+                    ? '每次播放只發出一個脈衝。全部離開畫面後自動停止，再按開始可重播；接面附近會出現入射與反射的疊加。'
+                    : '持續輸入正弦行進波；反射波離開左側後不再反射。';
             }
 
             // ────────────────────────────────────────
@@ -409,9 +434,7 @@
                 // 波形種類
                 document.getElementById('waveTypeSelect').addEventListener('change', (e) => {
                     this.waveType = e.target.value;
-                    document.getElementById('freqLabel').textContent =
-                        this.waveType === 'pulse' ? '脈衝寬度（越大越寬）' : '頻率（相對值）';
-                    // 脈衝模式：freqLevel 越大 → pulseHalfPeriod 越大 → 脈衝越寬，標籤已正確
+                    this.updateSourceDisplay();
                     this.reset();
                 });
 
@@ -424,7 +447,7 @@
                 document.getElementById('freqSlider').addEventListener('input', (e) => {
                     this.freqLevel = parseFloat(e.target.value);
                     this.frequency = this.freqLevel * 0.015;
-                    document.getElementById('freqValue').textContent = this.freqLevel;
+                    this.updateSourceDisplay();
                     this.reset();
                 });
 
@@ -481,10 +504,8 @@
             // 更新左側係數表格
             updateCoeffDisplay() {
                 const v1s = this.v_slow, v2f = this.v_fast;
-                const r1 = (v2f - v1s) / (v2f + v1s);
-                const t1 = 2 * v2f / (v2f + v1s);
-                const r2 = (v1s - v2f) / (v1s + v2f);
-                const t2 = 2 * v1s / (v1s + v2f);
+                const { r: r1, tau: t1 } = RopeWaveModel.coefficients(v1s, v2f);
+                const { r: r2, tau: t2 } = RopeWaveModel.coefficients(v2f, v1s);
 
                 document.getElementById('r1Cell').textContent = (r1 >= 0 ? '+' : '') + r1.toFixed(2);
                 document.getElementById('t1Cell').textContent = t1.toFixed(2);
@@ -497,6 +518,7 @@
             // ────────────────────────────────────────
             start() {
                 if (this.isRunning) return;
+                if (this.waveType === 'pulse' && this.time >= this.pulseEndTime) this.reset();
                 this.isRunning = true;
                 this.lastTimestamp = null;
                 this.animationId = requestAnimationFrame((ts) => this.loop(ts));
@@ -527,67 +549,18 @@
                     const dt_real = Math.min((timestamp - this.lastTimestamp) / 1000, 0.05);
                     const dt_sim  = dt_real * this.playbackSpeed * this.SIM_SPEED;
 
-                    // 子步長分割，確保 Courant 數穩定
-                    const numSteps = Math.max(1, Math.ceil(dt_sim / this.DT_SUB));
-                    const dt_step  = dt_sim / numSteps;
-
-                    for (let step = 0; step < numSteps; step++) {
-                        this.time += dt_step;
-                        for (const s of this.scenarios) {
-                            this.stepScenario(s, dt_step);
-                        }
+                    this.time += dt_sim;
+                    if (this.waveType === 'pulse') this.time = Math.min(this.time, this.pulseEndTime);
+                    const options = this.sourceOptions;
+                    for (const scenario of this.scenarios) {
+                        RopeWaveModel.fill(scenario, this.time, options, scenario.y);
                     }
+                    if (this.waveType === 'pulse' && this.time >= this.pulseEndTime) this.pause();
                 }
 
                 this.lastTimestamp = timestamp;
                 this.draw();
-                this.animationId = requestAnimationFrame((ts) => this.loop(ts));
-            }
-
-            // ────────────────────────────────────────
-            // 有限差分更新（Störmer-Verlet）
-            // ────────────────────────────────────────
-            stepScenario(s, dt) {
-                const { y, y_prev, v, type } = s;
-                const N = this.N;
-                const y_new = new Float64Array(N);
-
-                // 左端：驅動波源
-                let srcVal = 0;
-                if (this.waveType === 'sine') {
-                    srcVal = Math.sin(2 * Math.PI * this.frequency * this.time);
-                } else {
-                    // 半個正弦波脈衝：從 t=0 振到 t=T_half 後停止（一個完整的凸起）
-                    const T_half = this.pulseHalfPeriod;
-                    if (this.time <= T_half) {
-                        srcVal = Math.sin(Math.PI * this.time / T_half);
-                    }
-                }
-                y_new[0] = srcVal;
-
-                // 內部節點：二階差分（dx = 1）
-                for (let i = 1; i < N - 1; i++) {
-                    const C = v[i] * dt; // Courant 數
-                    y_new[i] = 2 * y[i] - y_prev[i] + C * C * (y[i + 1] - 2 * y[i] + y[i - 1]);
-                }
-
-                // 右端邊界條件
-                if (type === 'fixed') {
-                    // 固定端：強制零位移
-                    y_new[N - 1] = 0;
-                } else if (type === 'free') {
-                    // 活動端：零坡度（ghost node: y[N] = y[N-2]）
-                    const C = v[N - 2] * dt;
-                    y_new[N - 1] = 2 * y[N - 1] - y_prev[N - 1] + 2 * C * C * (y[N - 2] - y[N - 1]);
-                } else {
-                    // 吸收邊界（Mur 一階），防止右牆二次反射
-                    const C_end = v[N - 1] * dt;
-                    const coef  = (C_end - 1) / (C_end + 1);
-                    y_new[N - 1] = y[N - 2] + coef * (y_new[N - 2] - y[N - 1]);
-                }
-
-                y_prev.set(y);
-                y.set(y_new);
+                if (this.isRunning) this.animationId = requestAnimationFrame((ts) => this.loop(ts));
             }
 
             // ────────────────────────────────────────
@@ -612,12 +585,12 @@
 
             drawStrip(ctx, idx, W, y0, stripH) {
                 const scenario = this.scenarios[idx];
-                const { y, v, type, label } = scenario;
+                const { y, type, label } = scenario;
                 const N = this.N;
 
                 // 各條帶中心線
                 const centerY = y0 + stripH * 0.52;
-                const amp     = this.amplitude;
+                const amp     = this.amplitude * 0.55; // 為活動端最大 2A 留出空間。
 
                 // 帶狀背景（交錯深色）
                 ctx.fillStyle = idx % 2 === 0 ? '#0d1117' : '#0e1520';
@@ -684,7 +657,7 @@
                     ctx.lineTo(ex, y0 + stripH - 6);
                     ctx.stroke();
                     // 滑環（跟隨波形位移）
-                    const ringY = centerY + y[N - 1] * amp;
+                    const ringY = centerY - y[N - 1] * amp;
                     ctx.strokeStyle = '#cc5de8';
                     ctx.lineWidth = 2;
                     ctx.beginPath();
@@ -700,7 +673,7 @@
                     ctx.lineJoin = 'round';
                     for (let i = iFrom; i <= iTo; i++) {
                         const px = ropeX0 + (i / (N - 1)) * ropeW;
-                        const py = centerY + y[i] * amp;
+                        const py = centerY - y[i] * amp;
                         i === iFrom ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
                     }
                     ctx.stroke();
@@ -720,7 +693,7 @@
                 }
 
                 // ── 波源指示點 ──
-                const srcY = centerY + y[0] * amp;
+                const srcY = centerY - y[0] * amp;
                 ctx.fillStyle = '#ffd43b';
                 ctx.beginPath();
                 ctx.arc(ropeX0, srcY, 5, 0, Math.PI * 2);
@@ -733,27 +706,27 @@
                 ctx.fillText('〜', ropeX0 - 6, centerY + 5);
 
                 // ── 左側標籤 ──
-                ctx.font = 'bold 13px Roboto, sans-serif';
+                ctx.font = 'bold 16px Roboto, sans-serif';
                 ctx.textAlign = 'left';
                 ctx.fillStyle = '#ecf0f1';
                 ctx.fillText(label, 4, y0 + 15);
 
                 // ── 反射/透射係數標記（右上角）──
                 if (this.showCoeff) {
-                    ctx.font = '12px Roboto, sans-serif';
+                    ctx.font = '15px Roboto, sans-serif';
                     ctx.textAlign = 'right';
 
                     let coeffText = '';
                     let coeffColor = '#ecf0f1';
 
                     if (type === 'heavy-to-light') {
-                        const r = ((this.v_fast - this.v_slow) / (this.v_fast + this.v_slow)).toFixed(2);
-                        const t = (2 * this.v_fast / (this.v_fast + this.v_slow)).toFixed(2);
+                        const r = scenario.r.toFixed(2);
+                        const t = scenario.tau.toFixed(2);
                         coeffText  = `r = +${r}（不倒相）   t = ${t}`;
                         coeffColor = '#74c0fc';
                     } else if (type === 'light-to-heavy') {
-                        const r = ((this.v_slow - this.v_fast) / (this.v_slow + this.v_fast)).toFixed(2);
-                        const t = (2 * this.v_slow / (this.v_slow + this.v_fast)).toFixed(2);
+                        const r = scenario.r.toFixed(2);
+                        const t = scenario.tau.toFixed(2);
                         coeffText  = `r = ${r}（倒相）   t = ${t}`;
                         coeffColor = '#f7a44b';
                     } else if (type === 'fixed') {
@@ -771,7 +744,7 @@
                 // ── 分段文字標籤（分兩段的情境） ──
                 if (type === 'heavy-to-light' || type === 'light-to-heavy') {
                     const jx = ropeX0 + ropeW * 0.5;
-                    ctx.font = '11px Roboto, sans-serif';
+                    ctx.font = '14px Roboto, sans-serif';
                     ctx.textAlign = 'center';
 
                     if (type === 'heavy-to-light') {
@@ -790,13 +763,10 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            new RopeWaveSimulation();
+            window.waveDemos = [new RopeWaveSimulation()];
         });
     </script>
 
     <!-- 標準 JS -->
-    <script src="../../js/jquery-1.9.1.min.js"></script>
-    <script src="../../js/bootstrap.min.js"></script>
-    <script src="../../js/main.js"></script>
 </body>
 </html>

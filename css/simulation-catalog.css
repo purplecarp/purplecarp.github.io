@@ -1,0 +1,43 @@
+/* Five subject areas with a visual preview for every simulation. */
+.page-header-section { text-align:center; margin-bottom:28px; padding:40px 28px; background:#fff; border:1px solid #e3e9ef; border-radius:16px; }
+.page-header-section h2 { margin:0 0 14px; color:#26394e; font-size:34px; font-weight:700; }
+.page-header-section .subtitle { color:#57677a; font-size:15px; line-height:1.9; margin:0 0 22px; }
+.legend { display:flex; justify-content:center; flex-wrap:wrap; gap:9px; }
+.legend a { padding:7px 13px; border-radius:20px; color:#fff; font-size:12px; font-weight:500; }
+.badge-1 { background:#2879b9; } .badge-2 { background:#a96321; } .badge-3 { background:#8058b0; } .badge-4 { background:#be4550; } .badge-5 { background:#137b73; }
+.legend a:hover { color:#fff; filter:brightness(.9); }
+.physics-section { --accent:#2879b9; padding:28px; margin-bottom:26px; background:#fff; border:1px solid #e3e9ef; border-top:4px solid var(--accent); border-radius:12px; scroll-margin-top:85px; }
+#physics-2 { --accent:#a96321; } #physics-3 { --accent:#8058b0; } #physics-4 { --accent:#be4550; } #physics-5 { --accent:#137b73; }
+.physics-section h4 { display:flex; align-items:center; flex-wrap:wrap; gap:12px; margin:0 0 22px; color:#26394e; font-size:22px; font-weight:700; line-height:1.5; }
+.section-badge { padding:5px 12px; border-radius:18px; color:#fff; font-size:12px; white-space:nowrap; }
+.physics-section ul { list-style:none; padding:0; margin:0; }
+.physics-section ul li { color:#536376; font-size:15px; line-height:1.7; margin:0; padding:14px 0; border-top:1px solid #edf0f4; }
+.physics-section ul li:last-child { padding-bottom:0; }
+.simulation-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:18px; margin-top:13px; }
+.simulation-card { display:flex; flex-direction:column; min-width:0; overflow:hidden; background:#fff; border:1px solid #dde5ee; border-radius:11px; color:#26394e; text-decoration:none; transition:transform .2s,box-shadow .2s,border-color .2s; }
+.simulation-card:hover { color:#26394e; border-color:var(--accent,#137b73); transform:translateY(-3px); box-shadow:0 8px 22px #26394e12; }
+.simulation-card:focus-visible, .legend a:focus-visible { outline:3px solid #175fb5; outline-offset:4px; }
+.simulation-card img { display:block; width:100%; height:auto; aspect-ratio:32/21; object-fit:contain; background:#f5f8fc; border-bottom:1px solid #e9eef4; }
+.simulation-card-body { display:flex; flex:1; flex-direction:column; align-items:flex-start; gap:9px; padding:18px; }
+.simulation-card strong { font-size:17px; line-height:1.6; font-weight:700; }
+.simulation-description { color:#5d6d7e; font-size:14px; line-height:1.8; }
+.simulation-action { color:var(--accent,#137b73); font-size:13px; font-weight:700; margin-top:auto; padding-top:7px; }
+.simulations-highlight { --accent:#137b73; padding:24px 28px; margin-bottom:28px; border:1px solid #cfe4df; border-radius:12px; background:#f0f8f5; }
+.simulations-highlight h3 { margin:0 0 9px; font-size:20px; font-weight:700; color:#23665c; }
+.simulations-highlight p { margin:0 0 17px; color:#536c65; font-size:14px; line-height:1.8; }
+.simulations-highlight .simulation-card { flex-direction:row; align-items:stretch; }
+.simulations-highlight .simulation-card img { width:38%; border-bottom:0; border-right:1px solid #e9eef4; }
+.simulation-grid > .simulation-card:only-child { grid-column:1 / -1; flex-direction:row; }
+.simulation-grid > .simulation-card:only-child img { width:38%; border-bottom:0; border-right:1px solid #e9eef4; }
+@media (max-width:600px) {
+  .page-header-section { padding:28px 18px; }
+  .page-header-section h2 { font-size:26px; line-height:1.5; }
+  .physics-section, .simulations-highlight { padding:20px 16px; }
+  .physics-section h4 { font-size:19px; }
+  .simulation-grid { grid-template-columns:1fr; gap:16px; }
+  .simulation-grid > .simulation-card:only-child { flex-direction:column; }
+  .simulation-grid > .simulation-card:only-child img { width:100%; border-right:0; border-bottom:1px solid #e9eef4; }
+  .simulations-highlight .simulation-card { flex-direction:column; }
+  .simulations-highlight .simulation-card img { width:100%; border-right:0; border-bottom:1px solid #e9eef4; }
+}
+@media (prefers-reduced-motion:reduce) { .simulation-card { transition:none; } .simulation-card:hover { transform:none; } }

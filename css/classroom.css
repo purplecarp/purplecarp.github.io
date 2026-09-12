@@ -1,0 +1,135 @@
+﻿/* Shared, scoped classroom layout. Canvas coordinates are CSS pixels. */
+body.classroom { background:#edf1f5; color:#26384b; font:18px/1.5 system-ui,"Microsoft JhengHei",sans-serif; }
+.classroom * { box-sizing:border-box; }
+.classroom [hidden] { display:none !important; }
+.classroom a { color:#226faa; text-decoration:none; }
+.classroom button,.classroom input,.classroom select { font:inherit; }
+.classroom button,.classroom select,.classroom summary { cursor:pointer; }
+.classroom button { min-height:48px; min-width:48px; padding:8px 12px; border:1px solid #b8c7d6; border-radius:7px; background:#fff; color:#26384b; }
+.classroom button:hover { background:#e5eff8; }
+.classroom button.primary,.classroom button[aria-pressed="true"] { background:#226faa; color:#fff; border-color:#226faa; }
+.classroom button:disabled { opacity:.45; cursor:default; }
+.classroom :is(button,a,input,select,summary):focus-visible { outline:3px solid #b86a0d; outline-offset:3px; }
+.classroom .lesson-nav { display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 20px; background:#fff; border-bottom:1px solid #d6dee7; font-size:15px; }
+.classroom .lesson-brand { display:flex; align-items:center; gap:10px; font-weight:700; color:#26384b; }
+.classroom .lesson-brand img { width:32px; height:32px; }
+.classroom main { max-width:1800px; margin:auto; padding:14px 20px 24px; }
+.classroom .lesson-heading { margin-bottom:14px; }
+.classroom h1 { font-size:clamp(24px,2.5vw,34px); line-height:1.3; margin:0 0 6px; }
+.classroom h2 { font-size:20px; margin:0 0 10px; }
+.classroom h3 { font-size:18px; margin:0 0 8px; }
+.classroom .lesson-heading p,.classroom .help { color:#526477; font-size:15px; }
+.classroom .lesson-grid { display:grid; grid-template-columns:minmax(0,1fr) 304px; gap:14px; align-items:start; }
+.classroom .lesson-grid.controls-hidden { grid-template-columns:minmax(0,1fr); }
+.classroom .lesson-panel { min-width:0; background:#fff; border:1px solid #d6dee7; border-radius:10px; padding:12px; }
+.classroom .lesson-toolbar { display:flex; flex-wrap:wrap; gap:7px; margin-bottom:8px; align-items:center; }
+.classroom .lesson-toolbar .tools { margin-left:auto; display:flex; gap:7px; }
+.classroom .lesson-toolbar button { font-size:16px; padding:8px 10px; }
+.classroom .lesson-views { display:flex; gap:7px; flex-wrap:wrap; margin-bottom:8px; }
+.classroom .lesson-views button { font-size:16px; padding:6px 12px; }
+.classroom .canvas-box { min-width:0; min-height:280px; height:clamp(320px,48vh,560px); background:#101e2e; border-radius:8px; overflow:hidden; }
+.classroom canvas { display:block; width:100%; height:100%; }
+.classroom .lesson-timeline { display:grid; grid-template-columns:auto minmax(50px,1fr) auto; gap:10px; align-items:center; margin:8px 0; font-size:15px; }
+.classroom input[type="range"] { width:100%; min-height:32px; accent-color:#226faa; }
+.classroom .lesson-readouts { display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:8px; }
+.classroom .lesson-readout { min-width:0; padding:6px 10px; border-top:3px solid #226faa; border-radius:5px; background:#f0f5fa; }
+.classroom .lesson-readout span { display:block; font-size:14px; color:#526477; }
+.classroom .lesson-readout strong { display:block; font:700 32px/1.25 Consolas,monospace; font-variant-numeric:tabular-nums; overflow-wrap:anywhere; }
+.classroom .lesson-readout small { font-size:13px; color:#526477; }
+.classroom .lesson-status { font-size:14px; color:#526477; margin-top:8px; min-height:21px; }
+.classroom .lesson-control { padding:10px 0; border-bottom:1px solid #e0e7ee; }
+.classroom .lesson-control > label { display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:16px; }
+.classroom .lesson-control output { color:#19659a; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.classroom .range-controls { display:grid; grid-template-columns:48px minmax(0,1fr) 48px; align-items:center; gap:8px; margin-top:5px; }
+.classroom .lesson-control select { width:100%; min-height:48px; margin-top:7px; background:#fff; color:#26384b; border:1px solid #b8c7d6; border-radius:5px; padding:6px; }
+.classroom .lesson-control input[type="checkbox"] { width:24px; height:24px; accent-color:#226faa; }
+.classroom .lesson-presets { margin-top:14px; display:grid; gap:8px; }
+.classroom .lesson-presets button { text-align:left; font-size:16px; }
+.classroom .question-box { margin-top:12px; padding:12px; border-radius:7px; background:#eef5fb; font-size:16px; }
+.classroom .question-box p { margin-bottom:8px; }
+.classroom .question-box button { font-size:16px; }
+.classroom .lesson-notes { margin-top:14px; }
+.classroom .lesson-notes summary { font-weight:700; padding:3px 0; }
+.classroom .lesson-notes article { padding:14px 0; border-bottom:1px solid #d6dee7; }
+.classroom .lesson-notes p { margin:8px 0; }
+.classroom .lesson-notes ul { margin:8px 0 8px 24px; }
+.classroom .formula { color:#19659a; font-size:20px; }
+.classroom.is-presenting .lesson-nav,.classroom.is-presenting .lesson-heading,.classroom.is-presenting .lesson-notes { display:none; }
+.classroom.is-presenting main { max-width:none; padding:8px; }
+.classroom.is-presenting .lesson-stage { height:calc(100dvh - 16px); display:flex; flex-direction:column; }
+.classroom.is-presenting .canvas-box { flex:1; height:auto; min-height:140px; }
+.classroom.is-presenting .lesson-controls { max-height:calc(100dvh - 16px); overflow:auto; }
+.classroom.large-type .lesson-readout strong { font-size:40px; }
+.classroom.large-type .lesson-control > label,.classroom.large-type .lesson-toolbar button { font-size:20px; }
+@media(max-width:900px) {
+ .classroom .lesson-grid { grid-template-columns:minmax(0,1fr); }
+ .classroom.is-presenting .lesson-controls { position:fixed; right:8px; top:70px; bottom:8px; width:min(340px,calc(100vw - 16px)); z-index:5; box-shadow:0 8px 35px #0005; }
+ .classroom .lesson-readouts { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:600px) {
+ .classroom main { padding:12px 8px; }
+ .classroom .lesson-nav { padding:8px; font-size:12px; }
+ .classroom .lesson-toolbar { gap:5px; }
+ .classroom .lesson-toolbar button { font-size:15px; padding:6px 8px; }
+ .classroom .lesson-toolbar .tools { margin-left:0; flex-wrap:wrap; }
+ .classroom .lesson-readout strong { font-size:28px; }
+ .classroom .lesson-timeline { font-size:13px; }
+}
+
+/* Optional charts below the scene share the lesson clock and controls. */
+.classroom .lesson-comparisons { margin:6px 0 12px; }
+.classroom .comparison-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; }
+.classroom .comparison-chart { min-width:0; }
+.classroom .comparison-chart h3 { font-size:16px; margin-bottom:6px; }
+.classroom .comparison-canvas-box { height:220px; background:#101e2e; border-radius:8px; overflow:hidden; }
+.classroom.is-presenting .lesson-stage:has(.lesson-comparisons) { height:auto; min-height:calc(100dvh - 16px); }
+.classroom.is-presenting .lesson-stage:has(.lesson-comparisons) > .canvas-box { flex:none; height:clamp(320px,42vh,480px); }
+@media(max-width:1100px) {
+ .classroom .comparison-grid { grid-template-columns:minmax(0,1fr); }
+}
+
+/* Side-by-side simulation, synchronized charts, and experiment controls. */
+.classroom .lesson-grid.comparisons-side { grid-template-columns:minmax(0,1.1fr) minmax(0,1fr) 280px; }
+.classroom .lesson-grid.comparisons-side.controls-hidden { grid-template-columns:minmax(0,1.1fr) minmax(0,1fr); }
+.classroom .comparisons-side > .lesson-comparisons { margin:0; }
+.classroom .comparisons-side .comparison-grid { grid-template-columns:minmax(0,1fr); }
+.classroom .comparisons-side .comparison-canvas-box { height:190px; }
+.classroom .comparisons-side .lesson-toolbar .tools { margin-left:0; flex-wrap:wrap; }
+.classroom .comparisons-side .lesson-readouts { grid-template-columns:repeat(2,minmax(0,1fr)); }
+.classroom .comparisons-side .canvas-box { height:clamp(380px,54vh,580px); }
+.classroom.is-presenting .comparisons-side .lesson-stage { height:auto; min-height:calc(100dvh - 16px); }
+.classroom.is-presenting .comparisons-side .canvas-box { flex:1; min-height:380px; }
+@media(max-width:1000px) {
+ .classroom .lesson-grid.comparisons-side,
+ .classroom .lesson-grid.comparisons-side.controls-hidden { grid-template-columns:minmax(0,1fr); }
+ .classroom .comparisons-side .comparison-canvas-box { height:220px; }
+}
+
+@media(min-width:1001px) {
+ .classroom.is-presenting .lesson-grid.comparisons-side { height:calc(100dvh - 16px); }
+ .classroom.is-presenting .comparisons-side .lesson-stage { height:100%; min-height:0; overflow:auto; }
+ .classroom.is-presenting .comparisons-side .canvas-box { flex:1 1 0; height:auto; min-height:280px; }
+ .classroom.is-presenting .comparisons-side > .lesson-comparisons { height:100%; min-height:0; display:flex; flex-direction:column; }
+ .classroom.is-presenting .comparisons-side .comparison-grid { flex:1; min-height:0; grid-template-rows:repeat(3,minmax(0,1fr)); }
+ .classroom.is-presenting .comparisons-side .comparison-chart { display:flex; flex-direction:column; min-height:0; }
+ .classroom.is-presenting .comparisons-side .comparison-canvas-box { flex:1; height:auto; min-height:140px; }
+}
+
+.classroom .lesson-toolbar select { min-height:48px; max-width:100%; padding:8px; border:1px solid #b8c7d6; border-radius:7px; background:#fff; color:#26384b; font-size:16px; }
+
+
+/* Paired views share playback, parameters, and the same canvas height. */
+.classroom .lesson-paired-views { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+.classroom .paired-primary { min-width:0; }
+.classroom .lesson-paired-views .lesson-comparisons { margin:0; }
+.classroom .lesson-paired-views .comparison-grid { grid-template-columns:minmax(0,1fr); }
+.classroom .lesson-paired-views .comparison-chart h3 { display:none; }
+.classroom .lesson-paired-views .canvas-box,
+.classroom .lesson-paired-views .comparison-canvas-box { height:clamp(320px,48vh,560px); }
+.classroom.is-presenting .lesson-stage:has(.lesson-paired-views) { height:auto; min-height:calc(100dvh - 16px); }
+@media(min-width:761px) and (max-width:1200px) {
+ .classroom .lesson-grid:has(.lesson-paired-views) { grid-template-columns:minmax(0,1fr); }
+}
+@media(max-width:760px) {
+ .classroom .lesson-paired-views { grid-template-columns:minmax(0,1fr); }
+}

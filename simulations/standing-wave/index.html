@@ -59,8 +59,10 @@
             font-family: 'Roboto Mono', monospace;
         }
     </style>
+    <link href="../../css/wave-classroom.css" rel="stylesheet">
+    <script defer src="../../js/wave-classroom.js"></script>
 </head>
-<body>
+<body class="wave-classroom standing-wave">
     <div class="header">
       <div class="for-sticky">
         <div class="col-md-2 col-xs-6 logo">
@@ -101,140 +103,137 @@
     </div>
 
     <div class="main-container">
-        <div class="page-header">
+<div class="page-header">
             <h1>🌊 駐波模擬</h1>
-            <p class="subtitle">觀察弦線在兩端固定時形成的駐波與節點、腹點分布 | 選修物理 III - 波動</p>
+            <p class="subtitle">比較固定端反射、波的疊加與不同邊界下的駐波 | 選修物理3 · 第1章 波動</p>
         </div>
-
-        <div class="info-box physics-principle">
-            <h4>📚 物理原理與公式</h4>
-            <p>
-                • <strong>駐波條件：</strong>兩端固定的弦，只有在長度 $L$ 恰好為半波長的整數倍時才能形成駐波，即 $L = n\dfrac{\lambda}{2}$，其中 $n=1,2,3,\dots$<br>
-                • <strong>波長：</strong>$\lambda = \dfrac{2L}{n}$<br>
-                • <strong>頻率：</strong>$f_n = \dfrac{nv}{2L}$，其中 $v$ 是波速<br>
-                • <strong>位移函數：</strong>$y(x,t) = A\sin(kx)\cos(\omega t)$，$k = \dfrac{2\pi}{\lambda}$，$C9 = 2\pi f$<br>
-                • <strong>節點與腹點：</strong>節點出現在 $\sin(kx)=0$ 的位置，腹點則出現在 $|\sin(kx)|=1$ 的位置
-            </p>
-        </div>
-
-        <div class="info-box physics-principle">
-            <h4>第一部分：固定端反射</h4>
-            <p>
-                • <strong>由左端發波：</strong>先從左端產生週期波，向右傳播<br>
-                • <strong>碰到右端固定端：</strong>波會發生反射，並在固定端形成倒相<br>
-                • <strong>觀察重點：</strong>看波在端點處的反射與相位變化
-            </p>
-        </div>
-
-        <div class="tablet-layout">
+<div class="lesson-tabs" role="tablist" aria-label="駐波教學步驟"><button type="button" role="tab" id="wave-tab-0" aria-controls="wave-panel-0" aria-selected="true" tabindex="0">1．固定端反射</button><button type="button" role="tab" id="wave-tab-1" aria-controls="wave-panel-1" aria-selected="false" tabindex="-1">2．入射波與反射波疊加</button><button type="button" role="tab" id="wave-tab-2" aria-controls="wave-panel-2" aria-selected="false" tabindex="-1">3．駐波模式</button></div>
+<section id="wave-panel-0" role="tabpanel" aria-labelledby="wave-tab-0" class="wave-panel">
+<div class="tablet-layout">
             <div class="tablet-visual">
                 <div class="simulation-section">
+<div class="stage-toolbar"><h2>固定端反射</h2><div class="button-group">
+                    <button class="btn btn-start" id="fixedStartBtn">▶ 開始</button>
+                    <button class="btn btn-pause" id="fixedPauseBtn">⏸ 暫停</button>
+                    <button class="btn btn-reset" id="fixedResetBtn">🔄 重置</button>
+                </div></div>
                     <div class="canvas-wrapper">
                         <canvas id="fixedEndCanvas" width="900" height="440"></canvas>
                     </div>
                 </div>
             </div>
             <div class="tablet-controls">
-                <div class="controls" style="margin-bottom:0; padding:20px;">
+                <div class="controls">
                     <div class="control-section">
                         <h3>⚙️ 固定端反射演示</h3>
                         <div class="control-row">
-                            <label>振幅 $A$</label>
+                            <label for="fixedAmpSlider">振幅 A</label>
                             <input type="range" id="fixedAmpSlider" min="20" max="70" step="1" value="42">
                             <span class="value-display" id="fixedAmpValue">42</span>
                         </div>
                         <div class="control-row">
-                            <label>頻率 $f$</label>
+                            <label for="fixedFreqSlider">頻率 f</label>
                             <input type="range" id="fixedFreqSlider" min="0.4" max="1.8" step="0.1" value="0.9">
                             <span class="value-display" id="fixedFreqValue">0.9</span>
                         </div>
                         <div class="control-row">
-                            <label>播放速度</label>
+                            <label for="fixedSpeedSlider">播放速度</label>
                             <input type="range" id="fixedSpeedSlider" min="0.2" max="1.5" step="0.1" value="0.35">
                             <span class="value-display" id="fixedSpeedValue">0.35</span>
                         </div>
                     </div>
                 </div>
-                <div class="button-group">
-                    <button class="btn btn-start" id="fixedStartBtn">▶ 開始</button>
-                    <button class="btn btn-pause" id="fixedPauseBtn">⏸ 暫停</button>
-                    <button class="btn btn-reset" id="fixedResetBtn">🔄 重置</button>
-                </div>
+
             </div>
         </div>
-
-        <div class="info-box physics-principle">
-            <h4>第二部分：入射波、反射波與疊加</h4>
+<details class="info-box physics-principle">
+            <summary>第一部分：固定端反射</summary>
             <p>
-                • <strong>入射波：</strong>由左端向右傳播的波<br>
-                • <strong>反射波：</strong>碰到右端固定端後向左返傳<br>
-                • <strong>疊加結果：</strong>兩波在同一弦上重疊，形成駐波雛形
+                • <strong>由左端發波：</strong>先從左端產生週期波，向右傳播<br>
+                • <strong>碰到右端固定端：</strong>波會發生反射，並在固定端形成倒相<br>
+                • <strong>觀察重點：</strong>看波在端點處的反射與相位變化
             </p>
-        </div>
-
-        <div class="tablet-layout">
+        </details>
+</section>
+<section id="wave-panel-1" role="tabpanel" aria-labelledby="wave-tab-1" class="wave-panel">
+<div class="tablet-layout">
             <div class="tablet-visual">
                 <div class="simulation-section">
+<div class="stage-toolbar"><h2>入射波與反射波疊加</h2><div class="button-group">
+                    <button class="btn btn-start" id="reflectStartBtn">▶ 開始</button>
+                    <button class="btn btn-pause" id="reflectPauseBtn">⏸ 暫停</button>
+                    <button class="btn btn-reset" id="reflectResetBtn">🔄 重置</button>
+                </div></div>
                     <div class="canvas-wrapper">
                         <canvas id="superpositionCanvas" width="900" height="460"></canvas>
                     </div>
                 </div>
             </div>
             <div class="tablet-controls">
-                <div class="controls" style="margin-bottom:0; padding:20px;">
+                <div class="controls">
                     <div class="control-section">
                         <h3>⚙️ 反射波與疊加演示</h3>
                         <div class="control-row">
-                            <label>振幅 $A$</label>
+                            <label for="reflectAmpSlider">振幅 A</label>
                             <input type="range" id="reflectAmpSlider" min="20" max="70" step="1" value="42">
                             <span class="value-display" id="reflectAmpValue">42</span>
                         </div>
                         <div class="control-row">
-                            <label>頻率 $f$</label>
+                            <label for="reflectFreqSlider">頻率 f</label>
                             <input type="range" id="reflectFreqSlider" min="0.4" max="1.8" step="0.1" value="0.9">
                             <span class="value-display" id="reflectFreqValue">0.9</span>
                         </div>
                         <div class="control-row">
-                            <label>顯示反射波</label>
+                            <label for="showReflectedToggle">顯示反射波</label>
                             <input type="checkbox" id="showReflectedToggle" checked>
                         </div>
                         <div class="control-row">
-                            <label>顯示合成波</label>
+                            <label for="showSuperposedToggle">顯示合成波</label>
                             <input type="checkbox" id="showSuperposedToggle" checked>
                         </div>
                     </div>
                 </div>
-                <div class="button-group">
-                    <button class="btn btn-start" id="reflectStartBtn">▶ 開始</button>
-                    <button class="btn btn-pause" id="reflectPauseBtn">⏸ 暫停</button>
-                    <button class="btn btn-reset" id="reflectResetBtn">🔄 重置</button>
-                </div>
+
             </div>
         </div>
-
-        <div class="info-box physics-principle">
-            <h4>第三部分：不同 $n$ 模式的駐波</h4>
+<details class="info-box physics-principle">
+            <summary>第二部分：入射波、反射波與疊加</summary>
             <p>
-                • <strong>模式 $n$：</strong>改變駐波模式，觀察節點與腹點的數量變化<br>
-                • <strong>封閉端與開放端：</strong>比較兩種不同邊界條件下的駐波形態<br>
-                • <strong>關鍵觀察：</strong>不同模式對應不同波長與頻率
+                • <strong>入射波：</strong>由左端向右傳播的波<br>
+                • <strong>反射波：</strong>碰到右端固定端後向左返傳<br>
+                • <strong>疊加結果：</strong>兩波在同一弦上重疊，形成駐波雛形
             </p>
-        </div>
+        </details>
+</section>
+<section id="wave-panel-2" role="tabpanel" aria-labelledby="wave-tab-2" class="wave-panel">
+<div class="sim-layout">
 
-        <div class="sim-layout">
-            <div class="sim-layout-left">
+
+            <div class="sim-layout-right">
+                <div class="simulation-section">
+<div class="stage-toolbar"><h2>駐波模式</h2><div class="button-group">
+                    <button class="btn btn-start" id="startBtn">▶ 開始模擬</button>
+                    <button class="btn btn-pause" id="pauseBtn">⏸ 暫停</button>
+                    <button class="btn btn-reset" id="resetBtn">🔄 重置</button>
+                </div></div>
+                    <div class="canvas-wrapper">
+                        <canvas id="simCanvas" width="900" height="480"></canvas>
+                    </div>
+                </div>
+            </div>
+<div class="sim-layout-left">
                 <div class="controls">
                     <div class="control-section">
                         <h3>⚙️ 參數控制</h3>
 
                         <div class="control-row">
-                            <label>模式 $n$</label>
+                            <label for="modeSlider">模式 n</label>
                             <input type="range" id="modeSlider" min="1" max="6" step="1" value="3">
                             <span class="value-display" id="modeValue">3</span>
                         </div>
 
                         <div class="control-row">
-                            <label>振幅 $A$</label>
+                            <label for="ampSlider">振幅 A</label>
                             <input type="range" id="ampSlider" min="10" max="70" step="1" value="42">
                             <span class="value-display" id="ampValue">42</span>
                         </div>
@@ -255,43 +254,48 @@
 
                         <div class="stat-grid">
                             <div class="stat-card">
-                                <div class="stat-label">波長 $\lambda$</div>
+                                <div class="stat-label">波長 λ</div>
                                 <div class="stat-value" id="lambdaDisplay">1.33 m</div>
                             </div>
                             <div class="stat-card">
-                                <div class="stat-label">頻率 $f_n$</div>
+                                <div class="stat-label">頻率 fₙ</div>
                                 <div class="stat-value" id="freqDisplay">27.0 Hz</div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div class="button-group">
-                    <button class="btn btn-start" id="startBtn">▶ 開始模擬</button>
-                    <button class="btn btn-pause" id="pauseBtn">⏸ 暫停</button>
-                    <button class="btn btn-reset" id="resetBtn">🔄 重置</button>
-                </div>
-            </div>
 
-            <div class="sim-layout-right">
-                <div class="simulation-section">
-                    <div class="canvas-wrapper">
-                        <canvas id="simCanvas" width="900" height="480"></canvas>
-                    </div>
-                </div>
             </div>
-        </div>
-
-        <div class="info-box teaching-note">
-            <h4>💡 教學使用指引</h4>
+</div>
+<details class="info-box physics-principle">
+            <summary>第三部分：不同 n 模式的駐波</summary>
             <p>
-                • <strong>觀察節點：</strong>當你調整模式 $n$ 時，節點數會增加；每增加一個模式，弦上會多出一個節點對<br>
+                • <strong>模式 n：</strong>改變駐波模式，觀察節點與腹點的數量變化<br>
+                • <strong>封閉端與開放端：</strong>比較兩種不同邊界條件下的駐波形態<br>
+                • <strong>關鍵觀察：</strong>不同模式對應不同波長與頻率
+            </p>
+        </details>
+</section>
+<div class="lesson-notes"><details class="info-box physics-principle">
+            <summary>📚 物理原理與公式</summary>
+            <p>
+                • <strong>駐波條件：</strong>兩端固定的弦，只有在長度 $L$ 恰好為半波長的整數倍時才能形成駐波，即 $L = n\dfrac{\lambda}{2}$，其中 $n=1,2,3,\dots$<br>
+                • <strong>波長：</strong>$\lambda = \dfrac{2L}{n}$<br>
+                • <strong>頻率：</strong>$f_n = \dfrac{nv}{2L}$，其中 $v$ 是波速<br>
+                • <strong>位移函數：</strong>$y(x,t) = A\sin(kx)\cos(\omega t)$，$k = \dfrac{2\pi}{\lambda}$，$\omega = 2\pi f$<br>
+                • <strong>節點與腹點：</strong>節點出現在 $\sin(kx)=0$ 的位置，腹點則出現在 $|\sin(kx)|=1$ 的位置
+            </p>
+        </details><details class="info-box teaching-note">
+            <summary>💡 教學使用指引</summary>
+            <p>
+                • <strong>觀察節點：</strong>當你調整模式 n 時，節點數會增加；兩端固定時，第 n 模式有 n+1 個節點（含兩端）與 n 個腹點<br>
                 • <strong>比較不同模式：</strong>$n=1$ 是基音，$n=2$、$n=3$ 代表倍頻；每一個模式都滿足 $L = n\lambda/2$<br>
                 • <strong>連結到聲音：</strong>弦樂器上的基音與泛音，其實就是駐波的不同模式<br>
-                • <strong>注意現象：</strong>若固定端條件不成立，波會無法穩定形成整齊的駐波，圖形會變得混亂
+                • <strong>注意現象：</strong>右端開放時形成腹點，允許的波長改為 λ = 4L/(2n−1)，可與兩端固定時的 λ = 2L/n 比較
             </p>
-        </div>
-    </div>
+        </details></div>
+</div>
 
     <script>
         class StandingWaveSimulation {
@@ -922,9 +926,7 @@
         }
 
         window.addEventListener('DOMContentLoaded', () => {
-            new FixedEndReflectionSimulation();
-            new ReflectionStandingWaveSimulation();
-            new StandingWaveSimulation();
+            window.waveDemos = [new FixedEndReflectionSimulation(), new ReflectionStandingWaveSimulation(), new StandingWaveSimulation()];
         });
     </script>
 </body>
