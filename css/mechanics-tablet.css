@@ -1,0 +1,66 @@
+/* Mechanics-specific drawings inside the shared template classroom layout. */
+html { min-height:100%; height:auto; }
+body.classroom { margin:0; min-height:100%; height:auto; overflow:visible; }
+.classroom .lesson-nav a { min-height:48px; display:flex; align-items:center; }
+.classroom .lesson-heading p { margin:0; }
+.classroom .simulation-section { margin:0; box-shadow:none; }
+.classroom .lesson-control label { font-weight:400; }
+.classroom .lesson-control output { margin-left:auto; }
+.classroom .lesson-control input[type=range], .classroom .lesson-timeline input[type=range] { min-height:48px; margin:0; touch-action:pan-y; }
+.classroom .lesson-control .range-controls input { min-width:0; }
+.classroom .lesson-control .range-controls button { padding:8px; }
+.classroom .view-toggle { display:flex; gap:6px; flex-wrap:wrap; margin-top:8px; }
+.classroom .view-toggle button { flex:1; font-size:16px; }
+.classroom .preset-btn.active, .classroom .view-toggle .active { background:#226faa; color:white; }
+.classroom .lesson-controls fieldset { border:0; padding:0; margin:10px 0; min-width:0; }
+.classroom .lesson-controls legend { font-size:18px; font-weight:700; }
+.classroom .lesson-controls input[type=checkbox] { flex-shrink:0; }
+.classroom .lesson-controls .hint { font-size:15px; color:#526477; margin:8px 0; }
+.classroom .lesson-controls > h2 { margin-bottom:10px; }
+.classroom .motion-canvas { height:200px; min-height:160px; }
+.classroom .mechanics-graphs { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-top:12px; }
+.classroom .mechanics-chart { min-width:0; }
+.classroom .mechanics-chart h3 { font-size:16px; }
+.classroom .comparison-canvas-box { height:210px; background:#101e2e; border-radius:8px; overflow:hidden; }
+.classroom .lesson-readouts { margin-top:10px; }
+.classroom .legend { display:flex; gap:12px; flex-wrap:wrap; font-size:14px; margin:8px 0; }
+.classroom .blue { color:#1768a4; }.classroom .green { color:#147b60; }.classroom .orange { color:#aa580e; }
+.classroom .hint { font-size:14px; color:#526477; line-height:1.6; }
+.classroom .prediction { margin-top:12px; padding:12px; border-radius:7px; background:#eef5fb; font-size:16px; }
+.classroom .prediction > div { display:flex; justify-content:space-between; gap:8px; margin:8px 0; }
+.classroom .prediction p { margin-bottom:0; }
+.classroom .gravity-views { display:grid; grid-template-columns:minmax(0,1fr); gap:12px; }
+.classroom .gravity-view { min-width:0; background:#101e2e; color:#b9ccdf; border-radius:8px; overflow:hidden; }
+.classroom .gravity-heading { padding:12px 14px 0; }
+.classroom .gravity-heading p { font-size:14px; margin:0; }
+.classroom .legend-overlay { display:flex; flex-wrap:wrap; gap:12px; padding:6px 14px; font-size:14px; }
+.classroom .legend-overlay span { display:flex; gap:5px; align-items:center; }
+.classroom .legend-overlay i { display:inline-block; width:16px; height:3px; }
+.classroom #gravityCanvas { width:min(100%,660px); height:auto; margin:auto; touch-action:none; cursor:ew-resize; }
+.classroom #graphCanvas { width:min(100%,520px); height:auto; margin:auto; }
+.classroom .canvas-note { margin:0; padding:8px 14px; font-size:14px; }
+.classroom .equation-strip, .classroom .principle-grid, .classroom .challenge-row { display:grid; gap:12px; }
+.classroom .principle-card strong { display:block; }
+.classroom .lesson-notes article > section { margin:0; padding:0; border:0; background:none; }
+.classroom .lesson-notes summary { min-height:48px; display:flex; align-items:center; }
+.classroom .lesson-notes summary::before { content:'▸'; margin-right:10px; }
+.classroom .lesson-notes[open] > summary::before { content:'▾'; }
+.classroom.is-presenting .lesson-stage { height:auto; min-height:calc(100dvh - 16px); }
+.classroom.is-presenting .lesson-toolbar { position:sticky; top:0; z-index:3; background:white; padding:6px 0; }
+.classroom.is-presenting .motion-canvas { flex:none; height:200px; }
+.classroom.is-presenting .lesson-stage > .canvas-box:not(.motion-canvas) { flex:none; height:clamp(280px,48vh,560px); }
+.classroom.large-type .lesson-readout strong { font-size:40px; }
+.classroom.large-type .lesson-controls :is(label,output), .classroom.large-type .lesson-status { font-size:20px; }
+@media(min-width:1300px) { .classroom .gravity-views { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+@media(max-width:600px) { .classroom .mechanics-graphs { grid-template-columns:minmax(0,1fr); } }
+
+.classroom.mechanics-gravity { --cyan:#4dd9ff; --orange:#ffb347; }
+.classroom .lesson-control label:has(input[type=checkbox]) { justify-content:flex-start; }
+.classroom .lesson-control:has(input[type=checkbox]) { min-height:48px; }
+.classroom .mechanics-five-readouts { grid-template-columns:repeat(5,minmax(0,1fr)); }
+.classroom.mechanics-gravity .lesson-readout strong { font-size:clamp(20px,2vw,28px); }
+.classroom.mechanics-gravity.large-type .lesson-readout strong { font-size:36px; }
+@media(max-width:900px) { .classroom .mechanics-five-readouts { grid-template-columns:repeat(3,minmax(0,1fr)); } }
+@media(max-width:600px) { .classroom .mechanics-five-readouts { grid-template-columns:repeat(2,minmax(0,1fr)); } }
+
+@media(max-width:900px) { .classroom.is-presenting .lesson-controls { top:calc(var(--mechanics-toolbar-height, 120px) + 24px); } }

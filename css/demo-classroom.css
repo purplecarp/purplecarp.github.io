@@ -1,0 +1,61 @@
+/* Presentation controls matching the simulation template, without changing physics. */
+.demo-classroom [hidden] { display:none !important; }
+.demo-classroom .demo-toolbar { display:flex; flex-wrap:wrap; gap:7px; align-items:center; margin-bottom:12px; }
+.demo-classroom .demo-toolbar button { min-height:48px; padding:8px 12px; border:1px solid #b8c7d6; border-radius:7px; background:#fff; color:#26384b; font:16px/1.5 system-ui,"Microsoft JhengHei",sans-serif; cursor:pointer; }
+.demo-classroom .demo-toolbar button:hover { background:#e5eff8; }
+.demo-classroom .demo-toolbar button[aria-pressed="true"] { background:#226faa; border-color:#226faa; color:#fff; }
+.demo-classroom :is(button,input,select,summary):focus-visible { outline:3px solid #b86a0d; outline-offset:3px; }
+.demo-classroom .page-header { padding-right:0; }
+.demo-classroom.demo-presenting :is(.header,.top-nav,.page-header,.lesson-notes,.physics-principle,.scale-comparison,.experiment-note,.wave-panel > .info-box) { display:none; }
+.demo-classroom.demo-presenting .main-container { max-width:none; margin:0 auto; padding:8px; }
+.demo-classroom.demo-presenting .demo-toolbar { position:sticky; top:0; z-index:20; background:#edf2f6; padding-bottom:4px; }
+.demo-classroom.demo-presenting :is(.sim-layout-left,.tablet-controls,.demo-parameters) { max-height:calc(100dvh - 80px); overflow:auto; }
+.demo-classroom.demo-large :is(.control-row label,.control-unit label,.toggle-stack label,.control-row select,.control-unit select,.demo-toolbar button,.stage-toolbar h2,.button-group .btn) { font-size:20px; }
+.demo-classroom.demo-large :is(.value-display,.control-unit output) { font-size:26px; }
+.demo-classroom.demo-large :is(.wave-info-value,.stat-value,.tank-readouts strong,.readout-value) { font-size:32px; line-height:1.3; }
+.demo-classroom.demo-large :is(.wave-info-label,.stat-label,.tank-readouts span,.readout-label) { font-size:16px; white-space:normal; }
+.demo-classroom.demo-large .control-row { gap:8px; }
+.demo-classroom.demo-large :is(.sim-layout-left,.tablet-controls,.demo-parameters) { width:360px; min-width:360px; }
+.rope-wave.demo-presenting .canvas-wrapper canvas { max-width:calc((100dvh - 155px) * 1.875); margin:auto; }
+.standing-wave.demo-presenting .canvas-wrapper canvas { max-width:calc((100dvh - 220px) * 1.875); margin:auto; }
+.water-wave-interference.demo-presenting .canvas-wrapper { width:min(100%,calc((100dvh - 165px) * 1.18)); }
+.ripple-tank.demo-presenting #mainCanvas { height:clamp(205px,38dvh,550px); }
+.rutherford-classroom { background:#edf2f6; color:#26384b; }
+.rutherford-classroom .main-container { max-width:1800px; }
+.rutherford-classroom .demo-layout { display:grid; grid-template-columns:minmax(0,1fr) 304px; gap:14px; margin-bottom:18px; align-items:start; }
+.rutherford-classroom.demo-controls-hidden .demo-layout { grid-template-columns:minmax(0,1fr); }
+.rutherford-classroom .demo-visual,.rutherford-classroom .demo-parameters { min-width:0; padding:12px; border:1px solid #d6dee7; border-radius:10px; background:#fff; }
+.rutherford-classroom .control-topline { flex-wrap:wrap; gap:10px; margin-bottom:12px; }
+.rutherford-classroom .control-grid { grid-template-columns:minmax(0,1fr); gap:18px; border:0; padding:0; }
+.rutherford-classroom .control-unit label,.rutherford-classroom .toggle-stack label { font-size:16px; }
+.rutherford-classroom .control-unit select { height:48px; font-size:16px; }
+.rutherford-classroom .control-unit input[type="range"] { min-height:32px; }
+.rutherford-classroom .toggle-stack input { width:22px; height:22px; }
+.rutherford-classroom .action-buttons { flex-wrap:wrap; }
+.rutherford-classroom :is(.action-buttons .btn,.mode-btn) { min-height:48px; font-size:16px; }
+.rutherford-classroom .experiment-stage { grid-template-columns:minmax(0,2.5fr) minmax(0,1fr); gap:10px; margin-bottom:10px; }
+.rutherford-classroom .readout-grid { gap:8px; }
+.rutherford-classroom .readout-label { font-size:14px; white-space:normal; }
+.rutherford-classroom .readout-value { font-size:26px; white-space:normal; overflow-wrap:anywhere; }
+.rutherford-classroom.demo-large .demo-layout { grid-template-columns:minmax(0,1fr) 360px; }
+.rutherford-classroom.demo-large.demo-controls-hidden .demo-layout { grid-template-columns:minmax(0,1fr); }
+@media(min-width:901px) {
+ .rutherford-classroom.demo-presenting .demo-visual { height:calc(100dvh - 80px); display:flex; flex-direction:column; }
+ .rutherford-classroom.demo-presenting .experiment-stage { flex:1; min-height:160px; }
+ .rutherford-classroom.demo-presenting .canvas-card { display:flex; align-items:center; justify-content:center; }
+ .rutherford-classroom.demo-presenting .canvas-card canvas { width:auto; height:auto; max-width:100%; max-height:100%; object-fit:contain; }
+ .rutherford-classroom.demo-presenting .readout-grid { flex-shrink:0; }
+}
+@media(max-width:900px) {
+ .demo-classroom.demo-large :is(.sim-layout-left,.tablet-controls,.demo-parameters) { width:100%; min-width:0; }
+ .demo-classroom.demo-presenting :is(.sim-layout-left,.tablet-controls,.demo-parameters) { position:fixed; right:8px; top:78px; bottom:8px; width:min(360px,calc(100vw - 16px)); min-width:0; max-height:none; z-index:10; background:#fff; box-shadow:0 8px 35px #0005; border-radius:10px; }
+ .rutherford-classroom .demo-layout,.rutherford-classroom.demo-large .demo-layout { grid-template-columns:minmax(0,1fr); }
+ .rutherford-classroom .readout-grid { grid-template-columns:repeat(2,minmax(0,1fr)); }
+}
+@media(max-width:600px) {
+ .rutherford-classroom .experiment-stage { grid-template-columns:minmax(0,1fr); }
+ .rutherford-classroom #histCanvas { max-height:300px; object-fit:contain; }
+ .demo-classroom.demo-large .control-row { grid-template-columns:minmax(0,1fr); }
+ .demo-classroom.demo-large .value-display { grid-column:1; grid-row:auto; text-align:left; }
+ .demo-classroom.demo-large .control-row input[type="range"] { grid-row:auto; }
+}

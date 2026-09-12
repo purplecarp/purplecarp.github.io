@@ -22,23 +22,6 @@ document.addEventListener('DOMContentLoaded', () => {
             if (event.key === 'Escape' && document.body.classList.contains('show-menu')) setMenu(false);
         });
     }
-    const heading = document.querySelector('.page-header');
-    if (document.fullscreenEnabled && heading) {
-        const button = document.createElement('button');
-        button.type = 'button';
-        button.className = 'fullscreen-button';
-        button.textContent = '⛶ 全螢幕';
-        button.addEventListener('click', async () => {
-            try {
-                if (document.fullscreenElement) await document.exitFullscreen();
-                else await document.documentElement.requestFullscreen();
-            } catch { button.textContent = '請使用 F11'; }
-        });
-        document.addEventListener('fullscreenchange', () => {
-            button.textContent = document.fullscreenElement ? '⛶ 離開全螢幕' : '⛶ 全螢幕';
-        });
-        heading.append(button);
-    }
     const tabs = [...document.querySelectorAll('[role="tab"]')];
     function selectTab(selected) {
         (window.waveDemos || []).forEach(demo => demo.pause());

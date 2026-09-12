@@ -10,16 +10,17 @@
     <script defer src="physics.js"></script>
     <script defer src="simulation.js"></script>
 </head>
-<body class="potential-app classroom">
+<body class="potential-app">
     <nav class="ep-nav"><a href="../../index.html"><img src="../../images/fish.png" alt="物鯉魚">物鯉魚教學模擬</a><a href="../../physics-simulations.html">← 返回模擬列表</a></nav>
     <header class="ep-heading"><h1>電位地形：看見電場的坡度</h1><p>選修物理 IV · 電位、等位線與電場疊加</p></header>
     <main class="ep-shell">
         <div class="ep-toolbar" aria-label="演示工具列">
             <strong class="ep-title">電位地形</strong>
-            <button id="modeBtn">詳細說明</button>
+            <button id="modeBtn" aria-pressed="false">課堂演示</button>
+            <button id="panelBtn" aria-expanded="true" aria-controls="controlPanel">參數</button>
             <button id="largeBtn" aria-pressed="false">大字</button>
             <button id="fullBtn">全螢幕</button>
-            <button id="panelBtn" aria-expanded="true" aria-controls="controlPanel">收合控制</button>
+
         </div>
         <div class="ep-lesson">
             <label class="ep-sr" for="preset">教學情境</label>

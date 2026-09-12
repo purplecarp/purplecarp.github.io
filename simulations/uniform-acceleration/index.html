@@ -1,200 +1,130 @@
 <!DOCTYPE html>
+
 <html lang="zh-Hant">
 <head>
-    <meta charset="utf-8">
-    <title>等加速度運動模擬 - 物理模擬</title>
-    <meta content="IE=edge" http-equiv="X-UA-Compatible">
-    <meta content="width=device-width, initial-scale=1" name="viewport">
-    <link href="../../images/fish.png" rel="shortcut icon">
-    
-    <link href="../../css/bootstrap.min.css" rel="stylesheet">
-    <link href="../../css/normalize.css" rel="stylesheet">
-    <link href="../../css/style.css" rel="stylesheet">
-    <link href="../../css/responsive.css" rel="stylesheet">
-    <link href="../../css/simulations.css" rel="stylesheet">
-    
-    <link href='https://fonts.googleapis.com/css?family=Roboto+Slab:400,700' rel='stylesheet' type='text/css'>
-    <link href='https://fonts.googleapis.com/css?family=Roboto:400,300,500,700' rel='stylesheet' type='text/css'>
+<meta charset="utf-8"/>
+<title>等加速度運動模擬 - 物理模擬</title>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<link href="../../images/fish.png" rel="shortcut icon"/>
 
-    <link href="classroom.css" rel="stylesheet">
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
-        onload="renderMathInElement(document.body, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
-</head>
-<body>
-    <!--HEADER -->
-    <div class="header">
-      <div class="for-sticky">
-        <div class="col-md-2 col-xs-6 logo">
-          <a href="../../index.html"><img alt="logo" class="logo-nav" src="../../images/fish.png"></a>
-        </div>
-      </div>
-      <div class="menu-wrap">
-        <nav class="menu">
-          <div class="menu-list">
-            <a href="../../index.html#home"><span>首頁</span></a>
-            <a href="../../index.html#about"><span>關於我</span></a>
-            <a href="../../index.html#experience"><span>教學經驗</span></a>
-            <a href="../../teaching-gallery.html"><span>查看教學剪影</span></a>
-            <a href="../../physics-simulations.html" class="active"><span>高中物理內容</span></a>
-            <a href="../../index.html#skills"><span>專業技能</span></a>
-            <a href="../../index.html#achievements"><span>成果展示</span></a>
-            <a href="../../index.html#philosophy"><span>教育理念</span></a>
-            <a href="../../index.html#contact"><span>聯絡方式</span></a>
-          </div>
-        </nav>
-        <button class="close-button" id="close-button">Close Menu</button>
-      </div>
-      <button class="menu-button" id="open-button">
-        <span></span>
-        <span></span>
-        <span></span>
-      </button>
-    </div>
-    <!--/.HEADER END-->
-    
-    <!-- 頂部導航欄 -->
-    <div class="top-nav">
-        <div class="container">
-            <a href="../../index.html" class="nav-brand">
-                <img src="../../images/fish.png" alt="Logo">
-                <h2>物鯉魚教學模擬</h2>
-            </a>
-            <a href="../../physics-simulations.html" class="btn-back">← 返回列表</a>
-        </div>
-    </div>
-    
-    <!-- 主容器 -->
-    <div class="main-container">
-        <!-- 頁面標題 -->
-        <div class="page-header">
-            <h1>🚀 等加速度運動模擬</h1>
-            <p class="subtitle">控制初速度與加速度，即時觀察 x-t、v-t、a-t 圖 | 選修物理 I - 力學</p>
-        </div>
-        
-        <!-- 模擬與控制面板並排 -->
-        <div class="sim-layout">
-            <!-- 左側模擬區域 + 圖表 -->
-            <div class="sim-layout-right">
-                <div class="simulation-section">
-                    <div class="stage-toolbar">
-                        <h2>運動演示</h2>
-                        <!-- 控制按鈕 -->
-                        <div class="button-group">
-                            <button class="btn btn-start" id="startBtn">▶ 開始模擬</button>
-                            <button class="btn btn-pause" id="pauseBtn">⏸ 暫停</button>
-                            <button class="btn btn-reset" id="resetBtn">🔄 重置</button>
-                        </div>
-                    </div>
-                    <div class="canvas-wrapper">
-                        <canvas id="simCanvas" width="900" height="304"></canvas>
-                    </div>
 
-                    <div class="live-data" role="group" aria-label="即時運動數據">
-                        <div class="data-item"><span>時間 t <small>(s)</small></span><strong id="timeReadout">0.00</strong></div>
-                        <div class="data-item position-data"><span>位置 x <small>(m)</small></span><strong id="positionReadout">0.00</strong></div>
-                        <div class="data-item velocity-data"><span>速度 v <small>(m/s)</small></span><strong id="velocityReadout">5.00</strong></div>
-                        <div class="data-item acceleration-data"><span>加速度 a <small>(m/s²)</small></span><strong id="accelerationReadout">2.00</strong></div>
-                    </div>
-                    <!-- x-t, v-t, a-t 圖 -->
-                    <div class="graphs-container">
-                        <div class="graph-box">
-                            <h5>x-t 圖（位置-時間）</h5>
-                            <canvas id="xtCanvas" width="280" height="200"></canvas>
-                        </div>
-                        <div class="graph-box">
-                            <h5>v-t 圖（速度-時間）</h5>
-                            <canvas id="vtCanvas" width="280" height="200"></canvas>
-                        </div>
-                        <div class="graph-box">
-                            <h5>a-t 圖（加速度-時間）</h5>
-                            <canvas id="atCanvas" width="280" height="200"></canvas>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <!-- 右側控制面板 -->
-            <div class="sim-layout-left">
-                <div class="controls">
-                    <div class="control-section">
-                        <h3>⚙️ 運動參數</h3>
-                        
-                        <div class="control-row">
-                            <label for="v0Slider">初速度 v₀ (m/s)</label>
-                            <input type="range" id="v0Slider" min="-20" max="20" step="0.5" value="5">
-                            <span class="value-display" id="v0Value">5.0</span>
-                        </div>
-                        
-                        <div class="control-row">
-                            <label for="aSlider">加速度 a (m/s²)</label>
-                            <input type="range" id="aSlider" min="-10" max="10" step="0.5" value="2">
-                            <span class="value-display" id="aValue">2.0</span>
-                        </div>
 
-                        <div class="control-row">
-                            <label for="maxTimeSlider">模擬時間 (s)</label>
-                            <input type="range" id="maxTimeSlider" min="5" max="30" step="1" value="10">
-                            <span class="value-display" id="maxTimeValue">10</span>
-                        </div>
 
-                        <div class="control-row">
-                            <label for="speedSlider">播放速度</label>
-                            <input type="range" id="speedSlider" min="0.25" max="3" step="0.25" value="1">
-                            <span class="value-display" id="speedValue">1.0x</span>
-                        </div>
 
-                        <div class="control-row control-options">
-                            <label>座標軸視角</label>
-                            <div class="view-toggle">
-                                <button id="viewFixed" class="active">📌 固定視角</button>
-                                <button id="viewFollow">🎯 跟隨視角</button>
-                            </div>
-                        </div>
 
-                        <div class="control-row control-options">
-                            <label>🎬 預設模式</label>
-                            <div class="preset-group">
-                                <button class="preset-btn" id="preset1">① 減速再反向：v₀=10, a=−2</button>
-                                <button class="preset-btn" id="preset2">② 反向加速：v₀=−10, a=2</button>
-                                <button class="preset-btn" id="preset3">③ 先加速後減速：v₀=0, a=5→−5</button>
-                                <button class="preset-btn" id="preset4">④ 三階段：a=5→0~5s, −5→5~15s, 5→15~20s</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="lesson-notes">
-            <!-- 物理原理說明 -->
-            <details class="info-box physics-principle">
-                <summary>📚 物理原理與公式</summary>
-                <p>
-                    • <strong>等加速度運動：</strong>物體在固定加速度下的運動，速度隨時間均勻變化<br>
-                    • <strong>位移公式：</strong>$x(t) = x_0 + v_0 t + \dfrac{1}{2}at^2$<br>
-                    • <strong>速度公式：</strong>$v(t) = v_0 + at$<br>
-                    • <strong>加速度：</strong>$a =$ 常數<br>
+
+<link href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" rel="stylesheet"/>
+<script defer="" src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer="" onload="renderMathInElement(document.body, {delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});" src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+
+<link href="../../css/simulations.css" rel="stylesheet"/><link href="../../css/classroom.css" rel="stylesheet"/><link href="../../css/mechanics-tablet.css" rel="stylesheet"/><script defer="True" src="../../js/mechanics-layout.js"></script></head>
+<body class="classroom mechanics-uniform">
+<!--HEADER -->
+<nav aria-label="網站導覽" class="lesson-nav"><a class="lesson-brand" href="../../index.html"><img alt="" src="../../images/fish.png"/>物鯉魚教學模擬</a><a href="../../physics-simulations.html">← 返回模擬列表</a></nav>
+<!-- 主容器 -->
+<main>
+<!-- 頁面標題 -->
+<header class="lesson-heading">
+<h1>等加速度運動</h1>
+<p class="subtitle">控制初速度與加速度，即時觀察 x-t、v-t、a-t 圖 | 選修物理 I - 力學</p>
+</header>
+<!-- 模擬與控制面板並排 -->
+<div class="lesson-grid">
+<!-- 左側模擬區域 + 圖表 -->
+<section class="lesson-panel lesson-stage simulation-section">
+<div class="lesson-toolbar"><button class="primary" id="startBtn">▶ 播放</button><button id="pauseBtn">⏸ 暫停</button><button id="resetBtn">↻ 重播</button></div>
+<div class="canvas-box motion-canvas">
+<canvas height="304" id="simCanvas" width="900"></canvas>
+</div>
+<div aria-label="即時運動數據" class="lesson-readouts" role="group">
+<div class="lesson-readout"><span>時間 t <small>(s)</small></span><strong id="timeReadout">0.00</strong></div>
+<div class="lesson-readout"><span>位置 x <small>(m)</small></span><strong id="positionReadout">0.00</strong></div>
+<div class="lesson-readout"><span>速度 v <small>(m/s)</small></span><strong id="velocityReadout">5.00</strong></div>
+<div class="lesson-readout"><span>加速度 a <small>(m/s²)</small></span><strong id="accelerationReadout">2.00</strong></div>
+</div>
+<!-- x-t, v-t, a-t 圖 -->
+<div class="mechanics-graphs">
+<div class="mechanics-chart">
+<h3>x-t 圖（位置-時間）</h3>
+<div class="comparison-canvas-box"><canvas height="200" id="xtCanvas" width="280"></canvas></div>
+</div>
+<div class="mechanics-chart">
+<h3>v-t 圖（速度-時間）</h3>
+<div class="comparison-canvas-box"><canvas height="200" id="vtCanvas" width="280"></canvas></div>
+</div>
+<div class="mechanics-chart">
+<h3>a-t 圖（加速度-時間）</h3>
+<div class="comparison-canvas-box"><canvas height="200" id="atCanvas" width="280"></canvas></div>
+</div>
+</div>
+</section>
+<!-- 右側控制面板 -->
+<aside class="lesson-panel lesson-controls" id="controls">
+<div class="control-section">
+<h2>實驗設定</h2>
+<div class="lesson-control">
+<label for="v0Slider">初速度 v₀ (m/s)<output id="v0Value">5.0</output></label>
+<input id="v0Slider" max="20" min="-20" step="0.5" type="range" value="5"/>
+
+</div>
+<div class="lesson-control">
+<label for="aSlider">加速度 a (m/s²)<output id="aValue">2.0</output></label>
+<input id="aSlider" max="10" min="-10" step="0.5" type="range" value="2"/>
+
+</div>
+<div class="lesson-control">
+<label for="maxTimeSlider">模擬時間 (s)<output id="maxTimeValue">10</output></label>
+<input id="maxTimeSlider" max="30" min="5" step="1" type="range" value="10"/>
+
+</div>
+<div class="lesson-control">
+<label for="speedSlider">播放速度<output id="speedValue">1.0x</output></label>
+<input id="speedSlider" max="3" min="0.25" step="0.25" type="range" value="1"/>
+
+</div>
+<div class="lesson-control">
+<label>座標軸視角</label>
+<div class="view-toggle">
+<button class="active" id="viewFixed">📌 固定視角</button>
+<button id="viewFollow">🎯 跟隨視角</button>
+</div>
+</div>
+<div class="lesson-control">
+<label>🎬 預設模式</label>
+<div class="lesson-presets">
+<button class="preset-btn" id="preset1">① 減速再反向：v₀=10, a=−2</button>
+<button class="preset-btn" id="preset2">② 反向加速：v₀=−10, a=2</button>
+<button class="preset-btn" id="preset3">③ 先加速後減速：v₀=0, a=5→−5</button>
+<button class="preset-btn" id="preset4">④ 三階段：a=5→0~5s, −5→5~15s, 5→15~20s</button>
+</div>
+</div>
+</div>
+</aside>
+</div>
+<details class="lesson-panel lesson-notes"><summary>詳細說明與物理原理</summary><article><section>
+<h2>📚 物理原理與公式</h2>
+<p>
+                    • <strong>等加速度運動：</strong>物體在固定加速度下的運動，速度隨時間均勻變化<br/>
+                    • <strong>位移公式：</strong>$x(t) = x_0 + v_0 t + \dfrac{1}{2}at^2$<br/>
+                    • <strong>速度公式：</strong>$v(t) = v_0 + at$<br/>
+                    • <strong>加速度：</strong>$a =$ 常數<br/>
                     • <strong>圖形特徵：</strong>x-t 圖為拋物線、v-t 圖為直線、a-t 圖為水平線
                 </p>
-            </details>
-            <!-- 教學指引 -->
-            <details class="info-box teaching-note">
-                <summary>💡 教學使用指引</summary>
-                <p>
-                    • <strong>觀察重點 1：</strong>調整初速度為正、加速度為負，觀察物體先前進再後退的運動（減速→靜止→反向加速）<br>
-                    • <strong>觀察重點 2：</strong>觀察 v-t 圖的斜率即為加速度，v-t 圖下方面積即為位移<br>
-                    • <strong>視角切換：</strong>「固定視角」可觀察物體在全域的位移變化；「跟隨視角」讓畫面隨物體移動，方便觀察物體附近的相對運動<br>
-                    • <strong>思考問題：</strong>當 v₀ 與 a 方向相反時，物體何時速度為零？x-t 圖的極值出現在何處？<br>
+</section></article><article><section>
+<h2>💡 教學使用指引</h2>
+<p>
+                    • <strong>觀察重點 1：</strong>調整初速度為正、加速度為負，觀察物體先前進再後退的運動（減速→靜止→反向加速）<br/>
+                    • <strong>觀察重點 2：</strong>觀察 v-t 圖的斜率即為加速度，v-t 圖下方面積即為位移<br/>
+                    • <strong>視角切換：</strong>「固定視角」可觀察物體在全域的位移變化；「跟隨視角」讓畫面隨物體移動，方便觀察物體附近的相對運動<br/>
+                    • <strong>思考問題：</strong>當 v₀ 與 a 方向相反時，物體何時速度為零？x-t 圖的極值出現在何處？<br/>
                     • <strong>延伸應用：</strong>自由落體即為 v₀ = 0、a = 9.8 m/s² 的等加速度運動
                 </p>
-            </details>
-        </div>
-    </div>
-
-    <!-- JavaScript 模擬程式碼 -->
-    <script>
+</section></article></details>
+</main>
+<!-- JavaScript 模擬程式碼 -->
+<script>
     class UniformAccelerationSim {
         constructor() {
             this.simCanvas = document.getElementById('simCanvas');
@@ -834,22 +764,6 @@
     // 初始化
     const sim = new UniformAccelerationSim();
 
-    // 側邊欄選單
-    (function() {
-        var openBtn = document.getElementById('open-button');
-        var closeBtn = document.getElementById('close-button');
-        var menuWrap = document.querySelector('.menu-wrap');
-        if (openBtn && closeBtn && menuWrap) {
-            openBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                menuWrap.classList.add('active');
-            });
-            closeBtn.addEventListener('click', function(e) {
-                e.preventDefault();
-                menuWrap.classList.remove('active');
-            });
-        }
-    })();
     </script>
 </body>
 </html>

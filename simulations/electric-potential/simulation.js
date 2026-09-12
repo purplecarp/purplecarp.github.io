@@ -106,12 +106,12 @@ class PotentialSimulation {
     bind() {
         $('preset').onchange=e=>this.setPreset(e.target.value);
         $('revealBtn').onclick=()=>{ const show=$('conclusion').hidden;$('conclusion').hidden=!show;$('revealBtn').textContent=show?'收起結論':'揭示結論';$('revealBtn').setAttribute('aria-expanded',String(show)); };
-        $('modeBtn').onclick=()=>{const classroom=document.body.classList.toggle('classroom');$('modeBtn').textContent=classroom?'詳細說明':'課堂演示';};
+        $('modeBtn').onclick=()=>{const classroom=document.body.classList.toggle('classroom');$('modeBtn').textContent=classroom?'詳細說明':'課堂演示';$('modeBtn').setAttribute('aria-pressed',String(classroom));};
         $('largeBtn').onclick=()=>{const large=document.body.classList.toggle('large');$('largeBtn').setAttribute('aria-pressed',String(large));this.invalidate();};
         $('panelBtn').onclick=()=>this.togglePanel($('controlPanel').hidden);
         $('fullBtn').onclick=async()=>{
             try { if(document.fullscreenElement) await document.exitFullscreen();
-                else if(document.documentElement.requestFullscreen) {document.body.classList.add('classroom');$('modeBtn').textContent='詳細說明';await document.documentElement.requestFullscreen();}
+                else if(document.documentElement.requestFullscreen) {document.body.classList.add('classroom');$('modeBtn').textContent='詳細說明';$('modeBtn').setAttribute('aria-pressed','true');await document.documentElement.requestFullscreen();}
                 else this.notify('此瀏覽器不支援全螢幕，仍可使用課堂演示模式。');
             } catch {this.notify('無法進入全螢幕，仍可使用課堂演示模式。');}
         };
@@ -162,7 +162,7 @@ class PotentialSimulation {
         const description=s=>s.length?s.map(o=>`${o.type==='point'?'q':'σ'}=${o.value} ${o.type==='point'?'nC':'nC/m²'} @ (${o.x}, ${o.y}, ${o.z}) m${o.type==='sheet'?`，法向 ${o.angle}° / ${o.tilt}°`:''}`).join('；'):'空配置';
         $('compareInfo').textContent=`目前 ${this.showingA?'A':'B'}。A：${description(this.comparison.a)}。B：${description(this.comparison.b)}。共用相同尺度與切面。`;
     }
-    togglePanel(open) {$('controlPanel').hidden=!open;document.body.classList.toggle('panel-hidden',!open);$('panelBtn').textContent=open?'收合控制':'開啟控制';$('panelBtn').setAttribute('aria-expanded',String(open));}
+    togglePanel(open) {$('controlPanel').hidden=!open;document.body.classList.toggle('panel-hidden',!open);$('panelBtn').textContent='參數';$('panelBtn').setAttribute('aria-expanded',String(open));}
     setView(view) {
         this.view=view;this.drag=null;
         ['terrain','map'].forEach(v=>{const b=$(v+'Btn');b.classList.toggle('active',v===view);b.setAttribute('aria-pressed',String(v===view));});

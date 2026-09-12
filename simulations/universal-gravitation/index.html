@@ -1,508 +1,130 @@
 <!DOCTYPE html>
+
 <html lang="zh-Hant">
 <head>
-    <meta charset="utf-8">
-    <title>萬有引力與重力加速度 - 物理模擬</title>
-    <meta content="IE=edge" http-equiv="X-UA-Compatible">
-    <meta content="width=device-width, initial-scale=1" name="viewport">
-    <meta name="description" content="互動式萬有引力模擬，視覺化物體所受重力、重力加速度與距離地心的反平方關係。">
-    <link href="../../images/fish.png" rel="shortcut icon">
+<meta charset="utf-8"/>
+<title>萬有引力與重力加速度 - 物理模擬</title>
+<meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+<meta content="width=device-width, initial-scale=1" name="viewport"/>
+<meta content="互動式萬有引力模擬，視覺化物體所受重力、重力加速度與距離地心的反平方關係。" name="description"/>
+<link href="../../images/fish.png" rel="shortcut icon"/>
 
-    <link href="../../css/bootstrap.min.css" rel="stylesheet">
-    <link href="../../css/normalize.css" rel="stylesheet">
-    <link href="../../css/style.css" rel="stylesheet">
-    <link href="../../css/responsive.css" rel="stylesheet">
-    <link href="../../css/simulations.css" rel="stylesheet">
 
-    <link href="https://fonts.googleapis.com/css?family=Roboto+Slab:400,700" rel="stylesheet" type="text/css">
-    <link href="https://fonts.googleapis.com/css?family=Roboto:400,300,500,700" rel="stylesheet" type="text/css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
-    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"
-        onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});"></script>
 
-    <style>
-        :root {
-            --space: #07111f;
-            --space-2: #0d2037;
-            --ink: #263849;
-            --muted: #6c7a89;
-            --cyan: #4dd9ff;
-            --orange: #ffb347;
-            --green: #56d98b;
-            --purple: #a990ff;
-            --line: #dfe7ef;
-        }
 
-        .page-header { margin-bottom: 24px; }
 
-        .page-header .course-tag {
-            display: inline-block;
-            margin-top: 10px;
-            padding: 5px 13px;
-            border-radius: 999px;
-            background: #e8f3ff;
-            color: #2471a3;
-            font-size: 13px;
-            font-weight: 700;
-            letter-spacing: .04em;
-        }
 
-        .principle-grid {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 12px;
-            margin-top: 14px;
-        }
 
-        .principle-card {
-            padding: 12px 14px;
-            border: 1px solid #d6e4ef;
-            border-radius: 9px;
-            background: rgba(255, 255, 255, .72);
-        }
+<link href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css" rel="stylesheet"/>
+<script defer="" src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer="" onload="renderMathInElement(document.body,{delimiters:[{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}]});" src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
 
-        .principle-card strong {
-            display: block;
-            margin-bottom: 5px;
-            color: #2d5273;
-            font-size: 13px;
-        }
 
-        .principle-card span {
-            color: #586b7b;
-            font-size: 13px;
-            line-height: 1.55;
-        }
+<link href="../../css/simulations.css" rel="stylesheet"/><link href="../../css/classroom.css" rel="stylesheet"/><link href="../../css/mechanics-tablet.css" rel="stylesheet"/><script defer="True" src="../../js/mechanics-layout.js"></script></head>
+<body class="classroom mechanics-gravity">
+<nav aria-label="網站導覽" class="lesson-nav"><a class="lesson-brand" href="../../index.html"><img alt="" src="../../images/fish.png"/>物鯉魚教學模擬</a><a href="../../physics-simulations.html">← 返回模擬列表</a></nav>
+<main>
+<header class="lesson-heading">
+<h1>萬有引力與重力加速度</h1>
+<p class="subtitle">拖曳物體離開地球，觀察重力如何隨距離快速減弱</p>
 
-        .control-deck {
-            margin-bottom: 14px;
-            padding: 14px;
-            border: 1px solid var(--line);
-            border-radius: 12px;
-            background: #fff;
-            box-shadow: 0 7px 24px rgba(27, 43, 65, .08);
-        }
+</header><div class="lesson-grid"><section aria-label="萬有引力演示" class="lesson-panel lesson-stage"><div class="lesson-toolbar"><button class="primary" id="startBtn">▶ 自動掃描</button><button id="pauseBtn">⏸ 暫停</button><button id="resetBtn">↻ 重播</button></div><section class="gravity-views">
+<div class="gravity-view">
+<header class="gravity-heading">
+<h3>空間視圖</h3>
+<p id="dragHint">拖曳物體或距離尺，改變距地心距離</p>
+</header>
+<div aria-hidden="true" class="legend-overlay">
+<span><i style="background:var(--cyan)"></i>重力加速度 g</span>
+<span><i style="background:var(--orange)"></i>萬有引力 F</span>
+</div>
+<canvas aria-label="地球、物體、距地心距離與指向地心的重力向量" height="460" id="gravityCanvas" role="img" width="660"></canvas>
+<p class="canvas-note">箭頭長度採平方根比例；標示數值為真實計算值。</p>
+</div>
+<div class="gravity-view">
+<header class="gravity-heading">
+<h3>關係圖</h3>
+<p>兩條曲線皆呈 1/r² 下降</p>
+</header>
+<div aria-hidden="true" class="legend-overlay">
+<span><i style="background:var(--cyan)"></i>g–r</span>
+<span><i style="background:var(--orange)"></i>F–r</span>
+</div>
+<canvas aria-label="重力加速度及萬有引力對距地心距離的反平方曲線" height="460" id="graphCanvas" role="img" width="520"></canvas>
+</div>
+</section><div class="lesson-readouts mechanics-five-readouts">
+<div class="lesson-readout"><span class="readout-label">距地心 r</span><strong class="readout-value" id="radiusReadout">12,742 km</strong></div>
+<div class="lesson-readout"><span class="readout-label">離地高度 h</span><strong class="readout-value" id="heightReadout">6,371 km</strong></div>
+<div class="lesson-readout"><span class="readout-label">重力加速度 g</span><strong class="readout-value" id="gravityReadout">2.46 m/s²</strong></div>
+<div class="lesson-readout"><span class="readout-label">萬有引力 F</span><strong class="readout-value" id="forceReadout">196 N</strong></div>
+<div class="lesson-readout"><span class="readout-label">相對地表值</span><strong class="readout-value" id="ratioReadout">25.0%</strong></div>
+</div></section><aside aria-label="模擬控制面板" class="lesson-panel lesson-controls" id="controls">
+<h2>實驗設定</h2>
 
-        .control-topline {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 12px;
-            margin-bottom: 12px;
-        }
+<div class="lesson-control">
+<label for="distanceSlider"><span>距地心 r</span><output id="distanceOutput">2.00 Rₑ</output></label>
+<input aria-describedby="dragHint" id="distanceSlider" max="8" min="1" step="0.01" type="range" value="2"/>
+</div>
+<div class="lesson-control">
+<label for="massSlider"><span>物體質量 m</span><output id="massOutput">80 kg</output></label>
+<input id="massSlider" max="500" min="10" step="1" type="range" value="80"/>
+</div>
+<div aria-label="距離快速選擇" class="lesson-presets">
+<button class="preset-btn" data-distance="1">地表 Rₑ</button>
+<button class="preset-btn active" data-distance="2">2 Rₑ</button>
+<button class="preset-btn" data-distance="4">4 Rₑ</button>
+<button class="preset-btn" data-distance="8">8 Rₑ</button>
+</div>
 
-        .control-topline h2 {
-            margin: 0;
-            color: var(--ink);
-            font-family: 'Roboto Slab', serif;
-            font-size: 17px;
-        }
 
-        .action-buttons { display: flex; gap: 6px; }
+</aside></div>
 
-        .action-buttons .btn {
-            min-width: 92px;
-            min-height: 36px;
-            padding: 7px 12px;
-            border: 0;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: none;
-        }
 
-        .action-buttons .btn:disabled { opacity: .48; cursor: not-allowed; }
 
-        .control-grid {
-            display: grid;
-            grid-template-columns: minmax(220px, 1.35fr) minmax(220px, 1fr) auto;
-            align-items: end;
-            gap: 14px;
-            padding-top: 12px;
-            border-top: 1px solid #edf0f3;
-        }
 
-        .control-unit { min-width: 0; }
 
-        .control-unit label {
-            display: flex;
-            justify-content: space-between;
-            gap: 8px;
-            margin-bottom: 5px;
-            color: #4d5c6b;
-            font-size: 12px;
-            font-weight: 700;
-        }
-
-        .control-unit output {
-            color: #2471a3;
-            font-variant-numeric: tabular-nums;
-        }
-
-        .control-unit input[type="range"] {
-            width: 100%;
-            accent-color: #3498db;
-        }
-
-        .preset-group { display: flex; gap: 6px; }
-
-        .preset-btn {
-            padding: 6px 11px;
-            border: 1px solid #cbd8e5;
-            border-radius: 999px;
-            background: #f6f9fc;
-            color: #42617c;
-            font-size: 12px;
-            font-weight: 700;
-            cursor: pointer;
-        }
-
-        .preset-btn:hover,
-        .preset-btn.active {
-            border-color: #3498db;
-            background: #eaf5ff;
-            color: #1d6fa5;
-        }
-
-        .readout-grid {
-            display: grid;
-            grid-template-columns: repeat(5, minmax(0, 1fr));
-            gap: 8px;
-            margin-top: 12px;
-        }
-
-        .readout {
-            min-width: 0;
-            padding: 9px 11px;
-            border-left: 3px solid #8ca6c1;
-            border-radius: 6px;
-            background: #f5f8fb;
-        }
-
-        .readout:nth-child(2) { border-color: var(--purple); }
-        .readout:nth-child(3) { border-color: var(--cyan); }
-        .readout:nth-child(4) { border-color: var(--orange); }
-        .readout:nth-child(5) { border-color: var(--green); }
-
-        .readout-label {
-            display: block;
-            color: #798796;
-            font-size: 10px;
-            white-space: nowrap;
-        }
-
-        .readout-value {
-            display: block;
-            overflow: hidden;
-            margin-top: 2px;
-            color: var(--ink);
-            font-size: 16px;
-            font-weight: 700;
-            font-variant-numeric: tabular-nums;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
-        .experiment-stage {
-            display: grid;
-            grid-template-columns: minmax(0, 1.28fr) minmax(390px, 1fr);
-            gap: 14px;
-            margin-bottom: 24px;
-        }
-
-        .canvas-card {
-            position: relative;
-            min-width: 0;
-            overflow: hidden;
-            border-radius: 12px;
-            background: var(--space);
-            box-shadow: 0 10px 30px rgba(5, 16, 31, .18);
-        }
-
-        .canvas-card header {
-            position: absolute;
-            z-index: 2;
-            top: 12px;
-            left: 15px;
-            pointer-events: none;
-        }
-
-        .canvas-card header h3 {
-            margin: 0;
-            color: #edf7ff;
-            font-size: 13px;
-            font-weight: 700;
-        }
-
-        .canvas-card header p {
-            margin: 3px 0 0;
-            color: rgba(220, 235, 248, .62);
-            font-size: 10px;
-        }
-
-        .canvas-card canvas {
-            display: block;
-            width: 100%;
-            height: auto;
-            background: linear-gradient(135deg, var(--space), var(--space-2));
-        }
-
-        #gravityCanvas { cursor: ew-resize; touch-action: none; }
-
-        .legend-overlay {
-            position: absolute;
-            z-index: 2;
-            right: 12px;
-            top: 12px;
-            display: flex;
-            gap: 10px;
-            color: #dceaf5;
-            font-size: 10px;
-            pointer-events: none;
-        }
-
-        .legend-overlay span { display: flex; align-items: center; gap: 4px; }
-        .legend-overlay i { width: 15px; height: 3px; border-radius: 2px; }
-
-        .equation-strip {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 10px;
-            margin: 0 0 24px;
-        }
-
-        .equation-card {
-            padding: 13px 15px;
-            border: 1px solid var(--line);
-            border-radius: 9px;
-            background: #fff;
-            box-shadow: 0 4px 15px rgba(27, 43, 65, .06);
-        }
-
-        .equation-card small {
-            display: block;
-            margin-bottom: 5px;
-            color: #7a8794;
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: .06em;
-        }
-
-        .equation-main {
-            color: #294b68;
-            font-size: 16px;
-            font-weight: 700;
-        }
-
-        .equation-detail {
-            margin-top: 4px;
-            color: #697b8c;
-            font-size: 11px;
-            line-height: 1.5;
-        }
-
-        .challenge-row {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 10px;
-            margin-top: 13px;
-        }
-
-        .challenge {
-            padding: 10px 12px;
-            border: 1px solid #f2dfad;
-            border-radius: 8px;
-            background: #fffdf7;
-            color: #6e613d;
-            font-size: 12px;
-            line-height: 1.55;
-        }
-
-        .challenge strong { color: #8b6416; }
-
-        @media (max-width: 1050px) {
-            .experiment-stage { grid-template-columns: 1fr; }
-            .control-grid { grid-template-columns: 1fr 1fr; }
-            .preset-group { grid-column: 1 / -1; }
-        }
-
-        @media (max-width: 768px) {
-            body { overflow-x: hidden; }
-            .top-nav .container-nav { gap: 8px; }
-            .nav-brand { min-width: 0; gap: 8px; }
-            .nav-brand img { width: 34px; height: 34px; }
-            .nav-brand h2 { overflow: hidden; font-size: 18px; text-overflow: ellipsis; white-space: nowrap; }
-            .btn-back { flex-shrink: 0; padding: 8px 10px; font-size: 11px; white-space: nowrap; }
-            .page-header h1 { overflow-wrap: anywhere; }
-            .principle-grid,
-            .equation-strip,
-            .challenge-row { grid-template-columns: 1fr; }
-
-            .control-topline { align-items: flex-start; flex-direction: column; }
-            .action-buttons { width: 100%; }
-            .action-buttons .btn { flex: 1; min-width: 0; }
-            .control-grid { grid-template-columns: 1fr; }
-            .preset-group { grid-column: auto; flex-wrap: wrap; }
-            .readout-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-            .readout:last-child { grid-column: 1 / -1; }
-            .readout-value { font-size: 14px; }
-            .experiment-stage { grid-template-columns: minmax(0, 1fr); }
-            .canvas-card { max-width: 100%; }
-            .legend-overlay { top: 12px; right: 10px; bottom: auto; gap: 7px; }
-        }
-    </style>
-</head>
-<body>
-    <div class="header">
-        <div class="for-sticky">
-            <div class="col-md-2 col-xs-6 logo">
-                <a href="../../index.html"><img alt="logo" class="logo-nav" src="../../images/fish.png"></a>
-            </div>
-        </div>
-        <div class="menu-wrap">
-            <nav class="menu">
-                <div class="menu-list">
-                    <a href="../../index.html#home"><span>首頁</span></a>
-                    <a href="../../index.html#about"><span>關於我</span></a>
-                    <a href="../../index.html#experience"><span>教學經驗</span></a>
-                    <a href="../../teaching-gallery.html"><span>查看教學剪影</span></a>
-                    <a href="../../physics-simulations.html" class="active"><span>高中物理內容</span></a>
-                    <a href="../../index.html#skills"><span>專業技能</span></a>
-                    <a href="../../index.html#achievements"><span>成果展示</span></a>
-                    <a href="../../index.html#philosophy"><span>教育理念</span></a>
-                    <a href="../../index.html#contact"><span>聯絡方式</span></a>
-                </div>
-            </nav>
-            <button class="close-button" id="close-button">Close Menu</button>
-        </div>
-        <button class="menu-button" id="open-button"><span></span><span></span><span></span></button>
-    </div>
-
-    <div class="top-nav">
-        <div class="container-nav">
-            <a href="../../index.html" class="nav-brand">
-                <img src="../../images/fish.png" alt="Logo">
-                <h2>物鯉魚教學模擬</h2>
-            </a>
-            <a href="../../physics-simulations.html" class="btn-back">← 返回列表</a>
-        </div>
-    </div>
-
-    <main class="main-container">
-        <div class="page-header">
-            <h1>🌍 萬有引力與重力加速度</h1>
-            <p class="subtitle">拖曳物體離開地球，觀察重力如何隨距離快速減弱</p>
-            <span class="course-tag">選修物理一 · 萬有引力</span>
-        </div>
-
-        <section class="info-box physics-principle">
-            <h4>📚 從萬有引力到重力加速度</h4>
-            <div class="principle-grid">
-                <div class="principle-card">
-                    <strong>萬有引力</strong>
-                    <span>地球與物體互相吸引，力的大小為 $F=\dfrac{GMm}{r^2}$。</span>
-                </div>
-                <div class="principle-card">
-                    <strong>重力加速度</strong>
-                    <span>由 $F=mg$ 得 $g=\dfrac{GM}{r^2}$，與受力物體質量 $m$ 無關。</span>
-                </div>
-                <div class="principle-card">
-                    <strong>反平方關係</strong>
-                    <span>距地心變為 $n$ 倍時，$F$ 與 $g$ 都變為原本的 $1/n^2$。</span>
-                </div>
-            </div>
-        </section>
-
-        <section class="control-deck" aria-label="模擬控制面板">
-            <div class="control-topline">
-                <h2>調整觀測條件</h2>
-                <div class="action-buttons">
-                    <button class="btn btn-start" id="startBtn">▶ 自動掃描</button>
-                    <button class="btn btn-pause" id="pauseBtn" disabled>⏸ 暫停</button>
-                    <button class="btn btn-reset" id="resetBtn">↺ 重置</button>
-                </div>
-            </div>
-            <div class="control-grid">
-                <div class="control-unit">
-                    <label for="distanceSlider"><span>距地心 $r$</span><output id="distanceOutput">2.00 Rₑ</output></label>
-                    <input id="distanceSlider" type="range" min="1" max="8" step="0.01" value="2" aria-describedby="dragHint">
-                </div>
-                <div class="control-unit">
-                    <label for="massSlider"><span>物體質量 $m$</span><output id="massOutput">80 kg</output></label>
-                    <input id="massSlider" type="range" min="10" max="500" step="1" value="80">
-                </div>
-                <div class="preset-group" aria-label="距離快速選擇">
-                    <button class="preset-btn" data-distance="1">地表 Rₑ</button>
-                    <button class="preset-btn active" data-distance="2">2 Rₑ</button>
-                    <button class="preset-btn" data-distance="4">4 Rₑ</button>
-                    <button class="preset-btn" data-distance="8">8 Rₑ</button>
-                </div>
-            </div>
-            <div class="readout-grid" aria-live="polite">
-                <div class="readout"><span class="readout-label">距地心 r</span><span class="readout-value" id="radiusReadout">12,742 km</span></div>
-                <div class="readout"><span class="readout-label">離地高度 h</span><span class="readout-value" id="heightReadout">6,371 km</span></div>
-                <div class="readout"><span class="readout-label">重力加速度 g</span><span class="readout-value" id="gravityReadout">2.46 m/s²</span></div>
-                <div class="readout"><span class="readout-label">萬有引力 F</span><span class="readout-value" id="forceReadout">196 N</span></div>
-                <div class="readout"><span class="readout-label">相對地表值</span><span class="readout-value" id="ratioReadout">25.0%</span></div>
-            </div>
-        </section>
-
-        <section class="experiment-stage">
-            <div class="canvas-card">
-                <header>
-                    <h3>空間視圖</h3>
-                    <p id="dragHint">拖曳物體或距離尺，改變距地心距離</p>
-                </header>
-                <div class="legend-overlay" aria-hidden="true">
-                    <span><i style="background:var(--cyan)"></i>重力加速度 g</span>
-                    <span><i style="background:var(--orange)"></i>萬有引力 F</span>
-                </div>
-                <canvas id="gravityCanvas" width="660" height="460" role="img" aria-label="地球、物體、距地心距離與指向地心的重力向量"></canvas>
-            </div>
-            <div class="canvas-card">
-                <header>
-                    <h3>關係圖</h3>
-                    <p>兩條曲線皆呈 1/r² 下降</p>
-                </header>
-                <div class="legend-overlay" aria-hidden="true">
-                    <span><i style="background:var(--cyan)"></i>g–r</span>
-                    <span><i style="background:var(--orange)"></i>F–r</span>
-                </div>
-                <canvas id="graphCanvas" width="520" height="460" role="img" aria-label="重力加速度及萬有引力對距地心距離的反平方曲線"></canvas>
-            </div>
-        </section>
-
-        <section class="equation-strip" aria-label="目前數值代入公式">
-            <div class="equation-card">
-                <small>固定常數</small>
-                <div class="equation-main">$M_E=5.972\times10^{24}\ \mathrm{kg}$</div>
-                <div class="equation-detail">$R_E=6371\ \mathrm{km}$，$G=6.6743\times10^{-11}\ \mathrm{N\,m^2/kg^2}$</div>
-            </div>
-            <div class="equation-card">
-                <small>目前重力加速度</small>
-                <div class="equation-main" id="gravityEquation">g = GMₑ/r² = 2.46 m/s²</div>
-                <div class="equation-detail">物體質量改變時，這個數值不會改變。</div>
-            </div>
-            <div class="equation-card">
-                <small>目前所受重力</small>
-                <div class="equation-main" id="forceEquation">F = mg = 196 N</div>
-                <div class="equation-detail">相同位置下，物體質量加倍，重力也加倍。</div>
-            </div>
-        </section>
-
-        <section class="info-box teaching-note">
-            <h4>💡 觀察任務</h4>
-            <p>先固定物體質量，依序比較 $r=R_E$、$2R_E$、$4R_E$；再固定距離並改變質量，分辨「重力」與「重力加速度」的不同。</p>
-            <div class="challenge-row">
-                <div class="challenge"><strong>任務 1</strong><br>距離變成 2 倍時，$g$ 與 $F$ 是原來的幾倍？</div>
-                <div class="challenge"><strong>任務 2</strong><br>質量由 80 kg 變成 160 kg，哪一個量不會改變？</div>
-                <div class="challenge"><strong>想一想</strong><br>太空人離開地表後，真的會「沒有重力」嗎？</div>
-            </div>
-        </section>
-    </main>
-
-    <script>
+<details class="lesson-panel lesson-notes"><summary>詳細說明與物理原理</summary><article><section aria-label="目前數值代入公式" class="equation-strip">
+<div class="equation-card">
+<small>固定常數</small>
+<div class="equation-main">$M_E=5.972\times10^{24}\ \mathrm{kg}$</div>
+<div class="equation-detail">$R_E=6371\ \mathrm{km}$，$G=6.6743\times10^{-11}\ \mathrm{N\,m^2/kg^2}$</div>
+</div>
+<div class="equation-card">
+<small>目前重力加速度</small>
+<div class="equation-main" id="gravityEquation">g = GMₑ/r² = 2.46 m/s²</div>
+<div class="equation-detail">物體質量改變時，這個數值不會改變。</div>
+</div>
+<div class="equation-card">
+<small>目前所受重力</small>
+<div class="equation-main" id="forceEquation">F = mg = 196 N</div>
+<div class="equation-detail">相同位置下，物體質量加倍，重力也加倍。</div>
+</div>
+</section></article><article><section>
+<h4>📚 從萬有引力到重力加速度</h4>
+<div class="principle-grid">
+<div class="principle-card">
+<strong>萬有引力</strong>
+<span>地球與物體互相吸引，力的大小為 $F=\dfrac{GMm}{r^2}$。</span>
+</div>
+<div class="principle-card">
+<strong>重力加速度</strong>
+<span>由 $F=mg$ 得 $g=\dfrac{GM}{r^2}$，與受力物體質量 m 無關。</span>
+</div>
+<div class="principle-card">
+<strong>反平方關係</strong>
+<span>距地心變為 $n$ 倍時，$F$ 與 $g$ 都變為原本的 $1/n^2$。</span>
+</div>
+</div>
+</section></article><article><section>
+<h4>💡 觀察任務</h4>
+<p>先固定物體質量，依序比較 $r=R_E$、$2R_E$、$4R_E$；再固定距離並改變質量，分辨「重力」與「重力加速度」的不同。</p>
+<div class="challenge-row">
+<div class="challenge"><strong>任務 1</strong><br/>距離變成 2 倍時，$g$ 與 $F$ 是原來的幾倍？</div>
+<div class="challenge"><strong>任務 2</strong><br/>質量由 80 kg 變成 160 kg，哪一個量不會改變？</div>
+<div class="challenge"><strong>想一想</strong><br/>太空人離開地表後，真的會「沒有重力」嗎？</div>
+</div>
+</section></article></details></main>
+<script>
         class GravitationSimulation {
             constructor() {
                 this.G = 6.67430e-11;
@@ -720,7 +342,7 @@
                 ctx.beginPath();
                 ctx.arc(cx, cy, 4, 0, Math.PI * 2);
                 ctx.fill();
-                ctx.font = '11px Roboto, sans-serif';
+                ctx.font = '16px Roboto, sans-serif';
                 ctx.textAlign = 'center';
                 ctx.fillStyle = '#b9ccdc';
                 ctx.fillText('地心', cx, cy + 15);
@@ -742,7 +364,7 @@
                 this.drawArrow(ctx, objectX - bodyRadius - 4, objectY - 10, objectX - bodyRadius - 4 - scaledArrow, objectY - 10, '#4dd9ff', 4);
                 this.drawArrow(ctx, objectX - bodyRadius - 4, objectY + 14, objectX - bodyRadius - 4 - scaledArrow, objectY + 14, '#ffb347', 4);
                 ctx.textAlign = 'right';
-                ctx.font = 'bold 11px Roboto, sans-serif';
+                ctx.font = 'bold 16px Roboto, sans-serif';
                 ctx.fillStyle = '#4dd9ff';
                 ctx.fillText('g ' + this.formatNumber(values.g) + ' m/s²', objectX - bodyRadius - 7, objectY - 20);
                 ctx.fillStyle = '#ffb347';
@@ -750,15 +372,15 @@
 
                 ctx.textAlign = 'center';
                 ctx.fillStyle = '#e4eef6';
-                ctx.font = 'bold 11px Roboto, sans-serif';
-                ctx.fillText(this.objectMass.toFixed(0) + ' kg', objectX, objectY - bodyRadius - 12);
+                ctx.font = 'bold 16px Roboto, sans-serif';
+                ctx.fillText(this.objectMass.toFixed(0) + ' kg', objectX, objectY - bodyRadius - 30);
 
                 ctx.fillStyle = 'rgba(7,17,31,.78)';
                 ctx.fillRect(0, H - 39, W, 39);
                 ctx.textAlign = 'left';
-                ctx.font = '11px Roboto, sans-serif';
+                ctx.font = '16px Roboto, sans-serif';
                 ctx.fillStyle = '#9db3c6';
-                ctx.fillText('箭頭長度採平方根比例，避免遠距離時完全看不見；標示數值為真實計算值。', 16, H - 16);
+
             }
 
             drawGraphs() {
@@ -783,7 +405,7 @@
                     current: this.valuesAt().force
                 });
                 ctx.fillStyle = '#91a9bc';
-                ctx.font = '10px Roboto, sans-serif';
+                ctx.font = '14px Roboto, sans-serif';
                 ctx.textAlign = 'center';
                 ctx.fillText('距地心 r / Rₑ', W / 2, H - 20);
             }
@@ -794,7 +416,7 @@
                 ctx.fillRect(x, y, w, h);
                 ctx.strokeStyle = 'rgba(200,220,235,.18)';
                 ctx.lineWidth = 1;
-                ctx.font = '9px Roboto, sans-serif';
+                ctx.font = '14px Roboto, sans-serif';
                 for (let i = 0; i <= 4; i++) {
                     const gy = y + h - i / 4 * h;
                     ctx.beginPath(); ctx.moveTo(x, gy); ctx.lineTo(x + w, gy); ctx.stroke();
@@ -833,7 +455,7 @@
                 ctx.shadowBlur = 0;
                 ctx.fillStyle = '#dfeaf3';
                 ctx.textAlign = 'left';
-                ctx.font = 'bold 11px Roboto, sans-serif';
+                ctx.font = 'bold 16px Roboto, sans-serif';
                 ctx.fillText(title, x, y - 11);
                 ctx.textAlign = 'right';
                 ctx.fillStyle = color;
@@ -860,7 +482,7 @@
                     ctx.closePath(); ctx.fill();
                 });
                 ctx.fillStyle = '#c7baff';
-                ctx.font = 'bold 11px Roboto, sans-serif';
+                ctx.font = 'bold 16px Roboto, sans-serif';
                 ctx.textAlign = 'center';
                 ctx.fillText(label, (x1 + x2) / 2, y - 9);
             }
@@ -895,8 +517,5 @@
 
         window.addEventListener('DOMContentLoaded', () => new GravitationSimulation());
     </script>
-    <script src="../../js/jquery-1.9.1.min.js"></script>
-    <script src="../../js/classie.js"></script>
-    <script src="../../js/main.js"></script>
 </body>
 </html>
