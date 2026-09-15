@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="自由落體等加速度運動模擬：比較靜止釋放、向下拋與向上拋，並即時對照 x-t、v-t 圖。">
+  <title>自由落體與鉛直拋射 - 物鯉魚教學模擬</title>
+  <link rel="icon" href="../../images/fish.png">
+  <link rel="stylesheet" href="../../css/simulations.css">
+  <link rel="stylesheet" href="../../css/classroom.css">
+  <link rel="stylesheet" href="../../css/mechanics-tablet.css">
+  <link rel="stylesheet" href="free-fall.css">
+  <script defer src="model.js"></script>
+  <script defer src="simulation.js"></script>
+  <script defer src="../../js/mechanics-layout.js"></script>
+</head>
+<body class="classroom free-fall-classroom">
+  <nav class="lesson-nav" aria-label="網站導覽">
+    <a class="lesson-brand" href="../../index.html"><img src="../../images/fish.png" alt="">物鯉魚教學模擬</a>
+    <a href="../../physics-simulations.html">← 返回模擬列表</a>
+  </nav>
+
+  <main>
+    <header class="lesson-heading">
+      <p class="eyebrow">KINEMATICS · 一維等加速度</p>
+      <h1>自由落體與鉛直拋射</h1>
+      <p>選擇初速度方向，對照物體的等時軌跡、位置 x–t 圖與速度 v–t 圖。</p>
+    </header>
+
+    <div class="lesson-grid">
+      <section class="lesson-panel lesson-stage" aria-labelledby="stage-title">
+        <h2 class="visually-hidden" id="stage-title">自由落體模擬與運動圖</h2>
+        <div class="lesson-toolbar" role="group" aria-label="播放控制">
+          <button class="primary" id="play" type="button">▶ 開始</button>
+          <button id="step" type="button">＋0.05 s</button>
+          <button id="reset" type="button">↻ 重播</button>
+          <span class="sign-note">座標：約定向上為正</span>
+        </div>
+
+        <div class="visual-grid">
+          <div class="motion-wrap">
+            <canvas id="motionCanvas" role="img" aria-label="物體在鉛直方向的運動軌跡、速度與重力加速度向量">瀏覽器需支援 Canvas 才能顯示動畫。</canvas>
+            <div class="scene-legend" aria-hidden="true"><span><i class="current"></i>目前位置</span><span><i class="trail"></i>每 0.2 s</span></div>
+          </div>
+          <div class="graphs" aria-label="運動圖表">
+            <figure>
+              <figcaption><strong>x–t 圖</strong><span>位置 × 時間</span></figcaption>
+              <canvas id="xtCanvas" role="img" aria-label="位置 x 對時間 t 的圖形"></canvas>
+            </figure>
+            <figure>
+              <figcaption><strong>v–t 圖</strong><span>速度 × 時間</span></figcaption>
+              <canvas id="vtCanvas" role="img" aria-label="速度 v 對時間 t 的圖形"></canvas>
+            </figure>
+          </div>
+        </div>
+
+        <div class="lesson-timeline">
+          <label for="time">觀察時間 <output id="timeValue" for="time">0.00 s</output></label>
+          <input id="time" type="range" min="0" max="1000" step="1" value="0">
+          <span id="endTime">/ 3.50 s</span>
+        </div>
+
+        <div class="lesson-readouts" aria-label="即時運動數據">
+          <div class="lesson-readout time-readout"><span>時間 t</span><strong id="readTime">0.00</strong><small>s</small></div>
+          <div class="lesson-readout position-readout"><span>位置 x</span><strong id="readPosition">60.00</strong><small>m</small></div>
+          <div class="lesson-readout velocity-readout"><span>速度 v</span><strong id="readVelocity">0.00</strong><small>m/s</small></div>
+          <div class="lesson-readout acceleration-readout"><span>加速度 a</span><strong id="readAcceleration">−9.80</strong><small>m/s²</small></div>
+        </div>
+        <p class="lesson-status" id="status" role="status">準備就緒 · 物體由 60 m 高處靜止釋放。</p>
+      </section>
+
+      <aside class="lesson-panel lesson-controls" id="controls" aria-label="模擬控制">
+        <h2>實驗設定</h2>
+        <p class="help">選一種情境，或自行調整參數。改變物理參數會回到 t = 0。</p>
+
+        <fieldset class="preset-fieldset">
+          <legend>初速度預設</legend>
+          <div class="lesson-presets" id="presets">
+            <button class="preset active" type="button" data-preset="rest" aria-pressed="true"><span>01</span><strong>初速為 0</strong><small>靜止釋放</small></button>
+            <button class="preset" type="button" data-preset="down" aria-pressed="false"><span>02</span><strong>初速向下</strong><small>v₀ = −12 m/s</small></button>
+            <button class="preset" type="button" data-preset="up" aria-pressed="false"><span>03</span><strong>初速向上</strong><small>v₀ = ＋18 m/s</small></button>
+          </div>
+        </fieldset>
+
+        <div class="lesson-control">
+          <label for="height">初始高度 x₀ <output id="heightValue" for="height">60.0 m</output></label>
+          <input id="height" type="range" min="0" max="100" step="1" value="60">
+        </div>
+        <div class="lesson-control">
+          <label for="v0">初速度 v₀ <output id="v0Value" for="v0">0.0 m/s</output></label>
+          <input id="v0" type="range" min="-25" max="25" step="1" value="0">
+          <div class="range-hints"><span>向下 −</span><span>向上 ＋</span></div>
+        </div>
+        <div class="lesson-control">
+          <label for="gravity">重力加速度 g <output id="gravityValue" for="gravity">9.8 m/s²</output></label>
+          <input id="gravity" type="range" min="1" max="15" step="0.1" value="9.8">
+        </div>
+        <div class="lesson-control">
+          <label for="speed">播放速度 <output id="speedValue" for="speed">1×</output></label>
+          <input id="speed" type="range" min="0.25" max="2" step="0.25" value="1">
+        </div>
+
+        <fieldset class="display-options">
+          <legend>顯示輔助</legend>
+          <label><input id="showTrail" type="checkbox" checked> 等時軌跡點</label>
+          <label><input id="showVectors" type="checkbox" checked> 速度、加速度向量</label>
+          <label><input id="showPrediction" type="checkbox" checked> 完整圖形預測</label>
+        </fieldset>
+
+        <div class="prediction" aria-label="本次運動預測">
+          <h3>本次預測</h3>
+          <div><span>落地時間 T</span><strong id="impactValue">3.50 s</strong></div>
+          <div><span>最高位置 x<sub>max</sub></span><strong id="peakValue">60.00 m</strong></div>
+          <div><span>落地前速度 v<sub>T</sub></span><strong id="impactVelocityValue">−34.29 m/s</strong></div>
+        </div>
+      </aside>
+    </div>
+
+    <details class="lesson-panel lesson-notes">
+      <summary>詳細說明與物理原理</summary>
+      <article>
+        <h2>同一個加速度，三種不同的開始</h2>
+        <p class="formula">x(t) = x₀ + v₀t − ½gt²　　v(t) = v₀ − gt　　a(t) = −g</p>
+        <p>本頁以地面為 x = 0、鉛直向上為正，因此重力加速度永遠是 −g。初速為零或向下時，物體一路下降；初速向上時，物體先減速上升，在 v = 0 的最高點轉向，再加速下落。</p>
+      </article>
+      <article>
+        <h2>如何讀 x–t 與 v–t 圖</h2>
+        <p>x–t 圖的斜率就是速度，所以向上拋時曲線先向上、在最高點斜率變成 0，之後轉為向下。v–t 圖的斜率固定為 −g；直線與時間軸之間的帶正負面積，代表位置的改變量。</p>
+      </article>
+      <article>
+        <h2>觀察任務</h2>
+        <ol>
+          <li>依序播放三種預設，哪些情況的 x–t 圖有最高點？它與 v–t 圖通過 v = 0 的時刻是否一致？</li>
+          <li>比較「初速為 0」與「初速向下」：哪一個先落地？兩條 v–t 直線的斜率有不同嗎？</li>
+          <li>調大 g，觀察等時軌跡點的間距與兩張圖形如何改變。</li>
+        </ol>
+        <p>模型假設物體為質點、地面水平、重力場均勻，並忽略空氣阻力與落地後的碰撞。</p>
+      </article>
+    </details>
+  </main>
+  <noscript>請啟用 JavaScript 以操作模擬；上方公式與說明仍可閱讀。</noscript>
+</body>
+</html>

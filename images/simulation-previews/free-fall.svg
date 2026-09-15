@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="210" viewBox="0 0 320 210" role="img" aria-labelledby="title desc">
+  <title id="title">自由落體與鉛直拋射</title>
+  <desc id="desc">黃色小球沿鉛直方向下落，旁邊顯示位置時間曲線與速度時間直線</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#173a5d"/><stop offset="1" stop-color="#0b1725"/>
+    </linearGradient>
+    <filter id="glow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="320" height="210" rx="10" fill="url(#sky)"/>
+  <path d="M0 184h320v26H0z" fill="#173628"/><path d="M0 184h320" stroke="#5ee6a8" stroke-width="2"/>
+  <g opacity=".75" stroke="#7891aa" stroke-width="1">
+    <path d="M44 24v160"/><path d="M40 34h8M40 71h8M40 109h8M40 146h8"/>
+  </g>
+  <text x="20" y="19" fill="#c8d9e9" font-family="sans-serif" font-size="11">x</text>
+  <path d="M92 34v150" stroke="#4dc9ff" stroke-width="2" stroke-dasharray="4 6" opacity=".65"/>
+  <g fill="#4dc9ff" stroke="#0b1725" stroke-width="2">
+    <circle cx="92" cy="42" r="3"/><circle cx="92" cy="63" r="3"/><circle cx="92" cy="94" r="3"/><circle cx="92" cy="136" r="3"/>
+  </g>
+  <circle cx="92" cy="172" r="9" fill="#ffe068" stroke="#fff4b7" stroke-width="2" filter="url(#glow)"/>
+  <path d="M110 151v24m0 0-6-8m6 8 6-8" stroke="#ffad45" stroke-width="3" fill="none"/>
+  <g transform="translate(139 26)">
+    <rect width="164" height="70" rx="5" fill="#0b1725" stroke="#294158"/>
+    <path d="M25 12v43h124M25 23h124M25 39h124" stroke="#294158"/>
+    <path d="M25 14c39 2 79 12 122 40" fill="none" stroke="#4dc9ff" stroke-width="3"/>
+    <text x="8" y="15" fill="#4dc9ff" font-family="sans-serif" font-size="10">x</text><text x="145" y="66" fill="#c8d9e9" font-family="sans-serif" font-size="9">t</text>
+  </g>
+  <g transform="translate(139 107)">
+    <rect width="164" height="70" rx="5" fill="#0b1725" stroke="#294158"/>
+    <path d="M25 12v43h124M25 33h124" stroke="#294158"/>
+    <path d="M25 18l122 34" fill="none" stroke="#ffad45" stroke-width="3"/>
+    <text x="8" y="15" fill="#ffad45" font-family="sans-serif" font-size="10">v</text><text x="145" y="66" fill="#c8d9e9" font-family="sans-serif" font-size="9">t</text>
+  </g>
+</svg>
