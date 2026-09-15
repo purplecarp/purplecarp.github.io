@@ -4,6 +4,7 @@ const spring=require('../simulations/spring-shm/model.js');
 const magnetic=require('../simulations/charged-particle-magnetic-field/model.js');
 const hydrogen=require('../simulations/hydrogen-standing-wave/model.js');
 const photo=require('../simulations/photoelectric-effect/model.js');
+const ticker=require('../simulations/ticker-timer/model.js');
 const near=(a,b,tolerance=1e-8)=>assert.ok(Math.abs(a-b)<=tolerance*Math.max(1,Math.abs(a),Math.abs(b)),`${a} != ${b}`);
 test('collision: equal mass exchange and unequal mass hand calculation',()=>{assert.deepEqual(collision.velocities(2,2,5,-1),[-1,5]);const v=collision.velocities(2,4,4,-4);near(v[0],-20/3);near(v[1],4/3);});
 test('collision: energy, isolated momentum, and non-overlap at parameter extremes',()=>{
@@ -37,4 +38,27 @@ test('photoelectric: all-band light covers UV, visible and IR with consistent en
  const electrons=photo.events({...p,metal:'Pt'},12);
  assert.ok(electrons.length>0);
  assert.ok(electrons.every(e=>e.maximum>0&&e.energy<=photo.HC/e.lambda-photo.metals.Pt&&e.age>=0));
+});
+
+test('ticker timer: dot times follow the selected frequency',()=>{
+ const p={v0:1,acceleration:0,frequency:50,groupSize:5};
+ const s=ticker.state(p,.2);
+ assert.equal(s.dotCount,11);near(s.interval,.02);near(s.dots[10].time,.2);near(s.dots[10].x,.2);
+});
+test('ticker timer: existing holes travel with the tape while the striker stays fixed',()=>{
+ const p={v0:1,acceleration:0,frequency:10,groupSize:1},holes=ticker.holes(p,.2);
+ assert.deepEqual(holes.map(h=>Number(h.offsetFromTimer.toFixed(8))),[.2,.1,0]);
+ near(holes[0].offsetFromTimer-holes[1].offsetFromTimer,holes[1].x-holes[0].x);
+});
+test('ticker timer: grouped average velocity is exact at the midpoint for constant acceleration',()=>{
+ for(const frequency of [10,50,60])for(const groupSize of [1,5,6,10]){
+  const p={v0:.6,acceleration:.8,frequency,groupSize},groups=ticker.groups(p,2);
+  for(const g of groups)near(g.averageVelocity,ticker.velocity(p,g.midTime));
+ }
+});
+test('ticker timer: adjacent groups recover the allowed positive accelerations',()=>{
+ for(const acceleration of [.1,.8,2]){
+  const p={v0:.6,acceleration,frequency:60,groupSize:6},s=ticker.state(p,1);
+  near(s.estimatedAcceleration,acceleration);near(s.x,.6+.5*acceleration);near(s.v,.6+acceleration);
+ }
 });

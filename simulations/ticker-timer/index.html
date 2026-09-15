@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>打點計時器與紙帶分析 - 物鯉魚教學模擬</title>
+    <link rel="icon" href="../../images/fish.png">
+    <link rel="stylesheet" href="../../css/simulations.css">
+    <link rel="stylesheet" href="../../css/classroom.css">
+    <script defer src="../../js/classroom.js"></script>
+    <script defer src="model.js"></script>
+    <script defer src="lesson.js"></script>
+</head>
+<body class="classroom">
+    <nav class="lesson-nav" aria-label="網站導覽">
+        <a class="lesson-brand" href="../../index.html"><img src="../../images/fish.png" alt="">物鯉魚教學模擬</a>
+        <a href="../../physics-simulations.html">← 返回模擬列表</a>
+    </nav>
+    <main>
+        <header class="lesson-heading">
+            <h1>打點計時器與紙帶分析</h1>
+            <p>小車拉動紙帶通過固定撞針，保留每個既有孔洞的移動，再從攤平紙帶判讀運動。</p>
+        </header>
+        <div id="lesson"></div>
+        <noscript>請啟用 JavaScript 以操作模擬；下方仍可閱讀物理原理。</noscript>
+        <details class="lesson-panel lesson-notes">
+            <summary>詳細說明與物理原理</summary>
+            <article>
+                <h2>固定時間間隔，點距就是位移</h2>
+                <p class="formula">Δt = 1/f　　x(t) = v₀t + ½at²　　v(t) = v₀ + at</p>
+                <p>打點頻率為 f 時，相鄰兩點相隔 1/f 秒。點距相等表示速率不變；沿運動方向點距逐漸增加表示加速，逐漸縮短表示減速。</p>
+            </article>
+            <article>
+                <h2>分組估算速度與加速度</h2>
+                <p class="formula">v̄ = Δx/Δt組　　a估 = Δv̄/Δt組</p>
+                <p>本模擬把每 N 個打點間隔視為一組。等加速度運動中，一組的平均速度恰等於該時間區間中點的瞬時速度；相鄰兩組平均速度的差再除以組時間，可還原加速度。</p>
+            </article>
+            <article>
+                <h2>模型、限制與參考</h2>
+                <p>主畫面使用實驗室座標：打點器與撞針固定；紙帶由小車拉動，每個已打出的孔洞都隨紙帶平移，新孔只在離散打點時刻生成。右側則模擬取下紙帶、對齊起點後的分析結果。</p>
+                <p>小車視為質點，初始位置為 0；介面只允許設定正加速度（0.1–2.0 m/s²），且加速度在整段演示中保持不變。紙帶假設無伸長且持續拉緊，並忽略紙帶質量、打點阻力、滑輪摩擦與量測誤差。</p>
+                <p>60 Hz 選項代表每 1/60 s 打一點；10 Hz 是方便課堂觀察的慢速示意。不同頻率的紙帶不能只比較點距，必須同時考慮每個間隔的時間。</p>
+                <p>等加速度公式參考：<a href="https://openstax.org/books/university-physics-volume-1/pages/3-4-motion-with-constant-acceleration">OpenStax University Physics, 3.4 Motion with Constant Acceleration</a>。</p>
+            </article>
+        </details>
+    </main>
+</body>
+</html>
