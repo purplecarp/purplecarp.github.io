@@ -1,0 +1,5 @@
+﻿/* Keep the shared tablet shell; only adjust this lesson's touch targets. */
+.kepler .lesson-control:has(input[type="checkbox"]) > label { min-height:48px; cursor:pointer; }
+.kepler .lesson-timeline input[type="range"] { min-height:48px; }
+.kepler .lesson-notes summary { min-height:48px; display:flex; align-items:center; }
+.kepler .lesson-status { overflow-wrap:anywhere; }

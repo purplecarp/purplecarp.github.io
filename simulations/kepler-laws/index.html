@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>克卜勒三大定律 - 物鯉魚教學模擬</title>
+    <meta name="description" content="調整橢圓軌道、比較等時掃掠面積與公轉週期，探索克卜勒三大定律。">
+    <link rel="icon" href="../../images/fish.png">
+    <link rel="stylesheet" href="../../css/simulations.css">
+    <link rel="stylesheet" href="../../css/classroom.css">
+    <link rel="stylesheet" href="lesson.css">
+    <script defer src="../../js/classroom.js"></script>
+    <script defer src="model.js"></script>
+    <script defer src="lesson.js"></script>
+</head>
+<body class="classroom kepler">
+    <nav class="lesson-nav" aria-label="網站導覽">
+        <a class="lesson-brand" href="../../index.html"><img src="../../images/fish.png" alt="">物鯉魚教學模擬</a>
+        <a href="../../physics-simulations.html">← 返回模擬列表</a>
+    </nav>
+    <main>
+        <header class="lesson-heading">
+            <h1>克卜勒三大定律</h1>
+            <p>從軌道形狀、等時面積到公轉週期：調整參數，先預測，再播放驗證。</p>
+        </header>
+        <div id="lesson"></div>
+        <noscript>請啟用 JavaScript 以操作模擬；下方仍可閱讀物理原理。</noscript>
+        <details class="lesson-panel lesson-notes">
+            <summary>三大定律、操作提示與模型限制</summary>
+            <article>
+                <h2>第一定律：橢圓軌道</h2>
+                <p>行星沿橢圓運行，中心星位於其中一個焦點。a 是半長軸，b 是半短軸，c 是中心到焦點的距離。兩焦點到行星的距離和恆為 2a。</p>
+                <p class="formula">e = c/a　　b = a√(1 − e²)　　r近 = a(1 − e)　　r遠 = a(1 + e)</p>
+                <p>試著把離心率 e 調到 0：兩個焦點與圓心重合，近日點與遠日點也不再有區別。</p>
+            </article>
+            <article>
+                <h2>第二定律：等時等面積</h2>
+                <p>中心星與行星的連線，在相等時間內掃過相等面積。近日點附近走過的弧較長、速率較大；遠日點附近速率較小。</p>
+                <p class="formula">ΔA = (πab/T)Δt　　dA/dt = 常數</p>
+                <p>右上角 t 顯示累積模擬時間，Δt 顯示每個掃掠區域的時間窗。紅色 v 箭頭沿運動切線；黃色 a 箭頭為重力加速度，始終指向太陽（中心星），大小為 GM/r²。速度與加速度的單位不同，各自使用固定比例繪製，不能直接比較兩種箭頭的長度。</p>
+                <p>橘色與綠色區域是以近日點、遠日點為中點的兩段完整時間窗，預先畫出供比較，不表示已走過的軌跡。兩段皆長 Δt = T/N；等時點每 T/48 取樣，只保留最近一圈且不顯示未來點。</p>
+            </article>
+            <article>
+                <h2>第三定律：週期與半長軸</h2>
+                <p>繞同一中心星、且行星質量可忽略時，週期平方與半長軸立方成正比。瞬時距離 r 隨位置改變，不能拿來代替 a。</p>
+                <p class="formula">T²/a³ = 4π²/(GM)　　T² = a³/M（本模擬單位）</p>
+                <p>比較頁中的 A、B 共用時間、距離比例與離心率。a 相同時，改變 e 不會改變週期；改變中心星質量 M 則會改變 T²/a³。圖表上的直線代表目前中心星質量，並標出 A、B。</p>
+            </article>
+            <article>
+                <h2>單位、時間與模型限制</h2>
+                <p>距離以 AU、時間以年、中心星質量以太陽質量 M☉ 表示，採用理想化 GM☉ = 4π² AU³/年²。1 AU 約為地球軌道的半長軸。速率單位為 AU/年。</p>
+                <p>中心星固定於原點，兩顆行星皆視為質量可忽略的質點，忽略行星間作用、碰撞、相對論與其他天體擾動。圖中星體大小放大示意；不是太陽系的實際比例圖。</p>
+                <p>以克卜勒方程 E − e sin E = 2πt/T 求位置，沒有把角速度假設成常數。每次演示長度為 A、B 較長週期的兩倍，結束僅為方便重播，並非行星停止。1× 播放時每真實秒前進 0.25 模擬年；單步為 0.01 年。</p>
+                <p>改變物理參數會回到近日點並暫停；切換圖表、速度與顯示選項保留進度。參數改變時視野自動調整，圖形保持幾何比例。</p>
+            </article>
+            <article>
+                <h2>參考來源</h2>
+                <p><a href="https://science.nasa.gov/solar-system/orbits-and-keplers-laws/" target="_blank" rel="noopener noreferrer">NASA：Orbits and Kepler’s Laws</a></p>
+            </article>
+        </details>
+    </main>
+</body>
+</html>
