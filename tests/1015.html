@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="zh-Hant"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>中和高中｜魚躍龍門 × 班呼分貝王</title>
+<style>
+:root{--bg:#07152c;--panel:#0c2343;--cyan:#50dcff;--gold:#ffd166;--muted:#b6c7dc;--white:#f7fbff}*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#173e6c,#07152c 60%,#030916);color:var(--white);font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif}.wrap{max-width:1320px;margin:auto;padding:20px}.head{text-align:center}.eyebrow{color:var(--cyan);letter-spacing:.14em;font-weight:900}h1{font-size:clamp(30px,4.5vw,58px);margin:8px 0}.sub{color:var(--muted)}.tools{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin:14px}.layout{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(270px,.8fr);gap:16px}.card{background:rgba(7,24,48,.9);border:1px solid #29486c;border-radius:18px;padding:18px;min-width:0}.hero{text-align:center}.class{font-size:clamp(28px,3.5vw,44px);font-weight:1000}.hint{color:var(--muted);margin:6px 0 12px}.meter{height:24px;background:#06132a;border:1px solid #315071;border-radius:999px;overflow:hidden}.fill{height:100%;width:0;background:linear-gradient(90deg,#27d3ad,#50dcff,#ffd166,#ff6888)}.metric{font-size:clamp(76px,10vw,140px);font-weight:1000;line-height:1.05;margin:8px 0;font-variant-numeric:tabular-nums}.unit,.small{color:var(--muted);font-size:13px}.status{font-size:clamp(18px,2vw,27px);font-weight:900;min-height:36px;margin:10px 0}.gate{height:205px;max-width:650px;position:relative;margin:10px auto 0;overflow:hidden}.post{position:absolute;bottom:4px;height:76%;width:30px;border:4px solid var(--cyan);background:#18558a;border-radius:8px}.left{left:17%}.right{right:17%}.arch{position:absolute;left:17%;right:17%;top:17%;height:73%;border:10px solid var(--cyan);border-bottom:0;border-radius:100px 100px 0 0;filter:drop-shadow(0 0 10px #28bde7)}.fish{position:absolute;left:50%;top:34%;transform:translateX(-50%);font-size:60px;animation:jump 1.7s ease-in-out infinite}.flash{animation:shake .25s 3}.success .arch,.success .post{border-color:var(--gold);filter:drop-shadow(0 0 14px var(--gold))}@keyframes jump{50%{transform:translate(-50%,-22px) rotate(-8deg)}}@keyframes shake{25%{transform:translateX(5px)}75%{transform:translateX(-5px)}}.controls{display:grid;gap:10px}label{display:grid;gap:6px;font-weight:800}select,button{font:inherit;color:var(--white);background:#0c274b;border:1px solid #35577f;border-radius:10px;padding:12px;min-width:0}button{cursor:pointer;font-weight:900;min-height:44px}button:disabled{opacity:.45;cursor:not-allowed}.primary{background:var(--cyan);color:#052039;border:0}.goldbtn{background:var(--gold);color:#241a00;border:0}.danger{background:#421d31}.twocol{display:grid;grid-template-columns:1fr 1fr;gap:8px}.title{font-size:20px;font-weight:1000;margin-bottom:12px}.record{text-align:center;background:#102d51;border-radius:12px;padding:12px;margin-top:12px}.record strong{display:block;color:var(--gold);font-size:30px}.rank{display:grid;grid-template-columns:40px minmax(0,1fr) auto;gap:8px;padding:9px 0;border-bottom:1px solid #243a56;align-items:center}.score{color:var(--gold);font-weight:1000}.lower{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px}.chartbox{height:140px}.chartbox canvas{width:100%;height:100%;display:block}.winner{display:none;text-align:center;padding:24px}.winner.show{display:block}.winner-label{font-size:clamp(20px,3vw,36px);color:var(--gold);font-weight:1000}.winner-name{font-size:clamp(42px,8vw,100px);font-weight:1000;margin:12px 0;line-height:1.1}.winner-score{font-size:clamp(28px,5vw,58px);color:var(--cyan);font-weight:1000}.hidden{display:none!important}.stage-mode .wrap{max-width:none;padding:12px}.stage-mode h1{font-size:clamp(38px,5.5vw,78px)}.stage-mode .layout{display:block}.stage-mode .side,.stage-mode .lower,.stage-mode .tools,.stage-mode .hint,.stage-mode .operator-note{display:none!important}.stage-mode .class{font-size:clamp(36px,5vw,70px)}.stage-mode .metric{font-size:clamp(100px,18vw,240px)}.stage-mode .gate{height:clamp(150px,22vh,280px);max-width:900px}.stage-mode .fish{font-size:clamp(56px,7vw,100px)}.stage-mode .status{font-size:clamp(22px,2.5vw,38px)}.stage-mode .winner{padding:8px}.foot{text-align:center;margin-top:14px}.foot,.operator-note{font-size:12px;color:var(--muted);line-height:1.6}@media(max-width:820px){.layout,.lower{grid-template-columns:1fr}.wrap{padding:12px}.gate{height:165px}.metric{font-size:82px}}@media(prefers-reduced-motion:reduce){.fish,.flash{animation:none}}
+.remote-stage .tools,.remote-stage .side,.remote-stage .lower,.remote-stage .foot,.remote-stage .hint{display:none!important}.remote-stage .layout{display:block}.remote-stage .wrap{max-width:none}.remote-stage .class{font-size:clamp(38px,6vw,88px)}.remote-stage .metric{font-size:clamp(100px,18vw,250px)}.remote-stage .gate{height:clamp(190px,28vh,330px);max-width:1000px}.remote-stage .status{font-size:clamp(24px,3vw,48px)}.remote-stage .winner button{display:none}.remote-stage .head h1{font-size:clamp(38px,5vw,80px)}</style></head><body><div class="wrap" id="app">
+<header class="head"><div class="eyebrow">中和高中・高三學測誓師大會</div><h1>🐟 魚躍龍門 × 🔊 班呼分貝王</h1><div class="sub">全班一起喊出班呼，勇敢躍過龍門！</div>
+<div class="tools"><button id="popBtn" class="primary">開啟獨立舞台視窗</button><button id="stageBtn">本頁舞台模式</button><button id="fullBtn">瀏覽器全螢幕</button><button id="winnerBtn" class="goldbtn">冠軍揭曉</button></div></header>
+<div class="layout"><main class="card hero"><div id="live"><div class="class" id="className">高三 301 班</div><div class="hint" id="hint">準備好就開始挑戰！</div><div class="meter"><div class="fill" id="fill"></div></div><div class="metric" id="metric">—</div><div class="unit">比賽音量指標（非校準 dB SPL）</div><div class="status" id="status" aria-live="polite">選擇班級後，按「開始挑戰」</div><div class="gate" id="gate"><div class="post left"></div><div class="post right"></div><div class="arch"></div><div class="fish">🐟</div></div></div>
+<div class="winner" id="winner"><div class="winner-label">🏆 班呼分貝王</div><div class="winner-name" id="winnerName">尚未產生成績</div><div class="winner-score" id="winnerScore">—</div><p>恭喜獲得「班呼分貝王」特別獎！</p><button id="backBtn">返回比賽畫面</button></div></main>
+<aside class="card side"><div class="title">🎛️ 主持人控制台</div><div class="controls"><label>挑戰班級<select id="classSelect"></select></label><label>測量時間<select id="duration"><option value="10">10 秒</option><option value="15" selected>15 秒</option></select></label><div class="twocol"><button id="startBtn" class="primary">開始挑戰</button><button id="stopBtn" disabled>結束測量</button></div><button id="resetBtn">重設本班成績</button><button id="exportBtn">匯出成績 CSV</button><button id="clearBtn" class="danger">清除全部成績</button></div><div class="record">目前最高紀錄<strong id="bestScore">—</strong><span id="bestClass">尚無成績</span></div><p class="operator-note">操作流程：開始後倒數 3 秒，再開始收音；倒數結束立即開始測量，10 或 15 秒後自動結算；也可提前結束。固定同一支麥克風、位置及距離。</p><p class="small">需允許瀏覽器使用麥克風。部分瀏覽器要求 HTTPS 或 localhost。音量指標不是經校準的物理聲壓分貝。</p></aside></div>
+<div class="lower"><section class="card"><div class="title">📈 本次音量曲線</div><div class="chartbox"><canvas id="chart"></canvas></div><div class="small">顯示本次挑戰的相對音量變化。</div></section><section class="card"><div class="title">🏆 即時排行榜</div><div id="ranking"><div class="small">尚無成績，準備開始第一班！</div></div></section></div>
+<div class="foot">V3｜筆電操作控制台、投影幕顯示獨立舞台視窗。成績暫存於控制台頁面，重新整理會清除。音量為相對指標，非校準聲壓分貝。</div></div>
+<script>
+(()=>{
+"use strict";
+const $=id=>document.getElementById(id);
+const classes=Array.from({length:18},(_,i)=>`高三 ${301+i} 班`);
+const scores=Object.fromEntries(classes.map(c=>[c,null]));
+const sel=$("classSelect"), canvas=$("chart"), ctx=canvas.getContext("2d");
+const isStage=new URLSearchParams(location.search).get("stage")==="1";
+const channel=typeof BroadcastChannel!=="undefined"?new BroadcastChannel("zhonghe-chant-v3"):null;
+let stageWindow=null, audioCtx=null, stream=null, analyser=null, source=null, raf=0, timer=null, countdown=null, clock=null;
+let running=false, preparing=false, peak=0, values=[], startedAt=0, elapsed=0, measuringClass="", total=15, viewWinner=false;
+classes.forEach(c=>{const o=document.createElement("option");o.value=c;o.textContent=c;sel.appendChild(o)});
+function ranking(){return classes.map(c=>({c,s:scores[c]})).filter(x=>x.s).sort((a,b)=>b.s.peak-a.s.peak)}
+function renderRank(){
+ const arr=ranking();
+ $("ranking").innerHTML=arr.length?arr.map((x,i)=>`<div class="rank"><b>${["🥇","🥈","🥉"][i]||i+1}</b><span>${x.c}</span><span class="score">${x.s.peak.toFixed(1)}</span></div>`).join(""):'<div class="small">尚無成績，準備開始第一班！</div>';
+ const b=arr[0];$("bestScore").textContent=b?b.s.peak.toFixed(1):"—";$("bestClass").textContent=b?b.c:"尚無成績";
+}
+function resize(){const r=canvas.getBoundingClientRect(),d=window.devicePixelRatio||1;canvas.width=Math.max(1,Math.round(r.width*d));canvas.height=Math.max(1,Math.round(r.height*d));ctx.setTransform(d,0,0,d,0,0);draw()}
+function draw(){const w=canvas.clientWidth,h=canvas.clientHeight;ctx.clearRect(0,0,w,h);ctx.strokeStyle="rgba(160,190,220,.17)";for(let i=1;i<4;i++){ctx.beginPath();ctx.moveTo(0,h*i/4);ctx.lineTo(w,h*i/4);ctx.stroke()}if(values.length<2)return;ctx.beginPath();values.forEach((v,i)=>{const x=i/(values.length-1)*w,y=h-v/120*h;i?ctx.lineTo(x,y):ctx.moveTo(x,y)});ctx.strokeStyle="#50dcff";ctx.lineWidth=3;ctx.stroke()}
+function setStatus(t){$("status").textContent=t;sync()}
+function sync(){
+ if(isStage)return;
+ const b=ranking()[0];
+ const state={type:"state",className:$("className").textContent,metric:$("metric").textContent,fill:$("fill").style.width,status:$("status").textContent,
+ hint:$("hint").textContent,success:$("gate").classList.contains("success"),winner:viewWinner,
+ winnerName:b?b.c:"尚未產生成績",winnerScore:b?`最高音量指標 ${b.s.peak.toFixed(1)}`:"請先完成至少一班測量"};
+ if(channel)channel.postMessage(state);
+ if(stageWindow&&!stageWindow.closed)stageWindow.postMessage(state,"*");
+}
+function applyState(s){
+ if(!isStage||s.type!=="state")return;
+ $("className").textContent=s.className;$("metric").textContent=s.metric;$("fill").style.width=s.fill;$("status").textContent=s.status;$("hint").textContent=s.hint;
+ $("gate").classList.toggle("success",s.success);$("winner").classList.toggle("show",s.winner);$("live").classList.toggle("hidden",s.winner);
+ $("winnerName").textContent=s.winnerName;$("winnerScore").textContent=s.winnerScore;
+}
+if(isStage){
+ document.body.classList.add("remote-stage");
+ document.title="中和高中｜投影舞台";
+ $("status").textContent="等待控制台連線…";
+ if(channel)channel.onmessage=e=>applyState(e.data);
+ window.addEventListener("message",e=>{if(e.source===window.opener)applyState(e.data)});
+ if(window.opener)window.opener.postMessage({type:"ready"},"*");
+ window.addEventListener("keydown",e=>{if(e.key==="f"||e.key==="F")document.documentElement.requestFullscreen?.().catch(()=>{})});
+ resize();return;
+}
+window.addEventListener("message",e=>{if(e.source===stageWindow&&e.data?.type==="ready")sync()});
+if(channel)channel.onmessage=e=>{if(e.data?.type==="ready")sync()};
+$("popBtn").addEventListener("click",()=>{
+ const u=new URL(location.href);u.searchParams.set("stage","1");
+ if(stageWindow&&!stageWindow.closed){stageWindow.focus();sync();return}
+ stageWindow=window.open(u.href,"zhonghe-stage","popup=yes,width=1280,height=800");
+ if(!stageWindow){setStatus("瀏覽器封鎖彈出視窗，請允許本站開啟新視窗。");return}
+ setTimeout(sync,400);
+});
+function updateClass(){if(running||preparing)return;$("className").textContent=sel.value;$("hint").textContent="準備好就開始挑戰！";sync()}
+async function openMic(){
+ if(!navigator.mediaDevices?.getUserMedia)throw Error("microphone unavailable");
+ stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});
+ audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+ if(audioCtx.state==="suspended")await audioCtx.resume();
+ analyser=audioCtx.createAnalyser();analyser.fftSize=2048;source=audioCtx.createMediaStreamSource(stream);source.connect(analyser);
+}
+function closeMic(){if(stream)stream.getTracks().forEach(t=>t.stop());stream=null;if(audioCtx){audioCtx.close().catch(()=>{});audioCtx=null}analyser=null;source=null}
+function sample(){
+ if(!running||!analyser)return;
+ const a=new Uint8Array(analyser.fftSize);analyser.getByteTimeDomainData(a);
+ let sum=0;for(const v of a){const n=(v-128)/128;sum+=n*n}
+ const rms=Math.sqrt(sum/a.length),v=Math.max(0,Math.min(120,20*Math.log10(Math.max(rms,.0001))+120));
+ peak=Math.max(peak,v);values.push(v);if(values.length>220)values.shift();
+ $("metric").textContent=peak.toFixed(1);$("fill").style.width=(peak/120*100)+"%";draw();sync();raf=requestAnimationFrame(sample);
+}
+function unlock(){
+ $("stopBtn").disabled=true;$("startBtn").disabled=false;$("resetBtn").disabled=false;sel.disabled=false;$("duration").disabled=false;
+}
+function stop(auto){
+ if(!running)return;
+ running=false;cancelAnimationFrame(raf);clearTimeout(timer);clearInterval(clock);
+ elapsed=Math.min(total,(performance.now()-startedAt)/1000);
+ scores[measuringClass]={peak,duration:elapsed,when:new Date().toLocaleString("zh-TW")};
+ unlock();$("gate").classList.remove("flash");$("gate").classList.add("success");closeMic();renderRank();
+ const b=ranking()[0];
+ $("hint").textContent=`實際測量 ${elapsed.toFixed(1)} 秒`;
+ setStatus(b&&b.c===measuringClass?`👑 ${measuringClass} 暫居第一！最高 ${peak.toFixed(1)}`:`${auto?"時間到！":"測量結束！"} ${measuringClass} 最高 ${peak.toFixed(1)}`);
+}
+$("startBtn").addEventListener("click",async()=>{
+ if(running||preparing)return;
+ preparing=true;measuringClass=sel.value;total=Number($("duration").value);
+ $("startBtn").disabled=true;sel.disabled=true;$("duration").disabled=true;$("resetBtn").disabled=true;
+ viewWinner=false;$("winner").classList.remove("show");$("live").classList.remove("hidden");
+ peak=0;values=[];elapsed=0;$("metric").textContent="—";$("fill").style.width="0%";
+ $("gate").classList.remove("success");$("hint").textContent=`即將測量 ${total} 秒`;resize();sync();
+ try{await openMic()}catch(e){
+  preparing=false;unlock();closeMic();setStatus("無法啟用麥克風。請檢查權限；若從本機開啟不支援，可改用 localhost 或 HTTPS。");return;
+ }
+ let n=3;setStatus(`準備！ ${n}`);
+ countdown=setInterval(()=>{
+  n--;
+  if(n>0){setStatus(`準備！ ${n}`);return}
+  clearInterval(countdown);preparing=false;running=true;startedAt=performance.now();
+  $("stopBtn").disabled=false;$("gate").classList.add("flash");setStatus("🔥 開始！大聲喊班呼，衝過龍門！");
+  sample();
+  timer=setTimeout(()=>stop(true),total*1000);
+  clock=setInterval(()=>{if(!running)return;elapsed=(performance.now()-startedAt)/1000;setStatus(`🔥 大聲喊班呼！剩餘 ${Math.max(0,total-elapsed).toFixed(1)} 秒`)},100);
+ },1000);
+});
+$("stopBtn").addEventListener("click",()=>stop(false));
+$("resetBtn").addEventListener("click",()=>{
+ if(running||preparing)return;scores[sel.value]=null;peak=0;values=[];$("metric").textContent="—";$("fill").style.width="0%";
+ $("hint").textContent="準備好就開始挑戰！";$("gate").classList.remove("success");draw();renderRank();setStatus("本班成績已重設");
+});
+$("clearBtn").addEventListener("click",()=>{
+ if(running||preparing)return;
+ if(confirm("確定清除 18 班全部成績？")){classes.forEach(c=>scores[c]=null);renderRank();$("metric").textContent="—";$("fill").style.width="0%";$("hint").textContent="準備好就開始挑戰！";$("gate").classList.remove("success");setStatus("全部成績已清除")}
+});
+$("exportBtn").addEventListener("click",()=>{
+ const rows=[["班級","最高音量指標","實際測量秒數","紀錄時間"],...classes.filter(c=>scores[c]).map(c=>[c,scores[c].peak.toFixed(1),scores[c].duration.toFixed(1),scores[c].when])];
+ const csv="\uFEFF"+rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(",")).join("\r\n");
+ const url=URL.createObjectURL(new Blob([csv],{type:"text/csv;charset=utf-8"})),a=document.createElement("a");
+ a.href=url;a.download="中和高中班呼分貝王成績.csv";document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1000);
+});
+$("winnerBtn").addEventListener("click",()=>{
+ if(running||preparing){setStatus("請先完成目前班級測量，再揭曉冠軍。");return}
+ viewWinner=true;const b=ranking()[0];$("live").classList.add("hidden");$("winner").classList.add("show");
+ $("winnerName").textContent=b?b.c:"尚未產生成績";$("winnerScore").textContent=b?`最高音量指標 ${b.s.peak.toFixed(1)}`:"請先完成至少一班測量";sync();
+});
+$("backBtn").addEventListener("click",()=>{viewWinner=false;$("winner").classList.remove("show");$("live").classList.remove("hidden");sync()});
+$("stageBtn").addEventListener("click",()=>{document.body.classList.toggle("stage-mode");$("stageBtn").textContent=document.body.classList.contains("stage-mode")?"離開本頁舞台模式":"本頁舞台模式"});
+$("fullBtn").addEventListener("click",async()=>{try{if(!document.fullscreenElement)await document.documentElement.requestFullscreen();else await document.exitFullscreen()}catch(e){setStatus("瀏覽器未允許全螢幕，可使用舞台模式放大畫面")}});
+document.addEventListener("fullscreenchange",()=>$("fullBtn").textContent=document.fullscreenElement?"退出瀏覽器全螢幕":"瀏覽器全螢幕");
+sel.addEventListener("change",updateClass);window.addEventListener("resize",resize);
+updateClass();renderRank();resize();sync();
+})();
+</script></body></html>
