@@ -1,0 +1,26 @@
+body.classroom { margin:0; }
+.oblique-projectile .lesson-heading p { margin:0; }
+.oblique-projectile .lesson-stage { padding:16px; }
+.oblique-projectile .canvas-box { height:clamp(320px,48vh,560px); }
+.oblique-projectile .lesson-status { margin-left:auto; }
+.oblique-projectile .trajectory-legend { display:flex; flex-wrap:wrap; gap:18px; margin:10px 0; font-size:15px; }
+.oblique-projectile .trajectory-legend span { display:inline-flex; align-items:center; gap:7px; }
+.oblique-projectile .swatch { display:inline-block; width:12px; height:12px; border-radius:50%; background:var(--color); }
+.oblique-projectile .hint { font-size:14px; color:#526477; margin:8px 0; }
+.oblique-projectile fieldset { border:0; padding:0; margin:18px 0 0; min-width:0; }
+.oblique-projectile legend { font-weight:700; font-size:17px; }
+.oblique-projectile .check { display:flex; align-items:center; gap:9px; min-height:44px; font-size:15px; }
+.oblique-projectile .check input { width:20px; height:20px; accent-color:#226faa; }
+.oblique-projectile input[type=range] { min-height:44px; }
+.oblique-projectile #preset { width:100%; margin-top:12px; font-size:15px; }
+.oblique-projectile .model-note { font-size:14px; color:#526477; background:#f0f5fa; padding:12px; border-radius:6px; line-height:1.8; }
+.oblique-projectile .results-wrap { overflow-x:auto; }
+.oblique-projectile table { width:100%; border-collapse:collapse; font-size:14px; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.oblique-projectile caption { text-align:left; font-weight:700; font-size:16px; padding:8px 0; }
+.oblique-projectile th,.oblique-projectile td { text-align:right; padding:12px 10px; border-bottom:1px solid #e0e7ee; }
+.oblique-projectile th { background:#f0f5fa; font-weight:600; }
+.oblique-projectile th:first-child { text-align:left; }
+.oblique-projectile td .swatch { margin-right:6px; }
+.oblique-projectile .question-box { margin-bottom:0; }
+.oblique-projectile .lesson-notes article:last-child { border:0; }
+@media(max-width:600px) { .oblique-projectile .lesson-stage { padding:10px; } .oblique-projectile .canvas-box { height:320px; } .oblique-projectile .lesson-status { width:100%; margin-left:0; } .oblique-projectile .lesson-timeline { grid-template-columns:auto 1fr; } .oblique-projectile #endTime { grid-column:1 / -1; } }

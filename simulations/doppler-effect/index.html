@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>都卜勒效應 - 物鯉魚教學模擬</title>
+    <meta name="description" content="移動聲源或觀察者，觀察波前與接收頻率，並直接聆聽都卜勒效應的音高變化。">
+    <link rel="icon" href="../../images/fish.png">
+    <link rel="stylesheet" href="../../css/simulations.css">
+    <link rel="stylesheet" href="../../css/classroom.css">
+    <link rel="stylesheet" href="lesson.css">
+    <script defer src="../../js/classroom.js"></script>
+    <script defer src="model.js"></script>
+    <script defer src="audio.js"></script>
+    <script defer src="lesson.js"></script>
+</head>
+<body class="classroom doppler">
+    <nav class="lesson-nav" aria-label="網站導覽">
+        <a class="lesson-brand" href="../../index.html"><img src="../../images/fish.png" alt="">物鯉魚教學模擬</a>
+        <a href="../../physics-simulations.html">← 返回模擬列表</a>
+    </nav>
+    <main>
+        <header class="lesson-heading">
+            <h1>都卜勒效應</h1>
+            <p>移動聲源，或讓觀察者迎向聲音。看波前的疏密，也聽見音高的改變。</p>
+        </header>
+        <div id="lesson"></div>
+        <noscript>請啟用 JavaScript 以操作模擬與播放聲音。</noscript>
+        <details class="lesson-panel lesson-notes">
+            <summary>詳細說明、公式與模型限制</summary>
+            <article>
+                <h2>接收頻率從哪裡來？</h2>
+                <p class="formula">f觀(t) = f源(t發) × (c − v觀 · n) / (c − v源 · n)</p>
+                <p>c = 343 m/s，為靜止空氣中的聲速；速度以相對空氣、向右為正。n 是從「發聲當時的聲源位置」指向「接收當時的觀察者位置」的單位向量。本模擬兩者只沿水平方向移動，因此 v · n = vₓnₓ。</p>
+                <p>一維相向接近時，可寫成 f觀 = f源 (c + 觀察者速率) / (c − 聲源速率)。移動聲源改變波長；移動觀察者改變遇到波前的速率，兩者公式並不相同。</p>
+            </article>
+            <article>
+                <h2>傳播時間與擦身而過</h2>
+                <p class="formula">|r觀(t) − r源(t發)| = c(t − t發)</p>
+                <p>每一圈波前以發射位置為圓心向外擴張，不跟著聲源移動。頻率與音高都使用上式求出的延遲時間。兩條路徑間隔預設為 0 m，聲源與觀察者沿同一直線移動，交會前後的接收頻率會跳變。交會瞬間的傳播方向未定，畫面讀值與聲音採用交會後的極限值，圖線在此斷開。將間隔調大後，擦身而過時音高平滑改變；幾何上剛好並排，並不一定立刻聽到原頻率。</p>
+                <p>假設聲源在 t = 0 前已持續等速發聲，所以起點就有傳來的聲音與波前。忽略風、反射、吸收及振幅隨距離衰減，不包含超音速與震波。</p>
+            </article>
+            <article>
+                <h2>畫面、時間與聲音</h2>
+                <p>預設為合成救護車警笛，每 2 s 在基準頻率 f₀ 至 1.5 f₀ 間平滑升降（預設 440–660 Hz），也可切換固定頻率的純音。綠線與接收音使用發聲當時的警笛頻率及都卜勒頻移；藍線與聲源原音使用聲源此刻頻率。因此，即使兩者靜止，警笛的綠線與藍線仍可能因傳播延遲而錯開。圖表顯示基頻，警笛音色另包含諧波。</p>
+                <p>每一圈顯示每 100 個振動週期抽樣的一個波前，並非每一個真實波峰；圓圈的間距隨聲源頻率改變，警笛模式依累積振動週期決定每一圈的發射時刻。座標與圓形保持相同比例，人物大小及速度箭頭為示意。</p>
+                <p>頻率圖的綠線顯示觀察者接收頻率隨時間的變化，藍虛線表示聲源此刻頻率，黃色游標標示目前時間；圖表與播放、暫停及時間軸同步。演示區間為 12 s，僅為教學觀察長度，不表示物體在終點停止。播放速度只調整演示時間的快慢，聲音仍依讀值播放真實 Hz，不隨播放速度升降調；警笛升降的節奏則跟隨模擬時間。</p>
+                <p>聲音預設開啟，按「播放」後開始發聲；瀏覽器可能要求先點擊頁面才能播放音訊。可用「關閉聲音」靜音，或切換「觀察者聽到的聲音」與「聲源原音」比較。暫停、重播、拖動時間軸、演示結束或切到背景時靜音；恢復預設會重新開啟聲音設定，但維持暫停。</p>
+            </article>
+            <article>
+                <h2>參考來源</h2>
+                <p><a href="https://openstax.org/books/university-physics-volume-1/pages/17-7-the-doppler-effect" target="_blank" rel="noopener">OpenStax University Physics 1 §17.7：The Doppler Effect</a></p>
+                <p><a href="https://developer.mozilla.org/en-US/docs/Web/API/OscillatorNode/frequency" target="_blank" rel="noopener">MDN：OscillatorNode.frequency（Hz）</a></p>
+            </article>
+        </details>
+    </main>
+</body>
+</html>

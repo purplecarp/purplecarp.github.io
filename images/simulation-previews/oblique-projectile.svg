@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="210" viewBox="0 0 320 210">
+  <rect width="320" height="210" rx="12" fill="#101e2e"/>
+  <g stroke="#23364b"><path d="M35 35H295M35 75H295M35 115H295M35 155H295M75 25V175M125 25V175M175 25V175M225 25V175M275 25V175"/></g>
+  <path d="M35 25V175H298" fill="none" stroke="#8296aa" stroke-width="2"/>
+  <g fill="none" stroke-width="3"><path d="M35 175Q145 87 255 175" stroke="#63bbff"/><path d="M35 175Q162 5 289 175" stroke="#ffc16e"/><path d="M35 175Q145 -83 255 175" stroke="#81dfb5"/></g>
+  <circle cx="105" cy="137" r="5" fill="#63bbff"/><circle cx="92" cy="116" r="5" fill="#ffc16e"/><circle cx="75" cy="98" r="5" fill="#81dfb5"/>
+  <g font-family="system-ui,sans-serif" font-size="15"><text x="214" y="153" fill="#63bbff">30°</text><text x="266" y="130" fill="#ffc16e">45°</text><text x="222" y="76" fill="#81dfb5">60°</text><text x="35" y="199" fill="#b9ccdf">Same speed · Different angles</text></g>
+</svg>

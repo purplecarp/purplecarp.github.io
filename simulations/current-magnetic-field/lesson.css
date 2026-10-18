@@ -1,0 +1,14 @@
+/* Keep the template layout and its presentation breakpoints. */
+.magnetic-lesson #scene { touch-action:none; cursor:crosshair; }
+.magnetic-lesson #scene[data-spatial="true"] { cursor:grab; }
+.magnetic-lesson #scene[data-spatial="true"]:active { cursor:grabbing; }
+.magnetic-lesson #scene:focus-visible { outline:3px solid #efdb72; outline-offset:-4px; }
+.magnetic-lesson .lesson-status { line-height:1.55; }
+.magnetic-lesson .lesson-control input[type="checkbox"] { min-height:48px; min-width:48px; }
+.magnetic-lesson .lesson-views button { flex:1; }
+.magnetic-lesson #play,.magnetic-lesson #step,.magnetic-lesson #reset,
+.magnetic-lesson .lesson-timeline,.magnetic-lesson .lesson-control:has(#speed) { display:none; }
+.magnetic-lesson .lesson-readouts { margin-top:10px; }
+@media(max-width:600px) {
+ .magnetic-lesson .lesson-views button { font-size:15px; padding:6px; }
+}

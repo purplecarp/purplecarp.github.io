@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>電流的磁效應 - 物鯉魚教學模擬</title>
+    <meta name="description" content="以平面與可旋轉立體視角比較長直導線、環形線圈與螺線管的電流及磁場，支援平板課堂演示。">
+    <link rel="icon" href="../../images/fish.png">
+    <link rel="stylesheet" href="../../css/simulations.css">
+    <link rel="stylesheet" href="../../css/classroom.css">
+    <link rel="stylesheet" href="lesson.css">
+    <!-- Shared shell owns canvas sizing, accessibility controls and playback. -->
+    <script defer src="../../js/classroom.js"></script>
+    <script defer src="model.js"></script>
+    <script defer src="lesson.js"></script>
+</head>
+<body class="classroom magnetic-lesson">
+    <nav class="lesson-nav" aria-label="網站導覽">
+        <a class="lesson-brand" href="../../index.html"><img src="../../images/fish.png" alt="">物鯉魚教學模擬</a>
+        <a href="../../physics-simulations.html#physics-4">← 返回模擬列表</a>
+    </nav>
+    <main>
+        <header class="lesson-heading">
+            <h1>電流的磁效應</h1>
+            <p>切換長直導線、環形線圈與螺線管；用平面測量磁場，用立體視角看見導線與磁場的空間關係。</p>
+        </header>
+        <div id="lesson"></div>
+        <noscript>請啟用 JavaScript 以操作模擬；下方仍可閱讀物理原理。</noscript>
+        <details class="lesson-panel lesson-notes">
+            <summary>詳細說明、公式與模型限制</summary>
+            <article>
+                <h2>操作與視角</h2>
+                <p>每種模型都有「平面視角」、「立體視角」與「電流－磁場」圖。平面圖可用單指拖曳測量點 P；立體圖用單指拖曳旋轉，或使用方位角、仰角與縮放的滑桿／加減按鈕。視角歸位保留物理參數。</p>
+                <p>P 點固定在 xy 平面，兩種視角共用同一位置與讀值。立體視角可透過測量位置 x、y 滑桿移動 P；旋轉相機不會改變磁場數值。+z 為平面圖朝向觀察者的方向。綠色表示磁場，橙色表示傳統電流，黃色表示 P 點。</p>
+            </article>
+            <article>
+                <h2>長直導線與右手定則</h2>
+                <p class="formula">B = μ₀|I| / (2πr)</p>
+                <p>導線視為沿 z 軸的無限長細導線，r 是到導線的垂直距離。正電流沿 +z，平面圖以 ⊙ 表示出紙面，此時磁場逆時針；負電流以 ⊗ 表示入紙面。右手拇指沿電流，四指彎曲方向就是磁場方向。立體圖僅顯示無限長導線的一段。</p>
+            </article>
+            <article>
+                <h2>單匝環形線圈</h2>
+                <p class="formula">Bₓ(x) = μ₀IR² / [2(R² + x²)³ᐟ²]；B中心 = μ₀|I| / (2R)</p>
+                <p>圓環位於 yz 平面，軸線沿 x。平面圖的上下兩個截面屬於同一個完整圓環，立體圖顯示完整形狀。正電流在上方截面沿 +z、下方沿 −z，中心磁場沿 +x。右手四指順電流彎曲，拇指指向中心磁場。</p>
+            </article>
+            <article>
+                <h2>有限長螺線管</h2>
+                <p class="formula">長管內部近似：B ≈ μ₀N|I| / L</p>
+                <p>以 N 個圓環均勻排列於長度 L 內，各匝位於等分區間的中點，磁場由各匝畢奧–沙伐定律積分相加。平面圖每對上下截面對應立體圖的一匝。保留端點與外部磁場；不模擬螺旋連接線、引線與導線厚度。正電流時管內磁場朝右，右端為 N 極，外部磁場返回左端。</p>
+                <p>μ₀NI/L 僅為長管內部、遠離兩端的近似。畫面列出中心實算值及長管近似，短管兩者不必相等。</p>
+            </article>
+            <article>
+                <h2>靜態觀察與數值顯示</h2>
+                <p>本模擬顯示穩定電流的磁場。調整參數後立即更新，不需要播放或時間軸；較大的實心箭頭表示磁場與傳統電流方向，不代表粒子運動或傳播速率。</p>
+                <p>旋轉、縮放及顯示選項不改變物理條件；恢復預設還原全部參數與顯示設定。測量位置以 cm 輸入，計算使用 SI 單位，讀值以 μT 顯示。</p>
+                <p>採 μ₀ ≈ 4π × 10⁻⁷ T·m/A，空氣芯，忽略鐵芯、地磁與感應暫態。圓環採 128 點中點積分。距導線 0.8 cm 內隱藏非零電流的讀值與場線，避免細導線奇異點與近線數值誤差；此範圍不代表真實線徑。</p>
+                <p>磁力線採固定種子，數量不隨電流大小改變，不應用密度跨模式比較強弱；箭頭長度固定，只表示方向。電流－磁場圖在同一模型內使用固定縱軸：長直導線 ±50 μT、環形線圈 ±200 μT、螺線管 ±1500 μT；切換模型會改變尺度，讀值超界時會標示。磁場分量與電流呈線性，圖表使用帶正負號的 Bᵧ（長直導線）或 Bₓ（線圈）。立體採等比例正交投影及線段深度排序，遠側部分較暗；可關閉磁力線以清楚觀察繞線。</p>
+            </article>
+            <article>
+                <h2>參考來源</h2>
+                <p><a href="https://openstax.org/books/university-physics-volume-2/pages/12-summary" target="_blank" rel="noopener">OpenStax University Physics 2，第 12 章</a></p>
+                <p><a href="https://openstax.org/books/university-physics-volume-2/pages/12-6-solenoids-and-toroids" target="_blank" rel="noopener">OpenStax：Solenoids and Toroids</a></p>
+            </article>
+        </details>
+    </main>
+</body>
+</html>

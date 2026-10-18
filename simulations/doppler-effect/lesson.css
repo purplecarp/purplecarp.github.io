@@ -1,0 +1,20 @@
+/* Topic-only additions; playback and tablet layout come from the shared template. */
+.doppler .audio-bar { display:flex; align-items:center; flex-wrap:wrap; gap:8px 14px; margin:0 0 8px; padding:8px; background:#edf5fb; border-radius:8px; }
+.doppler .audio-bar p { margin:0; flex:1; min-width:120px; font-size:14px; color:#37566f; }
+.doppler .audio-bar button { font-size:16px; }
+.doppler .lesson-control:has(input[type=checkbox]) > label { min-height:48px; cursor:pointer; }
+.doppler input[type=range] { min-height:48px; }
+.doppler .lesson-readout:nth-child(2) { border-color:#208464; }
+.doppler .lesson-toolbar .tools { flex-wrap:wrap; }
+.doppler .lesson-notes summary { min-height:48px; }
+@media(max-width:600px) {
+ .doppler .lesson-panel { padding:8px; }
+ .doppler .audio-bar { padding:6px; gap:6px; }
+ .doppler .audio-bar button { font-size:15px; }
+ .doppler .lesson-status { margin-bottom:0; }
+}
+
+.doppler.is-presenting .canvas-box { min-height:260px; }
+
+.doppler .comparison-grid { grid-template-columns:minmax(0,1fr); }
+.doppler .comparison-canvas-box { height:260px; }

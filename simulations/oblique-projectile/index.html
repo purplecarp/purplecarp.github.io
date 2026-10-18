@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>斜向拋射 - 物鯉魚教學模擬</title>
+  <meta name="description" content="調整初速度與拋射角度，或讓相同初速、不同角度的物體同時射出，比較軌跡、射程與飛行時間。">
+  <link rel="icon" href="../../images/fish.png">
+  <link rel="stylesheet" href="../../css/classroom.css">
+  <link rel="stylesheet" href="lesson.css">
+  <script defer src="model.js"></script>
+  <script defer src="lesson.js"></script>
+</head>
+<body class="classroom oblique-projectile">
+  <nav class="lesson-nav" aria-label="網站導覽">
+    <a class="lesson-brand" href="../../index.html"><img src="../../images/fish.png" alt="">物鯉魚教學模擬</a>
+    <a href="../../physics-simulations.html">← 返回模擬列表</a>
+  </nav>
+  <main>
+    <header class="lesson-heading"><h1>斜向拋射</h1><p>改變出手的角度，觀察一條拋物線；同時發射，找出射程與滯空時間的秘密。</p></header>
+    <div class="lesson-views" role="group" aria-label="實驗模式">
+      <button id="singleMode" aria-pressed="true">單一拋射</button>
+      <button id="compareMode" aria-pressed="false">同速多角度比較</button>
+    </div>
+    <div class="lesson-grid">
+      <section class="lesson-panel lesson-stage" aria-label="拋射動畫與觀測結果">
+        <div class="lesson-toolbar">
+          <button id="play" class="primary">▶ 發射</button><button id="step">前進 0.05 s</button><button id="reset">↺ 重設</button>
+          <span id="status" class="lesson-status" role="status">準備就緒</span>
+        </div>
+        <div id="legend" class="trajectory-legend" aria-label="軌跡圖例"></div>
+        <div class="canvas-box"><canvas id="scene" role="img" aria-label="斜向拋射軌跡，水平與垂直使用相同距離比例。即時位置與預測結果列於下方。">請使用支援 Canvas 的瀏覽器。下方表格提供各物體的數值。</canvas></div>
+        <div class="lesson-timeline"><label for="time">時間 <output id="timeValue" for="time">0.00 s</output></label><input id="time" type="range" min="0" max="1000" step="1" value="0"><span id="endTime"></span></div>
+        <p class="hint">原點為發射位置，向右、向上為正；兩軸等比例。虛線為預測軌跡，實線為已飛行路徑。</p>
+        <div class="results-wrap" tabindex="0" role="region" aria-label="拋射數據，可左右捲動">
+          <table><caption>即時位置與理論預測</caption><thead><tr><th scope="col">物體／角度</th><th scope="col">x (m)</th><th scope="col">y (m)</th><th scope="col">射程 (m)</th><th scope="col">最高點 (m)</th><th scope="col">飛行時間 (s)</th><th scope="col">狀態</th></tr></thead><tbody id="results"></tbody></table>
+        </div>
+        <p id="insight" class="question-box"></p>
+      </section>
+      <aside class="lesson-panel lesson-controls" aria-label="模擬控制">
+        <h2>實驗設定</h2><p class="hint">調整初速、角度或切換模式後，時間會歸零。</p>
+        <div class="lesson-control"><label for="v0">初速度 v₀ <output id="v0Value" for="v0">20 m/s</output></label><input id="v0" type="range" min="1" max="60" step="0.5" value="20"></div>
+        <div id="singleControls" class="lesson-control"><label for="angle">拋射角度 θ <output id="angleValue" for="angle">45°</output></label><input id="angle" type="range" min="0" max="90" step="1" value="45"></div>
+        <fieldset id="compareControls" hidden><legend>七個角度，同時射出</legend>
+          <p class="hint">0°、15°、30°、45°、60°、75°、90°<br>A 至 G 共用上方初速度。</p>
+          <p class="hint">0° 由地面發射，飛行時間為零；90° 為鉛直上拋。</p>
+        </fieldset>
+        <div class="lesson-control"><label for="speed">播放速度</label><select id="speed"><option value="0.25">0.25× 慢動作</option><option value="0.5">0.5×</option><option value="1" selected>1× 正常</option><option value="2">2×</option></select></div>
+        <fieldset><legend>顯示輔助</legend>
+          <label class="check"><input id="prediction" type="checkbox" checked>完整預測軌跡</label>
+          <label class="check"><input id="trail" type="checkbox" checked>等時間軌跡點（每 0.2 s）</label>
+          <label class="check"><input id="velocity" type="checkbox">速度方向箭頭</label>
+          <label class="check"><input id="gravity" type="checkbox">重力箭頭與 g 值</label>
+        </fieldset>
+        <p class="model-note">重力加速度 g = 9.8 m/s²<br>由地面發射、落回同一高度，忽略空氣阻力。落地後停留於落點。</p>
+      </aside>
+    </div>
+    <noscript>請啟用 JavaScript 以操作斜向拋射模擬。</noscript>
+    <details class="lesson-panel lesson-notes"><summary>物理公式與觀察提示</summary>
+      <article><h2>水平等速，鉛直等加速度</h2><p class="formula">x = v₀ cosθ · t　　y = v₀ sinθ · t − ½gt²</p><p class="formula">vₓ = v₀ cosθ　　vᵧ = v₀ sinθ − gt</p><p>最高點的鉛直速度為零，水平速度仍不變。速度方向箭頭沿軌跡切線；黃色重力加速度箭頭恆向下，g = 9.8 m/s²（aᵧ = −9.8 m/s²）。箭長僅作示意，速度與加速度的箭長不可直接比較。落地後不再顯示箭頭。</p></article>
+      <article><h2>同速、不同角度，會發生什麼事？</h2><p class="formula">T = 2v₀ sinθ / g　　R = v₀² sin(2θ) / g　　H = v₀² sin²θ / (2g)</p><p>在此模型中，45° 的射程最大；互餘角（例如 30° 與 60°）的射程相同，但較大的角度飛得更高、滯空更久。比較時以同一時鐘前進，各球在自己的落地時刻停止。</p><p>0° 從地面水平射出時，飛行時間與射程皆為零；90° 是鉛直上拋，水平位移為零。物體視為質點，不模擬地面碰撞或反彈。</p></article>
+    </details>
+  </main>
+</body>
+</html>

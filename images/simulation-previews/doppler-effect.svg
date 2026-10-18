@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="210" viewBox="0 0 320 210">
+<rect width="320" height="210" fill="#101e2e"/>
+<g fill="none" stroke="#62b9fa" stroke-width="2" opacity=".7">
+<circle cx="70" cy="110" r="145"/><circle cx="90" cy="110" r="117"/><circle cx="110" cy="110" r="89"/><circle cx="130" cy="110" r="61"/><circle cx="150" cy="110" r="33"/>
+</g>
+<path d="M20 110H300" stroke="#b9ccdf" stroke-dasharray="4 8" opacity=".3"/>
+<circle cx="170" cy="110" r="12" fill="#62b9fa"/><circle cx="263" cy="129" r="11" fill="#65dcaf"/>
+<path d="M166 76h35m-9-7 9 7-9 7" fill="none" stroke="#62b9fa" stroke-width="3"/>
+<g font-family="system-ui,sans-serif" font-size="20" font-weight="700"><text x="18" y="31" fill="#b9ccdf">DOPPLER EFFECT</text><text x="164" y="151" fill="#62b9fa">S</text><text x="255" y="167" fill="#65dcaf">O</text></g>
+</svg>
