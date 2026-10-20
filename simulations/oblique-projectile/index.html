@@ -29,9 +29,13 @@
           <span id="status" class="lesson-status" role="status">準備就緒</span>
         </div>
         <div id="legend" class="trajectory-legend" aria-label="軌跡圖例"></div>
-        <div class="canvas-box"><canvas id="scene" role="img" aria-label="斜向拋射軌跡，水平與垂直使用相同距離比例。即時位置與預測結果列於下方。">請使用支援 Canvas 的瀏覽器。下方表格提供各物體的數值。</canvas></div>
+        <div id="componentInfo" class="component-info" hidden>
+          <p class="hint"><span class="component-x">■ x：水平等速</span>　<span class="component-y">◆ y：鉛直上拋</span>，分別使用原拋射的水平、鉛直初速度；虛線連接同時刻的位置，各組觀察至原物體落地。</p>
+          <p id="componentValues" class="hint"></p>
+        </div>
+        <div class="canvas-box"><canvas id="scene" role="img" aria-label="斜向拋射軌跡，水平與鉛直範圍依射程與最高點自動縮放，兩軸比例不同。即時位置與預測結果列於下方。">請使用支援 Canvas 的瀏覽器。下方表格提供各物體的數值。</canvas></div>
         <div class="lesson-timeline"><label for="time">時間 <output id="timeValue" for="time">0.00 s</output></label><input id="time" type="range" min="0" max="1000" step="1" value="0"><span id="endTime"></span></div>
-        <p class="hint">原點為發射位置，向右、向上為正；兩軸等比例。虛線為預測軌跡，實線為已飛行路徑。</p>
+        <p class="hint">原點為發射位置，向右、向上為正；兩軸依射程與最高點各自縮放以填滿畫面，畫面角度不代表實際拋射角度。虛線為預測軌跡，實線為已飛行路徑。</p>
         <div class="results-wrap" tabindex="0" role="region" aria-label="拋射數據，可左右捲動">
           <table><caption>即時位置與理論預測</caption><thead><tr><th scope="col">物體／角度</th><th scope="col">x (m)</th><th scope="col">y (m)</th><th scope="col">射程 (m)</th><th scope="col">最高點 (m)</th><th scope="col">飛行時間 (s)</th><th scope="col">狀態</th></tr></thead><tbody id="results"></tbody></table>
         </div>
@@ -50,6 +54,7 @@
           <label class="check"><input id="prediction" type="checkbox" checked>完整預測軌跡</label>
           <label class="check"><input id="trail" type="checkbox" checked>等時間軌跡點（每 0.2 s）</label>
           <label class="check"><input id="velocity" type="checkbox">速度方向箭頭</label>
+          <label class="check"><input id="components" type="checkbox" aria-controls="componentInfo">x、y 速度分解與軸上運動</label>
           <label class="check"><input id="gravity" type="checkbox">重力箭頭與 g 值</label>
         </fieldset>
         <p class="model-note">重力加速度 g = 9.8 m/s²<br>由地面發射、落回同一高度，忽略空氣阻力。落地後停留於落點。</p>
@@ -57,7 +62,7 @@
     </div>
     <noscript>請啟用 JavaScript 以操作斜向拋射模擬。</noscript>
     <details class="lesson-panel lesson-notes"><summary>物理公式與觀察提示</summary>
-      <article><h2>水平等速，鉛直等加速度</h2><p class="formula">x = v₀ cosθ · t　　y = v₀ sinθ · t − ½gt²</p><p class="formula">vₓ = v₀ cosθ　　vᵧ = v₀ sinθ − gt</p><p>最高點的鉛直速度為零，水平速度仍不變。速度方向箭頭沿軌跡切線；黃色重力加速度箭頭恆向下，g = 9.8 m/s²（aᵧ = −9.8 m/s²）。箭長僅作示意，速度與加速度的箭長不可直接比較。落地後不再顯示箭頭。</p></article>
+      <article><h2>水平等速，鉛直等加速度</h2><p class="formula">x = v₀ cosθ · t　　y = v₀ sinθ · t − ½gt²</p><p class="formula">vₓ = v₀ cosθ　　vᵧ = v₀ sinθ − gt</p><p>勾選「x、y 速度分解與軸上運動」，可看見綠色水平分速度與粉紅色鉛直分速度。水平軸上的方塊以 v₀ cosθ 等速移動；鉛直軸上的菱形以 v₀ sinθ 向上拋出。兩者與原拋射共用時間，分別保持相同的 x、y 座標。各組在原物體落地時結束觀察，水平等速運動的停止僅為展示範圍，並非受到水平減速力。</p><p>最高點的鉛直速度為零，水平速度仍不變。速度方向箭頭沿軌跡切線；黃色重力加速度箭頭恆向下，g = 9.8 m/s²（aᵧ = −9.8 m/s²）。速度與分速度使用相同箭長比例；速度與加速度的箭長不可直接比較。落地後不再顯示箭頭。</p></article>
       <article><h2>同速、不同角度，會發生什麼事？</h2><p class="formula">T = 2v₀ sinθ / g　　R = v₀² sin(2θ) / g　　H = v₀² sin²θ / (2g)</p><p>在此模型中，45° 的射程最大；互餘角（例如 30° 與 60°）的射程相同，但較大的角度飛得更高、滯空更久。比較時以同一時鐘前進，各球在自己的落地時刻停止。</p><p>0° 從地面水平射出時，飛行時間與射程皆為零；90° 是鉛直上拋，水平位移為零。物體視為質點，不模擬地面碰撞或反彈。</p></article>
     </details>
   </main>

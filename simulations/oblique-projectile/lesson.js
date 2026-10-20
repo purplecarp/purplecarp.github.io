@@ -5,6 +5,7 @@
   const colors = ['#c2cfdf', '#ff9ecb', '#63bbff', '#ffc16e', '#81dfb5', '#c5a5ff', '#79e4ed'];
   const darkColors = ['#526477', '#a32e66', '#18699e', '#975506', '#187450', '#7044a6', '#14757e'];
   const comparisonAngles = [0, 15, 30, 45, 60, 75, 90];
+  const componentColors = { x: '#81dfb5', y: '#ff9ecb' };
   let mode = 'single', time = 0, running = false, previous = null, frame = null;
   let width = 0, height = 0;
   const v0 = () => Number($('v0').value);
@@ -24,6 +25,12 @@
   function reset() { pause(); time = 0; render(); }
   function render() {
     const list = shots(), end = duration();
+    $('componentInfo').hidden = !$('components').checked;
+    $('componentValues').textContent = $('components').checked ? list.map(shot => {
+      const s = state(shot, time);
+      return s.landed ? `${shot.name}：已落地（分解運動觀察結束）`
+        : `${shot.name}：vₓ = ${fixed(s.vx)} m/s，vᵧ = ${fixed(s.vy)} m/s`;
+    }).join('；') : '';
     $('timeValue').textContent = `${fixed(time)} s`;
     $('time').value = end > 0 ? time / end * 1000 : 0;
     $('time').disabled = end === 0;
@@ -80,7 +87,7 @@
   $('singleMode').addEventListener('click', () => { mode = 'single'; configure(); });
   $('compareMode').addEventListener('click', () => { mode = 'compare'; configure(); });
   $('speed').addEventListener('change', () => { previous = null; });
-  for (const id of ['prediction', 'trail', 'velocity', 'gravity']) $(id).addEventListener('change', render);
+  for (const id of ['prediction', 'trail', 'velocity', 'components', 'gravity']) $(id).addEventListener('change', render);
   document.addEventListener('visibilitychange', () => { if (document.hidden) { pause(); render(); } });
 
   function line(x1, y1, x2, y2, color, weight = 1, dash = []) {
@@ -107,20 +114,30 @@
   function draw(list) {
     if (!width || !height) return;
     ctx.clearRect(0, 0, width, height);
-    // Reserve room for enlarged downward/rightward vectors near impact.
-    const left = 50, bottom = height - 110, top = 42, right = width - 116;
-    // Keep the frame fixed across angles and modes for a given initial speed.
-    // Use one distance scale so angles and trajectory shapes remain physical.
+    const vectors = $('velocity').checked || $('components').checked;
+    const left = 50, top = 42;
+    const bottom = height - (vectors ? 110 : $('gravity').checked ? 80 : 48);
+    const right = width - (vectors ? 116 : 28);
+    // Fit the full selected trajectories, keeping the viewport stable during playback.
+    // Independent axis scales use both dimensions, including on narrow screens.
+    const initialStates = list.map(shot => state(shot, 0));
     const limit = v0() ** 2 / 9.8;
-    const scale = Math.min((right - left) / limit, (bottom - top) / (limit / 2));
-    const X = x => left + x * scale, Y = y => bottom - y * scale;
-    const rough = 65 / scale, power = 10 ** Math.floor(Math.log10(rough));
-    const spacing = [1, 2, 5, 10].find(n => n * power >= rough) * power;
-    for (let x = 0; x <= (right - left) / scale; x += spacing) {
+    const range = Math.max(...initialStates.map(s => s.range)) || limit;
+    const maxHeight = Math.max(...initialStates.map(s => s.maxHeight)) || limit / 2;
+    const scaleX = (right - left) / range, scaleY = (bottom - top) / maxHeight;
+    const X = x => left + x * scaleX, Y = y => bottom - y * scaleY;
+    // Transform all velocity arrows together so their sum stays tangent to the drawn path.
+    const velocityScale = 100 / Math.max(...initialStates.map(s => Math.hypot(s.vx * scaleX, s.vy * scaleY)));
+    const tickSpacing = scale => {
+      const rough = 65 / scale, power = 10 ** Math.floor(Math.log10(rough));
+      return [1, 2, 5, 10].find(n => n * power >= rough) * power;
+    };
+    const spacingX = tickSpacing(scaleX), spacingY = tickSpacing(scaleY);
+    for (let x = 0; x <= range; x += spacingX) {
       line(X(x), top, X(x), bottom, '#23364b');
       text(String(Number(x.toPrecision(4))), X(x), bottom + 20, '#b9ccdf', 'center');
     }
-    for (let y = spacing; y <= (bottom - top) / scale; y += spacing) {
+    for (let y = spacingY; y <= maxHeight; y += spacingY) {
       line(left, Y(y), right, Y(y), '#23364b');
       text(String(Number(y.toPrecision(4))), left - 8, Y(y) + 4, '#b9ccdf', 'right');
     }
@@ -139,19 +156,56 @@
       ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
     };
     const states = list.map(shot => state(shot, time));
+    if ($('components').checked) list.forEach((shot, index) => {
+      const s = states[index], px = X(s.x), py = Y(s.y);
+      // Both independent motions use the projectile's clamped observation time.
+      // Thus x = vx0 * t and y = vy0 * t - g * t² / 2 stay exactly aligned.
+      if ($('prediction').checked) {
+        line(left, bottom, X(s.range), bottom, componentColors.x, 2, [6, 6]);
+        line(left, bottom, left, Y(s.maxHeight), componentColors.y, 2, [6, 6]);
+      }
+      line(left, bottom, px, bottom, componentColors.x, 3);
+      const reachedHeight = s.t >= s.flightTime / 2 ? s.maxHeight : s.y;
+      line(left, bottom, left, Y(reachedHeight), componentColors.y, 3);
+      line(left, py, px, py, componentColors.y, 1, [4, 5]);
+      line(px, py, px, bottom, componentColors.x, 1, [4, 5]);
+      if ($('trail').checked) for (let t = 0.2; t < s.t; t += 0.2) {
+        const p = state(shot, t);
+        dot(X(p.x), bottom, 2.5, componentColors.x);
+        dot(left, Y(p.y), 2.5, componentColors.y);
+      }
+      ctx.fillStyle = componentColors.x;
+      ctx.fillRect(px - 6, bottom - 6, 12, 12);
+      ctx.fillStyle = componentColors.y;
+      ctx.beginPath(); ctx.moveTo(left, py - 9); ctx.lineTo(left + 9, py);
+      ctx.lineTo(left, py + 9); ctx.lineTo(left - 9, py); ctx.closePath(); ctx.fill();
+      const xOverlap = states.slice(0, index).filter(other => Math.abs(other.x - s.x) * scaleX < 18).length;
+      const yOverlap = states.slice(0, index).filter(other => Math.abs(other.y - s.y) * scaleY < 18).length;
+      text(`${shot.name}ₓ`, px + (xOverlap % 3) * 24, bottom + 40 + Math.floor(xOverlap / 3) * 16, componentColors.x, 'center');
+      text(`${shot.name}ᵧ`, left + 14 + yOverlap * 24, py + 18, componentColors.y);
+    });
     list.forEach((shot, index) => {
       const s = states[index];
       if ($('prediction').checked) path(shot, s.flightTime, [6, 6], 0.55);
       path(shot, s.t, [], 1);
       if ($('trail').checked) for (let t = 0.2; t < s.t; t += 0.2) { const p = state(shot, t); dot(X(p.x), Y(p.y), 2.5, shot.color); }
       if ($('velocity').checked && !s.landed) {
-        const length = Math.min(100, 100 * s.speed / v0()), a = Math.atan2(-s.vy, s.vx);
-        const dx = length * Math.cos(a), dy = length * Math.sin(a);
+        const dx = s.vx * scaleX * velocityScale, dy = -s.vy * scaleY * velocityScale;
         arrow(X(s.x), Y(s.y), dx, dy, shot.color);
+      }
+      if ($('components').checked && !s.landed) {
+        // Use the same velocity scale as the resultant arrow.
+        const dx = s.vx * scaleX * velocityScale, dy = -s.vy * scaleY * velocityScale;
+        arrow(X(s.x), Y(s.y), dx, 0, componentColors.x);
+        arrow(X(s.x), Y(s.y), 0, dy, componentColors.y);
+        text('vₓ', X(s.x) + dx + 5, Y(s.y) - 5, componentColors.x);
+        text('vᵧ', X(s.x) - 8, Y(s.y) + dy - 7, componentColors.y, 'right');
+        arrow(X(s.x), bottom, dx, 0, componentColors.x);
+        arrow(left, Y(s.y), 0, dy, componentColors.y);
       }
       if ($('gravity').checked && !s.landed) arrow(X(s.x), Y(s.y), 0, 66, '#f4e66f');
       // Concentric outlines and staggered labels keep coincident launches/landings identifiable.
-      const overlap = states.slice(0, index).filter(other => Math.hypot(other.x - s.x, other.y - s.y) * scale < 1).length;
+      const overlap = states.slice(0, index).filter(other => Math.hypot((other.x - s.x) * scaleX, (other.y - s.y) * scaleY) < 1).length;
       const px = X(s.x), py = Y(s.y), radius = 7 + overlap * 2;
       ctx.beginPath(); ctx.arc(px, py, radius, 0, Math.PI * 2); ctx.strokeStyle = shot.color; ctx.lineWidth = 2; ctx.stroke();
       if (mode === 'single') dot(px, py, 4, shot.color);

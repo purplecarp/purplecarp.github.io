@@ -1,0 +1,2 @@
+/* Keep touch controls reachable above the portrait presentation panel. */
+.classroom.is-presenting .lesson-toolbar { position:relative; z-index:6; background:#fff; }

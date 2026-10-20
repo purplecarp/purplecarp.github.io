@@ -7,6 +7,9 @@ body.classroom { margin:0; }
 .oblique-projectile .trajectory-legend span { display:inline-flex; align-items:center; gap:7px; }
 .oblique-projectile .swatch { display:inline-block; width:12px; height:12px; border-radius:50%; background:var(--color); }
 .oblique-projectile .hint { font-size:14px; color:#526477; margin:8px 0; }
+.oblique-projectile .component-x { color:#187450; font-weight:700; }
+.oblique-projectile .component-y { color:#a32e66; font-weight:700; }
+.oblique-projectile #componentValues { font-variant-numeric:tabular-nums; }
 .oblique-projectile fieldset { border:0; padding:0; margin:18px 0 0; min-width:0; }
 .oblique-projectile legend { font-weight:700; font-size:17px; }
 .oblique-projectile .check { display:flex; align-items:center; gap:9px; min-height:44px; font-size:15px; }

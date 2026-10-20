@@ -89,7 +89,7 @@ test('gravity toggle draws downward vectors and g value without resetting time o
     const call = a.drawing[i];
     if (call.method !== 'stroke' || call.color !== '#f4e66f' || call.weight !== 4.5) continue;
     const from = a.drawing[i - 2].args, to = a.drawing[i - 1].args;
-    assert.equal(to[0], from[0]); assert.equal(to[1] - from[1], 66);
+    assert.equal(to[0], from[0]); assert.ok(Math.abs(to[1] - from[1] - 66) < 1e-9);
   }
   a.fire('play'); a.node('gravity').checked = false; a.fire('gravity', 'change');
   assert.equal(a.frames.size, 1); assert.equal(a.node('timeValue').textContent, time);
@@ -110,4 +110,67 @@ test('hidden tab pauses instead of advancing unseen', () => {
   const a = app(); a.fire('play'); a.tick(0); a.tick(100);
   a.document.hidden = true; a.document.listeners.visibilitychange();
   assert.equal(a.frames.size, 0); assert.equal(a.node('status').textContent, '已暫停');
+});
+
+test('component motions align with the projectile while vertical velocity reverses at the apex', () => {
+  const a = app();
+  a.node('components').checked = true; a.fire('components', 'change');
+  assert.equal(a.node('componentInfo').hidden, false);
+  const shafts = color => a.drawing.flatMap((call, i) =>
+    call.method === 'stroke' && call.color === color && call.weight === 4.5
+      ? [{ from: a.drawing[i - 2].args, to: a.drawing[i - 1].args }] : []);
+  for (const fraction of [250, 500, 750]) {
+    a.fire('time', 'input', fraction);
+    const s = model.stateAt({ v0: 20, angle: 45 }, model.stateAt({ v0: 20, angle: 45 }, 0).flightTime * fraction / 1000);
+    const initial = model.stateAt({ v0: 20, angle: 45 }, 0);
+    const scaleX = (700 - 116 - 50) / s.range, scaleY = (400 - 110 - 42) / s.maxHeight;
+    const velocityScale = 100 / Math.hypot(initial.vx * scaleX, initial.vy * scaleY);
+    const px = 50 + s.x * scaleX, py = 290 - s.y * scaleY;
+    const xArrows = shafts('#81dfb5'), yArrows = shafts('#ff9ecb');
+    assert.equal(xArrows.length, 2);
+    assert.deepEqual(xArrows[0].from, [px, py]);
+    assert.deepEqual(xArrows[1].from, [px, 290]);
+    for (const arrow of xArrows) {
+      assert.equal(arrow.to[1], arrow.from[1]);
+      assert.ok(Math.abs(arrow.to[0] - arrow.from[0] - s.vx * scaleX * velocityScale) < 1e-9);
+    }
+    assert.ok(a.drawing.some(call => call.method === 'fillRect' && call.args[0] === px - 6 && call.args[1] === 284));
+    assert.ok(a.drawing.some(call => call.method === 'moveTo' && call.args[0] === 50 && call.args[1] === py - 9));
+    if (fraction === 500) {
+      assert.equal(yArrows.length, 0);
+      assert.ok(a.node('componentValues').textContent.includes('vᵧ = 0.00 m/s'));
+    } else {
+      assert.equal(yArrows.length, 2);
+      assert.deepEqual(yArrows[0].from, [px, py]);
+      assert.deepEqual(yArrows[1].from, [50, py]);
+      for (const arrow of yArrows) {
+        assert.equal(arrow.to[0], arrow.from[0]);
+        assert.ok(Math.abs(arrow.to[1] - arrow.from[1] + s.vy * scaleY * velocityScale) < 1e-9);
+      }
+    }
+  }
+  a.fire('play');
+  const time = a.node('timeValue').textContent;
+  a.node('components').checked = false; a.fire('components', 'change');
+  assert.equal(a.frames.size, 1); assert.equal(a.node('timeValue').textContent, time);
+  assert.equal(a.node('componentInfo').hidden, true);
+  assert.equal(shafts('#81dfb5').length, 0); assert.equal(shafts('#ff9ecb').length, 0);
+});
+
+test('component comparison uses each impact time and handles zero and vertical launches', () => {
+  const a = app();
+  a.node('components').checked = true; a.fire('components', 'change'); a.fire('compareMode');
+  a.fire('time', 'input', 300);
+  const shafts = a.drawing.filter(call => call.method === 'stroke' && call.weight === 4.5);
+  assert.equal(shafts.filter(call => call.color === '#81dfb5').length, 8, 'Four airborne shots have horizontal components; 90 degrees has none');
+  assert.equal(shafts.filter(call => call.color === '#ff9ecb').length, 10, 'Five airborne shots have vertical components');
+  assert.ok(a.node('componentValues').textContent.includes('B：已落地'));
+  a.fire('time', 'input', 1000);
+  assert.ok(!a.drawing.some(call => call.method === 'stroke' && call.weight === 4.5));
+  a.fire('singleMode'); a.fire('angle', 'input', 0);
+  assert.equal(a.node('play').disabled, true);
+  assert.ok(!a.drawing.some(call => call.method === 'stroke' && call.weight === 4.5));
+  a.fire('angle', 'input', 90); a.fire('time', 'input', 500);
+  assert.ok(a.node('componentValues').textContent.includes('vₓ = 0.00 m/s，vᵧ = 0.00 m/s'));
+  assert.ok(!a.drawing.some(call => call.method === 'stroke' && call.weight === 4.5));
 });

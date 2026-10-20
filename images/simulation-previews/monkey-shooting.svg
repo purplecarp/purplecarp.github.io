@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 210" role="img" aria-labelledby="title">
+<title id="title">子彈沿拋物線與自由落下的猴子相遇</title>
+<rect width="320" height="210" rx="12" fill="#101e2e"/>
+<path d="M20 180H302" stroke="#7eaa87" stroke-width="3"/>
+<path d="M286 180V40H249" fill="none" stroke="#88674d" stroke-width="10"/>
+<ellipse cx="279" cy="33" rx="35" ry="22" fill="#295b4d"/>
+<path d="M35 168L251 63" stroke="#b9ccdf" stroke-dasharray="6 5"/>
+<path d="M35 168Q145 111 251 114" fill="none" stroke="#62b9fa" stroke-width="3"/>
+<path d="M251 65V114" stroke="#ffb66a" stroke-width="3" stroke-dasharray="4 4"/>
+<path d="M23 174L35 168" stroke="#62b9fa" stroke-width="9"/>
+<g transform="translate(251 114)"><path d="M-5 0L-16 -10M5 0L16 -10M-4 8L-12 16M4 8L12 16" stroke="#c89a6c" stroke-width="5" stroke-linecap="round"/><ellipse cy="3" rx="9" ry="11" fill="#a77850"/><circle cy="-13" r="12" fill="#a77850"/><circle cy="-11" r="8" fill="#f3d5ac"/><circle cx="-3" cy="-14" r="1.5"/><circle cx="3" cy="-14" r="1.5"/></g>
+<circle cx="251" cy="114" r="23" fill="none" stroke="#65dcaf" stroke-width="2"/>
+<circle cx="251" cy="114" r="5" fill="#62b9fa"/>
+<text x="18" y="30" fill="#b9ccdf" font-family="sans-serif" font-size="18">猴子射擊問題</text>
+</svg>
