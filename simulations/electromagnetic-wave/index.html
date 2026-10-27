@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>電磁波：電場、磁場與傳播方向 - 物鯉魚教學模擬</title>
+    <meta name="description" content="高中電磁波互動教學：以立體箭頭、側視圖與同相波形，探索電場、磁場和傳播方向。">
+    <link rel="icon" href="../../images/fish.png">
+    <link rel="stylesheet" href="../../css/simulations.css">
+    <link rel="stylesheet" href="../../css/classroom.css">
+    <link rel="stylesheet" href="lesson.css">
+    <script defer src="../../js/classroom.js"></script>
+    <script defer src="model.js"></script>
+    <script defer src="lesson.js"></script>
+</head>
+<body class="classroom em-wave">
+    <nav class="lesson-nav" aria-label="網站導覽">
+        <a class="lesson-brand" href="../../index.html"><img src="../../images/fish.png" alt="">物鯉魚教學模擬</a>
+        <a href="../../physics-simulations.html">← 返回模擬列表</a>
+    </nav>
+    <main>
+        <header class="lesson-heading">
+            <h1>電磁波：三個互相垂直的方向</h1>
+            <p>持續循環播放電磁波，拖曳旋轉視角，滾輪或兩指捏合縮放；隨時暫停，觀察電場 E、磁場 B 與能量傳播方向。</p>
+        </header>
+        <div id="lesson"></div>
+        <noscript>請啟用 JavaScript 以操作模擬；下方仍可閱讀物理原理。</noscript>
+        <details class="lesson-panel lesson-notes">
+            <summary>詳細說明、右手定則與課堂任務</summary>
+            <article>
+                <h2>先辨認方向，再看波形</h2>
+                <p>藍色實線與箭頭代表電場 E，沿 y 軸振盪；橙色虛線與箭頭代表磁場 B，沿 z 軸振盪。綠色箭頭表示波沿 x 軸傳播。E、B 與傳播方向在空間中兩兩垂直，立體投影的夾角不代表實際夾角。</p>
+                <p>在「立體波形」用滑鼠或單指拖曳旋轉，也可使用視角滑桿或聚焦畫布後按方向鍵。游標放在立體圖上，滾輪向上放大、向下縮小；兩指張開放大、捏合縮小，範圍為 0.5～3 倍，亦可用縮放滑桿調整。縮放以圖中央為中心，只改變顯示大小，不改變波長、場強或播放進度。「回到預設視角」同時恢復角度與 1 倍縮放。旋轉後以 +x、+y、+z 標示判讀方向；沿著某個向量觀看時，箭頭會縮短。綠色 ⊙／⊗ 表示波朝向／遠離觀察者。</p>
+                <p>在「方向特寫」中，x 軸向右、y 軸向上，+z 軸朝向你：⊙ 是箭頭尖端，表示出紙面；⊗ 是箭尾，表示入紙面。箭頭由黃色觀察點出發，方向代表該位置、該時刻的場方向。</p>
+                <p class="formula">E ⟂ B　　E ⟂ 傳播方向　　B ⟂ 傳播方向</p>
+                <p>右手食指指向 E，中指指向 B，拇指即為 E × B 的方向。例如 E 向上（+y），B 出紙面（+z），波就向右（+x）傳。半個週期後，E 與 B 同時反向，傳播方向仍不變。</p>
+            </article>
+            <article>
+                <h2>同相振盪與波速</h2>
+                <p class="formula">c = fλ ≈ 3.00 × 10⁸ m/s　　E₀ = cB₀</p>
+                <p>真空中的單一行進平面波，電場和磁場的大小同步變化：同時最強、同時為零。正向傳播時，Eᵧ 與 B𝓏 同號；反向傳播時，兩者異號，但大小仍同步。</p>
+                <p>本例 f = 100 MHz 時，λ = 3.00 m、T = 10.00 ns；E₀ = 3.00 V/m 對應 B₀ = 10.00 nT。頻率增加時，波長縮短，真空波速維持不變。</p>
+                <p class="formula">Eᵧ(x,t) = E₀ sin(kx − dωt)<br>B𝓏(x,t) = d Eᵧ(x,t) / c</p>
+                <p>d = +1 表示向 +x 傳播；d = −1 表示向 −x 傳播；k = 2π/λ，ω = 2πf。瞬時能流 S = (E × B)/μ₀；場恰為零時，瞬時能流也為零，但整體波的傳播方向仍然確定。</p>
+            </article>
+            <article>
+                <h2>動手預測</h2>
+                <ol>
+                    <li>在基本情境中，前進 5 ns（半個週期），E、B 的方向如何改變？波是否反向？</li>
+                    <li>保持振幅不變，把頻率從 100 MHz 增加至 150 MHz，觀察波長與週期。</li>
+                    <li>反轉傳播方向，固定觀察時間 t = 0，比較同一位置的 E 與 B，使用右手定則檢查。</li>
+                    <li>把振幅設為零：場箭頭與波形都應消失，不可把座標軸誤認為場向量。</li>
+                </ol>
+            </article>
+            <article>
+                <h2>模型與顯示比例</h2>
+                <p>模型為真空中、無衰減、線偏振的正弦平面波，圖中只取 x 軸上一列位置。曲線連接各處的場向量端點，並非粒子的軌跡，也不是電磁波需要依附的繩子。</p>
+                <p>電場與磁場以不同單位、不同尺度繪製，不能用兩種箭頭的畫面長度比較物理量大小。主圖尺度固定，調整振幅可看出場強變化；同相對照圖分別除以各自振幅，無單位。</p>
+                <p>時間以 ns（10⁻⁹ s）顯示，1× 播放時，實際 1 秒對應模擬 5 ns；並非光速的即時播放。波形持續循環、時間持續累計，不在 30 ns 停止或跳回起點。時間軸每 30 ns 自動延長；同相對照圖顯示目前的 30 ns 區間。改變物理參數會回到起點，移動觀察點、旋轉視角與切換顯示保留時間。</p>
+                <p>參考：<a href="https://openstax.org/books/university-physics-volume-2/pages/16-2-plane-electromagnetic-waves" target="_blank" rel="noopener noreferrer">OpenStax：Plane Electromagnetic Waves</a>；<a href="https://openstax.org/books/university-physics-volume-2/pages/16-3-energy-carried-by-electromagnetic-waves" target="_blank" rel="noopener noreferrer">Energy Carried by Electromagnetic Waves</a>。</p>
+            </article>
+        </details>
+    </main>
+</body>
+</html>

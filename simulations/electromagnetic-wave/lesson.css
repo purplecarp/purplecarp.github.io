@@ -1,0 +1,15 @@
+.em-wave .lesson-status { line-height:1.6; }
+.em-wave canvas.rotatable { touch-action:none; cursor:grab; }
+.em-wave canvas.dragging { cursor:grabbing; }
+.em-wave .lesson-readout:nth-child(3) { border-color:#227ab6; }
+.em-wave .lesson-readout:nth-child(4) { border-color:#c87523; }
+.em-wave .lesson-readout small { display:block; }
+.em-wave .canvas-box { height:clamp(370px,51vh,570px); }
+.em-wave .lesson-notes ol { padding-left:26px; }
+@media(max-width:600px) {
+ .em-wave .lesson-status { font-size:13px; }
+ .em-wave .lesson-readout { padding:5px 8px; }
+ .em-wave .lesson-readout strong { font-size:26px; }
+ .em-wave.is-presenting .lesson-status { margin:4px 0 0; }
+ .em-wave.is-presenting .lesson-views button { padding:5px 8px; }
+}

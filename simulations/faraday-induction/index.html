@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1">
+ <title>法拉第電磁感應定律 - 物鯉魚教學模擬</title>
+ <link rel="icon" href="../../images/fish.png">
+ <link rel="stylesheet" href="../../css/simulations.css">
+ <link rel="stylesheet" href="../../css/classroom.css">
+ <link rel="stylesheet" href="lesson.css">
+ <script defer src="../../js/classroom.js"></script>
+ <script defer src="model.js"></script>
+ <script defer src="lesson.js"></script>
+</head>
+<body class="classroom faraday-lesson">
+ <nav class="lesson-nav" aria-label="網站導覽">
+  <a class="lesson-brand" href="../../index.html"><img src="../../images/fish.png" alt="">物鯉魚教學模擬</a>
+  <a href="../../physics-simulations.html">← 返回模擬列表</a>
+ </nav>
+ <main>
+  <header class="lesson-heading">
+   <h1>法拉第電磁感應定律</h1>
+   <p>移動磁鐵、移動線圈，或轉動發電機：觀察磁通量的變化如何產生感應電流。</p>
+  </header>
+  <div id="lesson"></div>
+  <noscript>請啟用 JavaScript 以操作模擬。</noscript>
+  <details class="lesson-panel lesson-notes">
+   <summary>操作方法、物理原理與模型限制</summary>
+   <article>
+    <h2>先動手，再比較</h2>
+    <p>在「磁鐵與線圈」中，拖曳標示的磁鐵或線圈把手，也可使用位置滑桿及加減按鈕。移動時觀察電流，停手後電流歸零。選擇自動往復並播放，可用時間軸重播及比較；「一起移動」保持相對距離不變。</p>
+    <p>在發電機中，拖曳空白處轉動視角，或調整方位角與仰角。暫停後用初始角度滑桿檢查特殊角度，播放時觀察旋轉線圈與固定電刷。切換交流／直流會保留轉角、時間和其他參數，便於直接比較。</p>
+   </article>
+   <article>
+    <h2>有磁通量，不一定有電流</h2>
+    <p class="formula">ε = −N dΦ/dt　　I = ε/R</p>
+    <p>Φ 是每匝磁通量。磁鐵實驗取向右為線圈正法向量；從右側看，正電流沿逆時針方向。電流產生的磁場抵抗磁通量的變化，這就是楞次定律。黃箭頭表示傳統電流方向，綠箭頭表示外加磁場。</p>
+    <p>磁鐵實驗使用平滑的有效磁通模型：Φ(d) = s B₀ πr² [1 + (d/ℓ)²]<sup>−3/2</sup>，d = x線圈 − x磁鐵，r = 0.10 m、ℓ = 0.16 m，s 為磁極方向。B₀ 是中心有效磁場參數，非真實條形磁鐵的精確場解。磁力線僅示意方向，不作定量讀值；同軸移動忽略離軸效應。</p>
+   </article>
+   <article>
+    <h2>同一個旋轉線圈，兩種輸出</h2>
+    <p class="formula">Φ = BA cos θ　　ε線圈 = NBAω sin θ　　ω = 2π × rpm / 60</p>
+    <p>θ 是磁場與線圈法向量的夾角。發電機的每匝面積 A = 0.040 m²。交流發電機以兩個完整滑環連到固定電刷；直流發電機以兩片分裂環每半圈交換接點，外部負載得到同方向、大小起伏的脈動直流：ε輸出 = |ε線圈|。</p>
+    <p>轉子、接環、引線與固定電刷皆為立體幾何示意，導線只繪出代表匝；讀值以設定的總匝數 N 計算。接環局部放大圖同步旋轉，分裂環間隙加寬以利辨識，計算採瞬時理想換向。假設均勻磁場、定轉速、純電阻閉合電路、理想接觸；忽略自感、摩擦、電樞反應與電刷壓降。電流箭頭只表示方向，不代表電子移動速度。</p>
+   </article>
+   <article>
+    <h2>時間與圖表</h2>
+    <p>自動演示每次 10 s；暫停會凍結當下的運動狀態及瞬時讀值。若要觀察真正停止，請把轉速設為 0，或使用手動模式並放開物件。手動移動採實際操作時間估算速度；停止約 0.12 s 後電流歸零，保留最近 10 s、最多 600 筆操作紀錄。手動模式不提供時間倒拖，開始新的自動演示會清除手動紀錄。</p>
+    <p>波形頁分別顯示磁通量、線圈電動勢與負載電流，藍色虛線為同參數交流參考。圖軸依目前參數自動縮放；同參數交流／直流比較使用相同電流刻度。調整磁場或匝數視為設定新實驗，不模擬調整過程的瞬變。</p>
+    <p>參考：<a href="https://openstax.org/books/university-physics-volume-2/pages/13-1-faradays-law" target="_blank" rel="noopener">OpenStax：Faraday’s Law</a>、<a href="https://openstax.org/books/university-physics-volume-2/pages/13-6-electric-generators-and-back-emf" target="_blank" rel="noopener">Electric Generators</a>。</p>
+   </article>
+  </details>
+ </main>
+</body>
+</html>

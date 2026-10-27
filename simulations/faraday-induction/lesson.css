@@ -1,0 +1,20 @@
+.faraday-lesson #scene { touch-action:none; cursor:grab; }
+.faraday-lesson #scene:active { cursor:grabbing; }
+.faraday-lesson #scene:focus-visible { outline:3px solid #efdb72; outline-offset:-4px; }
+.faraday-lesson .experiment-tabs { display:flex; gap:7px; flex-wrap:wrap; margin-bottom:8px; }
+.faraday-lesson .experiment-tabs button { flex:1; font-size:16px; }
+.faraday-lesson .experiment-hint { margin:0 0 8px; font-size:15px; color:#526477; }
+.faraday-lesson .canvas-box { height:clamp(410px,57vh,640px); }
+.faraday-lesson .lesson-control input[type="checkbox"] { min-width:48px; min-height:48px; }
+.faraday-lesson .lesson-status { line-height:1.5; }
+.faraday-lesson .lesson-views button { flex:1; }
+.faraday-lesson .lesson-readout:nth-child(2) { border-color:#65aa8c; }
+.faraday-lesson .lesson-readout:nth-child(4) { border-color:#b29025; }
+.faraday-lesson.is-presenting .experiment-hint { display:none; }
+.faraday-lesson.is-presenting .canvas-box { min-height:200px; }
+@media(max-width:600px) {
+ .faraday-lesson .experiment-tabs button { padding:6px; font-size:14px; }
+ .faraday-lesson .lesson-views button { padding:6px; }
+ .faraday-lesson .canvas-box { height:440px; }
+ .faraday-lesson.is-presenting .lesson-status { font-size:12px; }
+}

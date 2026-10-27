@@ -1,0 +1,18 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="320" height="210" viewBox="0 0 320 210" role="img" aria-labelledby="title">
+<title id="title">線圈通過磁場，磁通量變化產生感應電流</title>
+<rect width="320" height="210" rx="12" fill="#101e2e"/>
+<rect x="115" y="35" width="175" height="130" rx="6" fill="#173b55"/>
+<g stroke="#62b9fa" fill="#62b9fa" stroke-width="1.5">
+<circle cx="145" cy="65" r="7" fill="none"/><circle cx="145" cy="65" r="2"/>
+<circle cx="200" cy="65" r="7" fill="none"/><circle cx="200" cy="65" r="2"/>
+<circle cx="255" cy="65" r="7" fill="none"/><circle cx="255" cy="65" r="2"/>
+<circle cx="145" cy="125" r="7" fill="none"/><circle cx="145" cy="125" r="2"/>
+<circle cx="200" cy="125" r="7" fill="none"/><circle cx="200" cy="125" r="2"/>
+<circle cx="255" cy="125" r="7" fill="none"/><circle cx="255" cy="125" r="2"/>
+</g>
+<path d="M65 55 H175 V145 H65 Z" fill="none" stroke="#efdb72" stroke-width="5"/>
+<path d="M95 55 H145 l-12 -8 M145 55 l-12 8" fill="none" stroke="#ffb66a" stroke-width="4"/>
+<path d="M45 100 H85 l-10 -7 M85 100 l-10 7" fill="none" stroke="#65dcaf" stroke-width="3"/>
+<text x="160" y="193" text-anchor="middle" font-family="system-ui,sans-serif" font-size="23" fill="#b9ccdf">ε = −N dΦ/dt</text>
+</svg>
+
