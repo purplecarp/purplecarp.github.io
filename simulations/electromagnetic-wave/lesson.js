@@ -1,6 +1,7 @@
 (() => {
  'use strict';
  const C=LessonColors,M=PhysicsModel;
+ const probeColors={electric:'#c084fc',magnetic:C.red};
  const cameraDefaults={azimuth:-25,elevation:20,zoom:1};
  const clamp=(v,min,max)=>Math.max(min,Math.min(max,v));
  const direction=(v,axis)=>v===0?'0（無方向）':`${v>0?'+':'−'}${axis}`;
@@ -11,6 +12,17 @@
  function path(a,points,color,dash=[]){
   const c=a.ctx;c.strokeStyle=color;c.lineWidth=3;c.setLineDash(dash);c.beginPath();
   points.forEach((p,i)=>i?c.lineTo(...p):c.moveTo(...p));c.stroke();c.setLineDash([]);
+ }
+ function thickArrow(a,start,end,color){
+  const dx=end[0]-start[0],dy=end[1]-start[1],length=Math.hypot(dx,dy);
+  if(length<.5)return;
+  const c=a.ctx,angle=Math.atan2(dy,dx),head=Math.min(16,length*.65);
+  c.save();c.strokeStyle=color;c.fillStyle=color;c.lineWidth=7;
+  c.beginPath();c.moveTo(...start);c.lineTo(...end);c.stroke();
+  c.beginPath();c.moveTo(...end);
+  c.lineTo(end[0]-head*Math.cos(angle-.5),end[1]-head*Math.sin(angle-.5));
+  c.lineTo(end[0]-head*Math.cos(angle+.5),end[1]-head*Math.sin(angle+.5));
+  c.closePath();c.fill();c.restore();
  }
  function propagation(a,s,y){
   const left=a.width*.28,right=a.width*.72;
@@ -57,9 +69,10 @@
    if(a.p.showE)arrow(base,point(x,f.ey/3,0),C.blue);
   }
   const probe=point(a.p.probe,0,0);
+  if(a.p.showE){const q=point(a.p.probe,s.ey/3,0);thickArrow(a,probe,q,probeColors.electric);a.dot(q[0],q[1],4,probeColors.electric);}
+  if(a.p.showB){const q=point(a.p.probe,0,s.bnT/10);thickArrow(a,probe,q,probeColors.magnetic);a.dot(q[0],q[1],4,probeColors.magnetic);}
+  thickArrow(a,probe,point(a.p.probe+s.direction*1.5,0,0),C.green);
   a.dot(probe[0],probe[1],6,C.yellow);
-  if(a.p.showE){const q=point(a.p.probe,s.ey/3,0);arrow(probe,q,C.blue);a.dot(q[0],q[1],4,C.blue);}
-  if(a.p.showB){const q=point(a.p.probe,0,s.bnT/10);arrow(probe,q,C.orange);a.dot(q[0],q[1],4,C.orange);}
   // Draw axis labels last, with a backing plate so the moving fields cannot cover them.
   for(const [q,name] of axes){
    const x=clamp(q[0]+(q[0]<origin[0]?-35:8),8,w-44);
@@ -75,10 +88,10 @@
   label(a,`拖曳旋轉 · 滾輪／兩指縮放 ${Math.round(a.p.zoom*100)}%`,w-12,w<550?88:58,C.ink,16,'right');
  }
  function symbol(a,x,y,value,r=21){
-  if(value===0){label(a,'B = 0',x,y,C.orange,24,'center');return;}
-  const c=a.ctx;c.strokeStyle=C.orange;c.lineWidth=3;c.beginPath();c.arc(x,y,r,0,2*Math.PI);c.stroke();
-  if(value>0)a.dot(x,y,4,C.orange);
-  else {a.line(x-r*.45,y-r*.45,x+r*.45,y+r*.45,C.orange,3);a.line(x-r*.45,y+r*.45,x+r*.45,y-r*.45,C.orange,3);}
+  if(value===0){label(a,'B = 0',x,y,probeColors.magnetic,24,'center');return;}
+  const c=a.ctx;c.strokeStyle=probeColors.magnetic;c.lineWidth=3;c.beginPath();c.arc(x,y,r,0,2*Math.PI);c.stroke();
+  if(value>0)a.dot(x,y,4,probeColors.magnetic);
+  else {a.line(x-r*.45,y-r*.45,x+r*.45,y+r*.45,probeColors.magnetic,3);a.line(x-r*.45,y+r*.45,x+r*.45,y-r*.45,probeColors.magnetic,3);}
  }
  function closeup(a,s){
   a.canvas.classList.remove('rotatable');
@@ -88,11 +101,12 @@
   const r=Math.min(w*.32,h*.20,110);
   a.arrow(cx-r,cy,2*r,0,C.ink);label(a,'+x',cx+r-5,cy+28,C.ink,20,'right');
   a.arrow(cx,cy+r,0,-2*r,C.ink);label(a,'+y',cx+12,cy-r+8,C.ink,20);
-  if(a.p.showE){a.arrow(cx,cy,0,-r*s.ey/3,C.blue);label(a,s.ey===0?'E = 0':s.ey>0?'E ↑ +y':'E ↓ −y',16,cy-r*.4,C.blue,24);}
+  if(a.p.showE){a.arrow(cx,cy,0,-r*s.ey/3,probeColors.electric);label(a,s.ey===0?'E = 0':s.ey>0?'E ↑ +y':'E ↓ −y',16,cy-r*.4,probeColors.electric,24);}
+  thickArrow(a,[cx,cy],[cx+s.direction*r*.85,cy],C.green);
   // Dot/cross expresses direction only; magnitude is stated in the numeric readout.
   if(a.p.showB)symbol(a,cx,cy,s.bz);
   a.dot(cx,cy,3,C.yellow);
-  label(a,a.p.showB?magnetic(s.bz):'磁場已隱藏',w/2,h-90,C.orange,w<550?20:24,'center');
+  label(a,a.p.showB?magnetic(s.bz):'磁場已隱藏',w/2,h-90,probeColors.magnetic,w<550?20:24,'center');
   label(a,'⊙ 朝向你　⊗ 遠離你',w/2,h-60,C.ink,20,'center');
   propagation(a,s,h-14);
  }
