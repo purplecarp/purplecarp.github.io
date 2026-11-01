@@ -1,0 +1,23 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="320" height="210" viewBox="0 0 320 210" role="img" aria-labelledby="title desc">
+  <title id="title">斜面上的受力</title>
+  <desc id="desc">均勻方塊放在斜面上，重力從質心鉛直向下，正向力與向上的摩擦力從接觸面出發。</desc>
+  <defs>
+    <marker id="weight" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="3.5" markerHeight="3.5" orient="auto"><path d="M0 0 10 5 0 10Z" fill="#ff8f9e"/></marker>
+    <marker id="normal" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="3.5" markerHeight="3.5" orient="auto"><path d="M0 0 10 5 0 10Z" fill="#62b9fa"/></marker>
+    <marker id="friction" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="3.5" markerHeight="3.5" orient="auto"><path d="M0 0 10 5 0 10Z" fill="#65dcaf"/></marker>
+  </defs>
+  <rect width="320" height="210" fill="#101e2e"/>
+  <path d="M40 195.21 288 52.03V196H40Z" fill="#203448"/>
+  <path d="M40 195.21 288 52.03" fill="none" stroke="#87abc8" stroke-width="2.5"/>
+  <path d="M112.29 79.57 167.71 47.57 199.71 103 144.29 135Z" fill="#345774" stroke="#87abc8" stroke-width="2"/>
+  <g fill="none" stroke-width="3.5" stroke-linecap="round">
+    <path d="M156 91.29V169.69" stroke="#ff8f9e" marker-end="url(#weight)"/>
+    <path d="M156 128.24 122.05 69.44" stroke="#62b9fa" marker-end="url(#normal)"/>
+    <path d="M156 128.24 189.95 108.64" stroke="#65dcaf" marker-end="url(#friction)"/>
+  </g>
+  <g font-family="system-ui,sans-serif" font-size="20" font-weight="700">
+    <text x="168" y="178" fill="#ff8f9e">W</text>
+    <text x="103" y="64" fill="#62b9fa">N</text>
+    <text x="202" y="110" fill="#65dcaf">f</text>
+  </g>
+</svg>

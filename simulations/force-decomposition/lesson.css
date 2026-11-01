@@ -1,0 +1,24 @@
+﻿.force-lesson .force-legend { display:flex; flex-wrap:wrap; gap:4px 16px; padding:7px 10px; margin-top:6px; border-radius:6px; background:#101e2e; color:#dce8f4; font-size:16px; }
+.force-lesson .force-legend span { white-space:nowrap; }
+.force-lesson .force-legend .weight { color:#ff8f9e; }
+.force-lesson .force-legend .support { color:#62b9fa; }
+.force-lesson .force-legend .friction { color:#65dcaf; }
+.force-lesson .force-legend .parallel { color:#ffb66a; }
+.force-lesson .force-legend .perpendicular { color:#c6a6ff; }
+.force-lesson .force-legend .decomposition-note { white-space:normal; flex-basis:100%; color:#dce8f4; font-size:14px; }
+.force-lesson .lesson-control:has(input[type="checkbox"]) label { min-height:48px; cursor:pointer; }
+.force-lesson .lesson-toolbar .tools { flex-wrap:wrap; }
+.force-lesson.large-type .force-legend { font-size:18px; }
+@media(max-width:600px) {
+ .force-lesson .force-legend { font-size:14px; gap:3px 10px; }
+ .force-lesson .force-legend .decomposition-note { font-size:12px; }
+ .force-lesson .lesson-status { font-size:12px; }
+ .force-lesson.is-presenting .lesson-readout { padding:3px 8px; }
+}
+
+
+/* Keep all three view/angle actions on one row on narrow phones. */
+@media(max-width:600px) {
+ .force-lesson .lesson-views { gap:6px; }
+ .force-lesson .lesson-views button { font-size:14px; padding:6px 8px; }
+}

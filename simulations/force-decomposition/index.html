@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>力的分解：斜面與單擺 - 物鯉魚教學模擬</title>
+    <meta name="description" content="觀察斜面上的重力、正向力、摩擦力與單擺的張力；開啟重力分解，理解沿斜面、垂直斜面及單擺沿繩子、垂直繩子方向的分力。">
+    <link rel="icon" href="../../images/fish.png">
+    <link rel="stylesheet" href="../../css/simulations.css">
+    <link rel="stylesheet" href="../../css/classroom.css">
+    <link rel="stylesheet" href="lesson.css">
+    <script defer src="../../js/classroom.js"></script>
+    <script defer src="model.js"></script>
+    <script defer src="lesson.js"></script>
+</head>
+<body class="classroom force-lesson">
+    <nav class="lesson-nav" aria-label="網站導覽">
+        <a class="lesson-brand" href="../../index.html"><img src="../../images/fish.png" alt="">物鯉魚教學模擬</a>
+        <a href="../../physics-simulations.html#physics-1">← 返回模擬列表</a>
+    </nav>
+    <main>
+        <header class="lesson-heading">
+            <h1>力的分解：斜面與單擺</h1>
+            <p>先找出物體受到哪些力，再開啟「分解重力」，觀察同一個重力在兩個方向上的作用。</p>
+        </header>
+        <div id="lesson"></div>
+        <noscript>請啟用 JavaScript 以操作模擬；下方仍可閱讀物理原理。</noscript>
+        <details class="lesson-panel lesson-notes">
+            <summary>詳細說明、公式與模型限制</summary>
+            <article>
+                <h2>先辨認力，再選擇分解方向</h2>
+                <p>重力 W 永遠鉛直向下；斜面的正向力 N 垂直表面向外；摩擦力 f 沿表面，阻礙相對滑動或滑動趨勢。單擺的繩張力 T 則沿繩指向懸點。</p>
+                <p>開啟分解後，橙色與紫色箭頭是重力的兩個分量；虛線連成的平行四邊形顯示它們的向量和就是 W。計算合力時使用 W，或改用兩個分量，不能重複相加。可關閉「顯示重力 W」單獨觀察分量。</p>
+                <p>在「情境受力圖」觀察物體與環境，在「獨立受力圖」聚焦於同一時刻的受力；兩者共用時間與參數。斜面上的均勻方塊以幾何中心 C 為質心。靜止且未翻倒時，從 C 作鉛直線與底面交於 P；W 的箭尾保持在 C，鉛直向下並越過 P，N 與 f 的箭尾則位於 P。三力的作用線交於 P，但箭頭起點不同。重力分量也由 C 出發。單擺的受力箭頭仍由擺球中心出發。</p>
+            </article>
+            <article>
+                <h2>由幾何求出 C 與 P</h2>
+                <p>畫布以向右為 x 正向、向下為 y 正向。令底面中點為 B、底寬為 b、方塊高度為 h；本圖採 b = h 的均勻正方形截面。沿斜面向上的單位切線為 u = (cosθ, −sinθ)，垂直斜面指向方塊內的單位法線為 n = (−sinθ, −cosθ)。</p>
+                <p class="formula">C = B + (h/2)n<br>P = C + (0, h/(2cosθ)) = B − (h/2)tanθ · u</p>
+                <p>因此 P 一般位於底面中點的下坡側，只有 θ = 0° 時才與中點重合。P 位於底面內的條件為 |(h/2)tanθ| ≤ b/2；等號是翻倒臨界。正方形在 θ &gt; 45° 時，鉛直投影落在底面延長線上，不可能保持這種靜止平衡。靜止還必須滿足 tanθ ≤ μₛ。</p>
+                <p>圖中的 N、f 表示接觸面分布力的等效合力。在靜止狀態，二者在 P 的力矩與重力一起滿足平衡；N 的作用線一般不通過 C，不能把 N 移到 C 或將 W 移到 P。</p>
+            </article>
+            <article>
+                <h2>斜面：沿斜面與垂直斜面</h2>
+                <p class="formula">W = mg；W∥ = mg sinθ；W⊥ = mg cosθ；N = mg cosθ</p>
+                <p>θ 是斜面與水平的夾角。W∥ 沿斜面向下，W⊥ 垂直指向斜面內。物體沒有離開或穿入斜面，因此 N 與 W⊥ 大小相等、方向相反。</p>
+                <p class="formula">靜止：fₛ = mg sinθ ≤ μₛN；下滑：fₖ = μₖN，a = g(sinθ − μₖcosθ)</p>
+                <p>物體從靜止釋放。若重力沿斜面的分量未超過最大靜摩擦力，物體保持靜止；靜摩擦力會配合需求調整，不一定等於 μₛN。超過上限後向下滑動，摩擦力沿斜面向上。水平面且無其他水平作用力時，摩擦力為零。參數自動維持 μₖ ≤ μₛ。</p>
+                <p>視角跟隨物體，斜面的刻痕向後移動表示相對運動；斜面視為足夠長，不模擬滑出邊緣。固定角度的運動演示範圍為 6 s，結束只暫停播放，不表示物體受力消失或真的停止。</p>
+                <p>下滑時採無轉動的平移模型。為使接觸力對 C 的合力矩為零，N 與 f 改由 Q = B − (h/2)(f/N)u 出發；此時三力作用線不必共點，不能套用靜止的 P 共點條件。靜止時 f/N = tanθ，Q 才與 P 重合。本模擬 μₖ ≤ μₛ ≤ 1，正方形的 Q 仍在底面內；不模擬翻倒後的轉動。</p>
+            </article>
+            <article>
+                <h2>逐漸改變斜面角度</h2>
+                <p>按「開始逐漸改變角度」，從目前傾角以每秒 3° 增加（播放速度 1× 時）。當 mg sinθ 超過 μₛmg cosθ，角度自動固定，摩擦力改為動摩擦力，物體從靜止開始下滑，不需要再按播放。臨界角為 θc = arctan μₛ；若起始角度已超過臨界角，就直接固定在起始角度下滑。</p>
+                <p>增加角度期間採緩慢傾斜的準靜態近似，忽略轉動斜面的慣性效應，物體相對斜面保持靜止。超過臨界後，以下滑開始的時刻計算速率與位移，固定角度的下滑持續演示 6 s。角度漸變與下滑共用同一時間軸，暫停、單步或倒拖都保留正確的階段；重播會回到原本的起始角度。</p>
+            </article>
+            <article>
+                <h2>角度漸變的操作</h2>
+                <p>尚未達臨界時，可按「固定目前角度」提早結束漸變。自動進入下滑後按鈕顯示「角度已固定」，用原本的播放／暫停控制運動，或調整傾角滑桿建立新的固定角度實驗。更改物理參數會回到起點；顯示選項與播放速度保留進度。</p>
+                <p>若靜、動摩擦係數相同，剛越過臨界時的加速度極小，下滑可能不明顯。通常 μₖ &lt; μₛ，開始滑動後可清楚看到摩擦力降低與下滑加速。</p>
+            </article>
+            <article>
+                <h2>單擺：沿繩子與垂直繩子</h2>
+                <p class="formula">W∥ = mg cosθ；W⊥ = mg sinθ；T − mg cosθ = mv²/L</p>
+                <p>θ 是繩與鉛直向下的夾角，向右為正。W∥ 沿繩子向外，背離懸點；W⊥ 垂直繩子，沿擺動切線朝最低點方向，讀值顯示大小。張力沿繩向內，擺動時通常不等於 mg cosθ，差值提供向心加速度。向心力是徑向合力的名稱，不是額外的一個力。</p>
+                <p class="formula">θ̈ = −(g/L) sinθ；T = mg cosθ + mv²/L</p>
+                <p>由設定的初始角度靜止釋放，繩無質量、不可伸長，擺球視為質點，忽略空氣阻力。初始角度限制在 ±70°，繩保持繃緊。計算使用完整 sinθ，沒有小角度近似；以固定 1/240 s 的 RK4 積分，倒拖時間會重算同一狀態。每次演示 12 s。</p>
+            </article>
+            <article>
+                <h2>尺度與操作</h2>
+                <p>g = 9.8 m/s²。所有力及分量共用同一箭頭比例，數值單位為 N；比例會依質量、情境與畫面空間自動調整，單擺播放中不依瞬時張力縮放。比較不同設定的大小時請看讀值。物體大小與繩長以示意比例顯示，幾何角度保持正確。</p>
+                <p>播放、暫停、單步與時間軸都對應同一物理狀態。調整物理參數會回到釋放瞬間；重力分解、顯示選項與速度不重置時間。教學預設下的問題可先預測，再按「揭示結論」。</p>
+            </article>
+            <article>
+                <h2>參考來源</h2>
+                <p><a href="https://openstax.org/books/university-physics-volume-1/pages/5-6-common-forces" target="_blank" rel="noopener">OpenStax：Common Forces（重力、正向力與張力）</a></p>
+                <p><a href="https://openstax.org/books/university-physics-volume-1/pages/6-2-friction" target="_blank" rel="noopener">OpenStax：Friction（斜面與摩擦力）</a></p>
+            </article>
+        </details>
+    </main>
+</body>
+</html>
+

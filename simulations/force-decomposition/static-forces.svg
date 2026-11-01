@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="620" viewBox="0 0 900 620" role="img" aria-labelledby="title desc">
+<title id="title">靜止方塊：重力由質心 C 出發，正向力與摩擦力由 P 出發</title>
+<desc id="desc">30 度斜面上的均勻正方塊。C 的鉛直投影與底面交於 P。重力箭身越過 P，三條作用線交於 P，箭尾不相同。</desc>
+<defs><marker id="w" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="#ff8f9e"/></marker><marker id="n" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="#62b9fa"/></marker><marker id="f" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="4" markerHeight="4" orient="auto"><path d="M0 0 L10 5 L0 10Z" fill="#65dcaf"/></marker></defs>
+<rect width="900" height="620" fill="#101e2e"/>
+<g font-family="system-ui,Microsoft JhengHei,sans-serif">
+<text x="32" y="44" fill="#e7f0fa" font-size="30" font-weight="700">靜止、未翻倒的均勻方塊</text>
+<text x="32" y="80" fill="#b9ccdf" font-size="22">三條作用線交於 P；重力的起點仍在質心 C</text>
+<path d="M55 569.6004 L845 113.4936 V575 H55Z" fill="#203448"/>
+<path d="M55 569.6004 L845 113.4936" stroke="#b9ccdf" stroke-width="3"/>
+<polygon points="283.3975 206.7949 456.6025 106.7949 556.6025 280 383.3975 380" fill="#345774" stroke="#87abc8" stroke-width="2.5"/>
+<path d="M420 243.3975 L420 358.8675" stroke="#efdb72" stroke-width="2" stroke-dasharray="4 5"/>
+<path d="M420 243.3975 L420 400.1975" stroke="#ff8f9e" stroke-width="5" fill="none" marker-end="url(#w)"/>
+<path d="M420 358.8675 L352.1036 241.2675" stroke="#62b9fa" stroke-width="5" fill="none" marker-end="url(#n)"/>
+<path d="M420 358.8675 L487.8964 319.6675" stroke="#65dcaf" stroke-width="5" fill="none" marker-end="url(#f)"/>
+<circle cx="420" cy="243.3975" r="5" fill="#efdb72"/>
+<circle cx="420" cy="358.8675" r="5" fill="#e7f0fa"/>
+<text x="433" y="233.3975" fill="#efdb72" font-size="28" font-weight="700">C</text>
+<text x="433" y="385.8675" fill="#e7f0fa" font-size="28" font-weight="700">P</text>
+<text x="383" y="427.1975" fill="#ff8f9e" font-size="28" font-weight="700">W</text>
+<text x="322.1036" y="233.2675" fill="#62b9fa" font-size="28" font-weight="700">N</text>
+<text x="499.8964" y="316.6675" fill="#65dcaf" font-size="28" font-weight="700">f</text>
+<g font-size="22"><text x="620" y="365" fill="#ff8f9e">W = 19.60 N</text><text x="620" y="401" fill="#62b9fa">N = 16.97 N</text><text x="620" y="437" fill="#65dcaf">f = 9.80 N</text></g>
+<text x="70" y="525" fill="#efdb72" font-size="24">θ = 30°</text>
+<text x="32" y="607" fill="#b9ccdf" font-size="21">P 位於底面中點的下坡側，偏移量 = (h/2) tanθ　｜　各力使用相同箭頭比例</text>
+</g></svg>
