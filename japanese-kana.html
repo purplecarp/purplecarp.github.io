@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="從五十音開始學日文：平假名、片假名、發音、翻卡記憶與隨機測驗，依自己的步調練習。">
+  <title>日日五十音｜日文學習練習室</title>
+  <link rel="icon" href="images/fish.png">
+  <link rel="stylesheet" href="css/japanese-kana.css">
+  <script src="js/kana-data.js" defer></script>
+  <script src="js/n5-data.js" defer></script>
+  <script src="js/kana-audio.js" defer></script>
+  <script src="js/kana-challenges.js" defer></script>
+  <script src="js/kana-games.js" defer></script>
+  <script src="js/japanese-kana.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#learning">跳至學習區</a>
+  <header class="site-header"><a class="brand" href="japanese-kana.html"><span class="brand-mark" lang="ja">あ</span><span>日日五十音<small>KANA, EVERY DAY</small></span></a><a class="home-link" href="index.html">回個人首頁 <span aria-hidden="true">↗</span></a></header>
+  <main>
+    <section class="hero" aria-labelledby="page-title">
+      <div class="hero-copy"><p class="eyebrow"><span></span> YOUR FIRST STEP IN JAPANESE</p><h1 id="page-title">每天一點，<br>日文從<span>五十音</span>開始。</h1><p class="hero-description">聽一聽、念一念，再把它記起來。<br>用自己的步調，認識日文的每一個聲音。</p><a class="primary-button" href="#learning">開始今天的練習 <span aria-hidden="true">↘</span></a><p class="hero-note">從零開始也沒關係，一次記住一行就好。</p></div>
+      <div class="hero-art" aria-hidden="true"><div class="art-orbit"></div><span class="art-caption">ひとつずつ、ゆっくり。</span><div class="paper paper-back"><span>ア</span><small>KATAKANA</small></div><div class="paper paper-front"><span>あ</span><small>HIRAGANA · a</small></div><span class="art-stamp">毎日<br>練習</span><span class="art-bottom">a little practice, every day.</span></div>
+    </section>
+    <section class="progress-strip" aria-label="學習進度"><div><span class="small-label">我的學習足跡</span><strong><span id="learned-count">0</span><small> / <span id="total-count">46</span> 個已熟悉</small></strong></div><div class="progress-track" role="progressbar" aria-label="目前假名與音類的熟悉進度" aria-valuemin="0" aria-valuemax="46" aria-valuenow="0" id="progress"><span id="progress-fill"></span></div><p id="progress-caption">每認識一個假名，就是一小步。</p></section>
+    <section id="learning" class="learning" aria-labelledby="learning-title">
+      <div class="section-heading"><div><p class="eyebrow">01 / PRACTICE ROOM</p><h2 id="learning-title">今天，學一點什麼？</h2></div><p>選一種方式，開始你的日文日常。</p></div>
+      <div class="mode-tabs" role="group" aria-label="學習模式"><button type="button" data-mode="chart" aria-pressed="true"><span aria-hidden="true">▦</span> 五十音表</button><button type="button" data-mode="flash" aria-pressed="false"><span aria-hidden="true">▱</span> 翻卡記憶</button><button type="button" data-mode="quiz" aria-pressed="false"><span aria-hidden="true">✎</span> 小小測驗</button><button type="button" data-mode="listen" aria-pressed="false"><span aria-hidden="true">♫</span> 聽音挑戰</button><button type="button" data-mode="vocab" aria-pressed="false"><span aria-hidden="true">文</span> N5 單字</button></div>
+      <div class="workspace">
+        <div class="toolbar" id="kana-toolbar"><div class="segmented" role="group" aria-label="假名種類"><button type="button" data-script="hira" aria-pressed="true">平假名 <span lang="ja">あ</span></button><button type="button" data-script="kata" aria-pressed="false">片假名 <span lang="ja">ア</span></button></div><label class="select-label">學習範圍 <select id="category"><option value="basic">清音・46 字</option><option value="voiced">濁音／半濁音・25 字</option><option value="contracted">拗音・33 組</option></select></label></div>
+        <div id="chart-panel"><div class="panel-heading"><div><h3 id="chart-title">平假名・清音</h3><p>點選假名查看讀音，將記住的字標記為「已熟悉」。</p></div><label class="check-label"><input type="checkbox" id="show-romaji" checked> 顯示羅馬拼音</label></div><div id="kana-chart" class="kana-chart"></div><p class="chart-note"><span class="learned-dot"></span> 已熟悉 <span>·</span> 五十音表的現代基本假名共有 46 個，包含「ん」。</p></div>
+        <div id="flash-panel" hidden><div class="panel-heading"><div><h3>翻卡記憶</h3><p>先試著唸出讀音，再翻面確認答案。</p></div><button type="button" id="shuffle" class="text-button">⇄ 重新洗牌</button></div><p id="flash-position" class="practice-position"></p><button type="button" id="flash-card" class="flash-card" aria-label="翻卡查看讀音"></button><div class="practice-actions"><button type="button" id="flash-prev" class="secondary-button">← 上一張</button><button type="button" id="flash-known" class="primary-button">標記已熟悉</button><button type="button" id="flash-next" class="secondary-button">下一張 →</button></div><p class="keyboard-hint">點擊卡片翻面 · 方向鍵切換上一張／下一張</p></div>
+        <div id="quiz-panel" hidden><div class="panel-heading"><div><h3>小小測驗</h3><p>看假名，選出正確的羅馬拼音。每次練習 10 題。</p></div></div><div id="quiz-content"></div></div>
+        <div id="listen-panel" hidden>
+          <div class="panel-heading"><div><h3>聽音挑戰</h3><p>聽聲音，點選對應假名。點下就判定，不用送出答案。</p></div><span class="challenge-badge">10 題 / 每題 100 分</span></div>
+          <div id="listen-game"></div>
+          <p class="keyboard-hint">同音字不會同時出現在選項中。可以不限次數重播，沒有作答時間限制。</p>
+        </div>
+        <div id="vocab-panel" hidden>
+          <div class="panel-heading"><div><p class="eyebrow">N5 / DAILY WORDS</p><h3>把五十音，變成生活裡的單字。</h3><p>160 個常見入門單字 · 8 個主題 · 發音與即時作答</p></div></div>
+          <div class="vocab-toolbar"><label class="select-label">單字主題 <select id="vocab-category"><option value="all">全部主題</option></select></label><div class="segmented" role="group" aria-label="單字練習模式"><button type="button" data-vocab-mode="study" aria-pressed="true">單字卡</button><button type="button" data-vocab-mode="meaning" aria-pressed="false">看字選義</button><button type="button" data-vocab-mode="listening" aria-pressed="false">聽音選字</button></div></div>
+          <p id="vocab-progress" class="vocab-progress" aria-live="polite"></p>
+          <div id="vocab-study"><div class="vocab-search"><label for="vocab-search">搜尋單字</label><input type="search" id="vocab-search" placeholder="輸入日文、讀音或中文" autocomplete="off"><label class="check-label"><input type="checkbox" id="vocab-hide-meaning"> 隱藏中文，自我練習</label></div><p id="vocab-count" class="voice-note" role="status"></p><div id="vocab-cards" class="vocab-grid"></div><p id="vocab-audio-status" class="audio-status" role="status"></p></div>
+          <div id="vocab-game" hidden></div>
+          <p class="vocab-source">本區為 N5 常見入門單字選集，非完整考試詞表。<a href="https://jlpt.jp/sp/e/faq/index.html" target="_blank" rel="noopener noreferrer">JLPT 官方未公布指定詞表 ↗</a>。動詞以辭書形呈現。</p>
+        </div>
+      </div>
+    </section>
+    <section class="learning-notes" aria-label="初學小提醒"><div class="notes-intro"><p class="eyebrow">A LITTLE GUIDANCE</p><h2>學習之前，<br>先認識它們。</h2></div><article><span class="note-number">01</span><h3>平假名 <span lang="ja">ひらがな</span></h3><p>線條圓潤，常用於日文原有詞彙、助詞和語尾。初次接觸日文，可以從這裡開始。</p></article><article><span class="note-number">02</span><h3>片假名 <span lang="ja">カタカナ</span></h3><p>線條俐落，常用於外來語、人名與擬聲語。和平假名一一對應，讀音相同。</p></article><article><span class="note-number">03</span><h3>讓耳朵也一起練習</h3><p>羅馬拼音是記憶的輔助。聽完發音後跟著唸，再試著關掉拼音，練習直接認字。</p></article></section>
+  </main>
+  <footer><span class="footer-brand">日日五十音</span><p>不用急，每天都比昨天多認識一點。</p><span>Made for little daily progress.</span></footer>
+  <dialog id="kana-dialog" aria-labelledby="detail-title"><button type="button" id="close-dialog" class="close-button" aria-label="關閉假名詳情">×</button><p class="eyebrow" id="detail-type"></p><h2 id="detail-title" lang="ja"></h2><p id="detail-romaji"></p><p id="detail-pair"></p><p id="detail-note" class="detail-note"></p><div class="detail-actions"><button type="button" id="speak" class="secondary-button">♪ 聽發音</button><button type="button" id="mark-known" class="primary-button">標記已熟悉</button></div><p class="voice-note">發音使用裝置的日文語音，需支援日文語音服務。</p><p id="detail-status" class="detail-note" role="status"></p></dialog>
+  <p id="status" class="status-message" role="status" aria-live="polite"></p>
+  <noscript><p class="noscript">請啟用 JavaScript，以使用五十音表與互動練習。</p></noscript>
+</body>
+</html>

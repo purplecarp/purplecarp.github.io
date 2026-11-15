@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>線性回歸 - 其他工具 - 李宜閎</title>
+  <meta name="description" content="輸入成對數據，繪製回歸直線，匯出圖表與 CSV。">
+  <link rel="icon" href="../images/fish.png">
+  <link rel="stylesheet" href="../css/bootstrap.min.css">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+  <link rel="stylesheet" href="../css/tool-page.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script defer src="../js/tools/linear-regression.js"></script>
+</head>
+<body>
+  <nav class="tool-page-nav" aria-label="網站導覽">
+    <a href="../physics-tools.html">← 返回其他工具</a>
+    <a href="../index.html">個人首頁</a>
+  </nav>
+  <header class="page-header">
+    <div class="container">
+      <p class="tool-eyebrow">其他工具 / 數據分析與計算</p>
+      <h1 class="page-title">線性回歸</h1>
+      <p class="page-subtitle">輸入成對數據，繪製回歸直線，匯出圖表與 CSV。</p>
+    </div>
+  </header>
+  <main class="tool-container"><div class="tool-card">
+    <div id="regression" class="tool-content active">
+          <h3>線性回歸分析</h3>
+          
+          <!-- 數據表格 -->
+          <div class="data-table-container">
+            <table class="data-table" id="dataTable">
+              <thead>
+                <tr>
+                  <th style="width: 50px;">#</th>
+                  <th>X 值</th>
+                  <th>Y 值</th>
+                  <th style="width: 80px;">操作</th>
+                </tr>
+              </thead>
+              <tbody id="dataTableBody">
+                <!-- 動態生成行 -->
+              </tbody>
+            </table>
+          </div>
+          
+          <div class="table-actions">
+            <button class="add-row-btn" onclick="addDataRow()">➕ 新增數據點</button>
+            <button class="add-row-btn" onclick="fillSampleData()">📝 填入範例數據</button>
+            <button class="add-row-btn" onclick="quickInput()">⚡ 快速輸入</button>
+            <button class="add-row-btn" onclick="clearAllData()">🗑️ 清除所有數據</button>
+            <button class="add-row-btn" onclick="downloadCSV()">💾 下載CSV</button>
+          </div>
+          
+          <div style="margin-top: 15px; display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
+            <label>
+              <input type="checkbox" id="autoUpdate" checked>
+              自動更新圖表（輸入數據後自動重繪）
+            </label>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <label>小數點位數：</label>
+              <input type="number" id="regressionDecimalPlaces" min="0" max="10" step="1" value="6" style="width: 80px;" placeholder="6">
+            </div>
+          </div>
+          
+          <button class="calculate-btn" onclick="calculateRegression()" style="margin-top: 15px;">計算與繪圖</button>
+          
+          <!-- 圖表顯示 -->
+          <div id="regressionChart" style="display: none;">
+            <div class="chart-container">
+              <canvas id="regressionCanvas"></canvas>
+            </div>
+            
+            <!-- 基本控制 -->
+            <div class="chart-controls">
+              <div class="input-group" style="flex: 2; min-width: 250px;">
+                <label>圖表標題：</label>
+                <input type="text" id="chartTitle" value="線性回歸分析" onchange="updateChart()">
+              </div>
+              <div class="input-group">
+                <label>X 軸標籤：</label>
+                <input type="text" id="xAxisLabel" value="X" onchange="updateChart()">
+              </div>
+              <div class="input-group">
+                <label>Y 軸標籤：</label>
+                <input type="text" id="yAxisLabel" value="Y" onchange="updateChart()">
+              </div>
+              <div class="input-group">
+                <label>下載背景：</label>
+                <select id="downloadBackground" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;">
+                  <option value="white">白色背景</option>
+                  <option value="transparent">透明背景</option>
+                </select>
+              </div>
+              <button class="download-btn" onclick="downloadChart()">⬇️ 下載圖表 (PNG)</button>
+            </div>
+            
+            <!-- 進階控制 -->
+            <div class="control-section">
+              <h5 onclick="toggleSection('fontControl')">
+                🔤 字體設定
+                <span id="fontControlIcon">▼</span>
+              </h5>
+              <div id="fontControl" class="control-content">
+                <div class="control-item">
+                  <label>標題字體大小：</label>
+                  <input type="number" id="titleFontSize" value="18" min="10" max="36" onchange="updateChart()">
+                </div>
+                <div class="control-item">
+                  <label>標題字體粗細：</label>
+                  <select id="titleFontWeight" onchange="updateChart()">
+                    <option value="normal">正常</option>
+                    <option value="bold" selected>粗體</option>
+                  </select>
+                </div>
+                <div class="control-item">
+                  <label>坐標軸字體大小：</label>
+                  <input type="number" id="axisLabelFontSize" value="14" min="8" max="24" onchange="updateChart()">
+                </div>
+                <div class="control-item">
+                  <label>坐標軸刻度字體：</label>
+                  <input type="number" id="axisTickFontSize" value="12" min="8" max="20" onchange="updateChart()">
+                </div>
+              </div>
+            </div>
+            
+            <div class="control-section">
+              <h5 onclick="toggleSection('gridControl')">
+                🗄 網格線設定
+                <span id="gridControlIcon">▼</span>
+              </h5>
+              <div id="gridControl" class="control-content">
+                <div class="control-item">
+                  <label>
+                    <input type="checkbox" id="showXGrid" checked onchange="updateChart()">
+                    X軸主網格線
+                  </label>
+                </div>
+                <div class="control-item">
+                  <label>
+                    <input type="checkbox" id="showYGrid" checked onchange="updateChart()">
+                    Y軸主網格線
+                  </label>
+                </div>
+                <div class="control-item">
+                  <label>
+                    <input type="checkbox" id="showXMinorGrid" onchange="updateChart()">
+                    X軸次網格線
+                  </label>
+                </div>
+                <div class="control-item">
+                  <label>
+                    <input type="checkbox" id="showYMinorGrid" onchange="updateChart()">
+                    Y軸次網格線
+                  </label>
+                </div>
+              </div>
+            </div>
+            
+            <div class="control-section">
+              <h5 onclick="toggleSection('axisControl')">
+                📊 坐標軸設定
+                <span id="axisControlIcon">▼</span>
+              </h5>
+              <div id="axisControl" class="control-content">
+                <div class="control-item">
+                  <label>X軸主間隔：</label>
+                  <input type="number" id="xAxisStep" step="any" placeholder="自動" onchange="updateChart()">
+                </div>
+                <div class="control-item">
+                  <label>Y軸主間隔：</label>
+                  <input type="number" id="yAxisStep" step="any" placeholder="自動" onchange="updateChart()">
+                </div>
+                <div class="control-item">
+                  <label>X軸次間隔數：</label>
+                  <input type="number" id="xMinorTicks" value="5" min="0" max="10" onchange="updateChart()">
+                </div>
+                <div class="control-item">
+                  <label>Y軸次間隔數：</label>
+                  <input type="number" id="yMinorTicks" value="5" min="0" max="10" onchange="updateChart()">
+                </div>
+              </div>
+            </div>
+            
+            <div class="control-section">
+              <h5 onclick="toggleSection('dataPointControl')">
+                ● 數據點設定
+                <span id="dataPointControlIcon">▼</span>
+              </h5>
+              <div id="dataPointControl" class="control-content">
+                <div class="control-item">
+                  <label>數據點大小：</label>
+                  <input type="number" id="pointRadius" value="6" min="2" max="15" onchange="updateChart()">
+                </div>
+                <div class="control-item">
+                  <label>數據點樣式：</label>
+                  <select id="pointStyle" onchange="updateChart()">
+                    <option value="circle" selected>圓形</option>
+                    <option value="rect">方形</option>
+                    <option value="triangle">三角形</option>
+                    <option value="cross">十字</option>
+                    <option value="star">星形</option>
+                  </select>
+                </div>
+                <div class="control-item">
+                  <label>數據點顏色：</label>
+                  <input type="color" id="pointColor" value="#818181" onchange="updateChart()">
+                </div>
+                <div class="control-item">
+                  <label>數據點邊框寬度：</label>
+                  <input type="number" id="pointBorderWidth" value="2" min="0" max="5" onchange="updateChart()">
+                </div>
+              </div>
+            </div>
+            
+            <div class="control-section">
+              <h5 onclick="toggleSection('regressionLineControl')">
+                📊 回歸直線設定
+                <span id="regressionLineControlIcon">▼</span>
+              </h5>
+              <div id="regressionLineControl" class="control-content">
+                <div class="control-item">
+                  <label>
+                    <input type="checkbox" id="showRegressionLine" checked onchange="updateChart()">
+                    顯示回歸直線
+                  </label>
+                </div>
+                <div class="control-item">
+                  <label>直線寬度：</label>
+                  <input type="number" id="lineWidth" value="2" min="1" max="10" onchange="updateChart()">
+                </div>
+                <div class="control-item">
+                  <label>直線樣式：</label>
+                  <select id="lineStyle" onchange="updateChart()">
+                    <option value="solid" selected>實線</option>
+                    <option value="dashed">虛線</option>
+                    <option value="dotted">點線</option>
+                  </select>
+                </div>
+                <div class="control-item">
+                  <label>直線顏色：</label>
+                  <input type="color" id="lineColor" value="#ff6384" onchange="updateChart()">
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div id="regressionResult" class="result-box" style="display: none;">
+            <h4>計算結果</h4>
+            <div id="regressionOutput"></div>
+          </div>
+        </div>
+  </div></main>
+  <footer class="tool-page-footer"><a href="../physics-tools.html">查看所有工具 →</a></footer>
+</body>
+</html>

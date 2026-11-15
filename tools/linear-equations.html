@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>二元一次方程式 - 其他工具 - 李宜閎</title>
+  <meta name="description" content="輸入兩組方程式係數，求出 x、y 並檢查代入結果。">
+  <link rel="icon" href="../images/fish.png">
+  <link rel="stylesheet" href="../css/bootstrap.min.css">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+  <link rel="stylesheet" href="../css/tool-page.css">
+  
+  <script defer src="../js/tools/linear-equations.js"></script>
+</head>
+<body>
+  <nav class="tool-page-nav" aria-label="網站導覽">
+    <a href="../physics-tools.html">← 返回其他工具</a>
+    <a href="../index.html">個人首頁</a>
+  </nav>
+  <header class="page-header">
+    <div class="container">
+      <p class="tool-eyebrow">其他工具 / 數據分析與計算</p>
+      <h1 class="page-title">二元一次方程式</h1>
+      <p class="page-subtitle">輸入兩組方程式係數，求出 x、y 並檢查代入結果。</p>
+    </div>
+  </header>
+  <main class="tool-container"><div class="tool-card">
+    <div id="equation" class="tool-content active">
+          <h3>二元一次聯立方程式求解</h3>
+          <p style="margin-bottom: 20px; color: #666;">求解方程式組：<br>
+          a₁x + b₁y = c₁<br>
+          a₂x + b₂y = c₂</p>
+          <div class="input-group">
+            <label>第一式 - a₁（x 的係數）：</label>
+            <input type="number" id="eqA1" step="any" placeholder="例如：2">
+          </div>
+          <div class="input-group">
+            <label>第一式 - b₁（y 的係數）：</label>
+            <input type="number" id="eqB1" step="any" placeholder="例如：3">
+          </div>
+          <div class="input-group">
+            <label>第一式 - c₁（常數項）：</label>
+            <input type="number" id="eqC1" step="any" placeholder="例如：13">
+          </div>
+          <div class="input-group">
+            <label>第二式 - a₂（x 的係數）：</label>
+            <input type="number" id="eqA2" step="any" placeholder="例如：4">
+          </div>
+          <div class="input-group">
+            <label>第二式 - b₂（y 的係數）：</label>
+            <input type="number" id="eqB2" step="any" placeholder="例如：-1">
+          </div>
+          <div class="input-group">
+            <label>第二式 - c₂（常數項）：</label>
+            <input type="number" id="eqC2" step="any" placeholder="例如：5">
+          </div>
+          <button class="calculate-btn" onclick="solveEquations()">求解</button>
+          <div id="equationResult" class="result-box" style="display: none;">
+            <h4>計算結果</h4>
+            <div id="equationOutput"></div>
+          </div>
+        </div>
+  </div></main>
+  <footer class="tool-page-footer"><a href="../physics-tools.html">查看所有工具 →</a></footer>
+</body>
+</html>

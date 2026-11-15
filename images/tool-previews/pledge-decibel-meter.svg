@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="320" height="210" viewBox="0 0 320 210">
+  <rect width="320" height="210" fill="#f5f8fc"/>
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="57" y="51" width="34" height="68" rx="17" fill="#eee7f6" stroke="#8058b0" stroke-width="3"/>
+    <path d="M45 96v9a29 29 0 0 0 58 0v-9M74 135v23M57 158h34" stroke="#8058b0" stroke-width="3"/>
+    <path d="M66 65h16M66 75h16M66 85h16" stroke="#b5a1cf" stroke-width="2"/>
+    <path d="M134 122a65 65 0 0 1 130 0" stroke="#dce5ee" stroke-width="12"/>
+    <path d="M134 122a65 65 0 0 1 108-49" stroke="#137b73" stroke-width="12"/>
+    <path d="M199 122l36-36" stroke="#8058b0" stroke-width="4"/>
+    <circle cx="199" cy="122" r="7" fill="#8058b0"/>
+    <path d="M145 157v-9M159 163v-21M173 169v-33M187 162v-19M201 171v-37M215 165v-25M229 160v-15M243 154v-5" stroke="#137b73" stroke-width="4"/>
+  </g>
+  <text x="160" y="194" text-anchor="middle" fill="#35516b" font-family="sans-serif" font-size="13">VOICE CHALLENGE</text>
+</svg>

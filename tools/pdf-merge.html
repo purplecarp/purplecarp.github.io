@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>PDF 合併 - 其他工具 - 李宜閎</title>
+  <meta name="description" content="選取多份 PDF、預覽並調整順序，再合併下載。">
+  <link rel="icon" href="../images/fish.png">
+  <link rel="stylesheet" href="../css/bootstrap.min.css">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+  <link rel="stylesheet" href="../css/tool-page.css">
+  <script defer src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.15.349/pdf.min.js"></script>
+  <script defer src="../js/tools/pdf-merge.js"></script>
+</head>
+<body>
+  <nav class="tool-page-nav" aria-label="網站導覽">
+    <a href="../physics-tools.html">← 返回其他工具</a>
+    <a href="../index.html">個人首頁</a>
+  </nav>
+  <header class="page-header">
+    <div class="container">
+      <p class="tool-eyebrow">其他工具 / 文件處理</p>
+      <h1 class="page-title">PDF 合併</h1>
+      <p class="page-subtitle">選取多份 PDF、預覽並調整順序，再合併下載。</p>
+    </div>
+  </header>
+  <main class="tool-container"><div class="tool-card">
+    <div id="pdfMerge" class="tool-content active">
+          <h3>PDF 合併工具</h3>
+          <p style="margin-bottom: 20px; color: #666;">選擇多個 PDF 檔案，拖曳調整合併順序後再輸出一份新 PDF。</p>
+          
+          <div class="input-group">
+            <label>選擇 PDF 檔案（可多選）：</label>
+            <input type="file" id="pdfMergeFiles" accept=".pdf,application/pdf" multiple>
+            <p class="hint-text">可直接拖曳清單中的檔案卡片，調整合併順序。</p>
+          </div>
+
+          <div id="pdfMergeFileList" class="result-box" style="display: none;">
+            <h4>已選擇檔案（可拖曳排序）</h4>
+            <div id="pdfMergeList" class="pdf-merge-list"></div>
+            <div style="margin-top: 12px;">
+              <button type="button" onclick="document.getElementById('pdfMergeAddFiles').click()">＋ 增加</button>
+              <input id="pdfMergeAddFiles" type="file" accept=".pdf,application/pdf" multiple style="display: none;">
+            </div>
+          </div>
+
+          <button class="calculate-btn" id="mergePdfBtn" onclick="mergePdfFiles()">合併 PDF</button>
+          <div id="pdfMergeResult" class="result-box" style="display: none;">
+            <h4>合併結果</h4>
+            <div id="pdfMergeOutput"></div>
+          </div>
+        </div>
+  </div></main>
+  <footer class="tool-page-footer"><a href="../physics-tools.html">查看所有工具 →</a></footer>
+</body>
+</html>

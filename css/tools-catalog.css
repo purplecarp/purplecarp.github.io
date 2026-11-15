@@ -1,0 +1,11 @@
+.tools-catalog { min-height:100vh; padding:100px 0 60px; }
+.catalog-eyebrow { color:#137b73; font-size:13px; letter-spacing:2px; margin:0 0 12px; }
+.page-header-section h1 { margin:0 0 14px; color:#26394e; font-size:34px; font-weight:700; }
+.physics-section h2 { display:flex; align-items:center; gap:12px; margin:0 0 12px; color:#26394e; font-size:22px; font-weight:700; line-height:1.5; }
+.category-description { color:#5d6d7e; font-size:14px; line-height:1.8; margin-bottom:18px; }
+#document-tools { --accent:#137b73; }
+#activity-tools { --accent:#8058b0; }
+.catalog-footer { display:flex; justify-content:space-between; flex-wrap:wrap; gap:16px; padding:8px 0; }
+.catalog-footer a { color:#536376; font-size:14px; }
+.catalog-footer a:focus-visible { outline:3px solid #2879b9; outline-offset:4px; }
+@media(max-width:600px) { .tools-catalog { padding-top:85px; } .page-header-section h1 { font-size:28px; } .physics-section h2 { font-size:20px; } }

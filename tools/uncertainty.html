@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>不確定度與統計 - 其他工具 - 李宜閎</title>
+  <meta name="description" content="輸入測量數據，計算平均值、標準差與測量不確定度。">
+  <link rel="icon" href="../images/fish.png">
+  <link rel="stylesheet" href="../css/bootstrap.min.css">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+  <link rel="stylesheet" href="../css/tool-page.css">
+  
+  <script defer src="../js/tools/uncertainty.js"></script>
+</head>
+<body>
+  <nav class="tool-page-nav" aria-label="網站導覽">
+    <a href="../physics-tools.html">← 返回其他工具</a>
+    <a href="../index.html">個人首頁</a>
+  </nav>
+  <header class="page-header">
+    <div class="container">
+      <p class="tool-eyebrow">其他工具 / 數據分析與計算</p>
+      <h1 class="page-title">不確定度與統計</h1>
+      <p class="page-subtitle">輸入測量數據，計算平均值、標準差與測量不確定度。</p>
+    </div>
+  </header>
+  <main class="tool-container"><div class="tool-card">
+    <div id="uncertainty" class="tool-content active">
+          <h3>不確定度計算與基本統計</h3>
+          <div class="input-group">
+            <label>輸入數據（每行一個數值）：</label>
+            <textarea id="uncertaintyData" placeholder="例如：&#10;10.5&#10;10.3&#10;10.6&#10;10.4"></textarea>
+            <p class="hint-text">請輸入測量數據，每個數值一行</p>
+          </div>
+          <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+            <div class="input-group" style="flex: 1; min-width: 200px;">
+              <label>儀器最小刻度：</label>
+              <input type="number" id="minScale" step="any" value="0.1" placeholder="例如：0.1">
+              <p class="hint-text">儀器的最小刻度值（用於計算儀器不確定度）</p>
+            </div>
+            <div class="input-group" style="flex: 1; min-width: 200px;">
+              <label>小數點位數：</label>
+              <input type="number" id="decimalPlaces" min="0" max="10" step="1" value="2" placeholder="例如：2">
+              <p class="hint-text">結果顯示的小數點位數</p>
+            </div>
+          </div>
+          <button class="calculate-btn" onclick="calculateUncertainty()">計算</button>
+          <div id="uncertaintyResult" class="result-box" style="display: none;">
+            <h4>計算結果</h4>
+            <div id="uncertaintyOutput"></div>
+          </div>
+        </div>
+  </div></main>
+  <footer class="tool-page-footer"><a href="../physics-tools.html">查看所有工具 →</a></footer>
+</body>
+</html>

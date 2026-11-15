@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>不確定度傳遞 - 其他工具 - 李宜閎</title>
+  <meta name="description" content="比較加減、乘除與冪次運算，計算結果的不確定度。">
+  <link rel="icon" href="../images/fish.png">
+  <link rel="stylesheet" href="../css/bootstrap.min.css">
+  <link rel="stylesheet" href="../css/style.css">
+  <link rel="stylesheet" href="../css/responsive.css">
+  <link rel="stylesheet" href="../css/tool-page.css">
+  
+  <script defer src="../js/tools/uncertainty-propagation.js"></script>
+</head>
+<body>
+  <nav class="tool-page-nav" aria-label="網站導覽">
+    <a href="../physics-tools.html">← 返回其他工具</a>
+    <a href="../index.html">個人首頁</a>
+  </nav>
+  <header class="page-header">
+    <div class="container">
+      <p class="tool-eyebrow">其他工具 / 數據分析與計算</p>
+      <h1 class="page-title">不確定度傳遞</h1>
+      <p class="page-subtitle">比較加減、乘除與冪次運算，計算結果的不確定度。</p>
+    </div>
+  </header>
+  <main class="tool-container"><div class="tool-card">
+    <div id="propagation" class="tool-content active">
+          <h3>不確定度傳遞計算</h3>
+          <div class="input-group">
+            <label>選擇公式類型：</label>
+            <select id="propagationType" onchange="updatePropagationInputs()" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+              <option value="add">加法/減法: f = A ± B</option>
+              <option value="multiply">乘法/除法: f = A × B 或 A / B</option>
+              <option value="power">冪次: f = A^n</option>
+              <option value="custom">自訂公式</option>
+            </select>
+          </div>
+          <div id="propagationInputs">
+            <div class="input-group">
+              <label>A 值：</label>
+              <input type="number" id="propA" step="any">
+            </div>
+            <div class="input-group">
+              <label>A 的不確定度 (ΔA)：</label>
+              <input type="number" id="propDeltaA" step="any">
+            </div>
+            <div class="input-group">
+              <label>B 值：</label>
+              <input type="number" id="propB" step="any">
+            </div>
+            <div class="input-group">
+              <label>B 的不確定度 (ΔB)：</label>
+              <input type="number" id="propDeltaB" step="any">
+            </div>
+          </div>
+          <button class="calculate-btn" onclick="calculatePropagation()">計算</button>
+          <div id="propagationResult" class="result-box" style="display: none;">
+            <h4>計算結果</h4>
+            <div id="propagationOutput"></div>
+          </div>
+        </div>
+  </div></main>
+  <footer class="tool-page-footer"><a href="../physics-tools.html">查看所有工具 →</a></footer>
+</body>
+</html>
