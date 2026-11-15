@@ -64,21 +64,52 @@ const { chromium } = require(process.env.ZIWEI_PLAYWRIGHT || 'playwright');
     await page.emulateMedia({ media: 'print' });
     await page.pdf({ path: path.join(output, 'print.pdf'), preferCSSPageSize: true, printBackground: true });
     assert.equal(await page.locator('.birth-panel').isVisible(), false);
+    await page.locator('.chart-section').screenshot({ path: path.join(output, 'print-layout.png') });
     await page.emulateMedia({ media: 'screen' });
-    for (const width of [390, 768]) {
+    for (const width of [320, 390, 768, 844, 1024]) {
       await page.setViewportSize({ width, height: 844 });
+      await page.waitForFunction(() => {
+        const box = document.getElementById('astrolabe').getBoundingClientRect();
+        return box.width <= document.getElementById('chart-scroll').clientWidth + 1;
+      });
       assert.equal(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth), true, `page overflow at ${width}`);
-      const scrolls = await page.locator('.chart-scroll').evaluate(el => el.scrollWidth > el.clientWidth);
-      assert.equal(scrolls, width < 754);
-      if (scrolls) {
-        await page.locator('.chart-scroll').evaluate(el => { el.scrollLeft = el.scrollWidth; });
-        assert.ok(await page.locator('.chart-scroll').evaluate(el => el.scrollLeft > 0));
-      }
-      await page.locator('.chart-scroll').evaluate(el => { el.scrollLeft = 0; });
+      assert.equal(await page.locator('.chart-scroll').evaluate(el => el.scrollWidth <= el.clientWidth + 1), true);
+      const boundsFit = await page.evaluate(() => {
+        const container = document.querySelector('.chart-scroll').getBoundingClientRect();
+        return [...document.querySelectorAll('.palace')].every(el => {
+          const rect = el.getBoundingClientRect();
+          return rect.left >= container.left && rect.right <= container.right + 1 && rect.bottom <= container.bottom + 1;
+        });
+      });
+      assert.equal(boundsFit, true, `all 12 palaces visible at ${width}`);
       await page.screenshot({ path: path.join(output, `mobile-${width}.png`), fullPage: true });
     }
+    await page.setViewportSize({ width: 390, height: 844 });
+    await page.locator('#chart-size').click();
+    assert.equal(await page.locator('#chart-size').getAttribute('aria-pressed'), 'true');
+    await page.locator('.chart-scroll').evaluate(el => { el.scrollLeft = el.scrollWidth; });
+    assert.ok(await page.locator('.chart-scroll').evaluate(el => el.scrollLeft > 0));
+    await page.locator('[data-palace="6"]').click();
+    assert.equal(await page.locator('[data-palace="6"]').getAttribute('aria-pressed'), 'true');
+    // Print while zoomed on a phone: screen transforms must not affect A4 output.
+    await page.emulateMedia({ media: 'print' });
+    await page.pdf({ path: path.join(output, 'print-mobile.pdf'), preferCSSPageSize: true, printBackground: true });
+    await page.emulateMedia({ media: 'screen' });
+    await page.locator('#chart-size').click();
+    for (const view of ['origin', 'yearly']) {
+      await page.locator(`[data-view="${view}"]`).click();
+      await page.emulateMedia({ media: 'print' });
+      await page.pdf({ path: path.join(output, `print-${view}.pdf`), preferCSSPageSize: true, printBackground: true });
+      await page.emulateMedia({ media: 'screen' });
+    }
+    await page.locator('[data-view="monthly"]').click();
+    await page.emulateMedia({ media: 'print' });
+    assert.equal(await page.locator('.astrolabe').evaluate(el => getComputedStyle(el).transform), 'none');
+    const overflow = await page.locator('.palace').evaluateAll(items => items.filter(el => el.scrollHeight > el.clientHeight + 1).map(el => el.dataset.palace));
+    assert.deepEqual(overflow, [], 'printed palace contents fit their cells');
+    await page.emulateMedia({ media: 'screen' });
     assert.deepEqual(errors, []);
-    console.log('Browser checks passed: catalog, 12 palaces, selections, lines, monthly navigation, validation, safe text, JSON export, print, mobile scrolling.');
+    console.log('Browser checks passed: catalog, 12 palaces, selections, lines, flow navigation, validation, safe text, JSON export, A4 print layout, automatic scaling at 320–1024 px, and optional zoom.');
     console.log(`Screenshots and print output: ${output}`);
   } finally { await browser.close(); }
 })().catch(error => { console.error(error); process.exitCode = 1; });

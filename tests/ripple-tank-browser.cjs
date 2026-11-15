@@ -1,0 +1,137 @@
+// Run: node tests/ripple-tank-browser.cjs
+// Set RIPPLE_PLAYWRIGHT to an installed Playwright package if not resolvable.
+const assert=require('node:assert/strict');
+const {createHash}=require('node:crypto');
+const fs=require('node:fs/promises');
+const path=require('node:path');
+const os=require('node:os');
+const {pathToFileURL}=require('node:url');
+const {chromium}=require(process.env.RIPPLE_PLAYWRIGHT || 'playwright');
+(async()=>{
+ const browser=await chromium.launch({channel:'msedge',headless:true});
+ const artifacts=await fs.mkdtemp(path.join(os.tmpdir(),'ripple-tank-qa-'));
+ try {
+  const page=await browser.newPage({viewport:{width:1440,height:1100}});
+  await page.emulateMedia({reducedMotion:'no-preference'});
+  const snapshot=async selector=>createHash('sha256').update(await page.locator(selector).evaluate(c=>c.toDataURL())).digest('hex');
+  const errors=[];page.on('pageerror',e=>errors.push(e.message));
+  const url=pathToFileURL(path.resolve(__dirname,'../simulations/ripple-tank-3d/index.html')).href;
+  await page.goto(url);
+  assert.equal(await page.locator('body.classroom').count(),1);
+  assert.equal(await page.locator('h1').innerText(),'3D 水波槽：雙點波源干涉');
+  assert.equal(await page.locator('.lesson-readout').count(),2);
+  assert.equal(await page.locator('.lesson-notes').count(),1);
+  assert.doesNotMatch(await page.locator('body').innerText(),/\?{2,}/);
+  assert.equal(await page.locator('link[href="../../css/classroom.css"]').count(),1);
+  assert.equal(await page.locator('.learning, [data-preset], #waterDepth, #screenGap').count(),0);
+  assert.equal(await page.locator('#wavelength').count(),1);
+  assert.equal(await page.locator('#wavelength-out').innerText(),'6.0 cm');
+  assert.equal(await page.locator('#waterDepth-out').innerText(),'4 cm');
+  assert.equal(await page.locator('#screenGap-out').innerText(),'3 cm');
+  assert.equal(await page.locator('#separation').inputValue(),'10');
+  assert.equal(await page.locator('#frequency').inputValue(),'1');
+  assert.equal(await page.locator('#amplitude').inputValue(),'0.15');
+  assert.equal(await page.locator('#wave-speed').innerText(),'6.0 cm/s');
+  await page.evaluate(()=>{
+    const original=RippleOptics.frame;
+    RippleOptics.frame=(p,...args)=>{window.lastOpticsParameters={...p};return original(p,...args);};
+  });
+  await page.waitForFunction(()=>window.lastOpticsParameters);
+  const checkFixed=async(wavelength=6)=>{
+    assert.deepEqual(await page.evaluate(()=>({
+      wavelength:lastOpticsParameters.wavelength,
+      waterDepth:lastOpticsParameters.waterDepth,
+      screenGap:lastOpticsParameters.screenGap
+    })),{wavelength,waterDepth:4,screenGap:3});
+  };
+  await checkFixed();
+  await page.waitForFunction(()=>parseFloat(document.querySelector('#clock').textContent.split('=')[1])>.1);
+  await page.locator('#play').click();
+  await page.waitForTimeout(150);
+  const stamp=await page.locator('#clock').innerText();
+  const image=await snapshot('#screen');
+  await page.waitForTimeout(250);
+  assert.equal(await page.locator('#clock').innerText(),stamp,'pause holds time');
+  assert.equal(await snapshot('#screen'),image,'pause holds projection');
+  await page.screenshot({path:path.join(artifacts,'desktop.png'),fullPage:true});
+  await page.locator('#step').click();await page.waitForTimeout(150);
+  assert.notEqual(await page.locator('#clock').innerText(),stamp);
+  assert.notEqual(await snapshot('#screen'),image,'step changes projection');
+  await page.locator('[data-phase="180"]').click();await page.waitForTimeout(150);
+  assert.equal(await page.locator('#envelope-value').innerText(),'0.00 cm');
+  await page.locator('[data-phase="0"]').click();await page.waitForTimeout(150);
+  assert.equal(await page.locator('#envelope-value').innerText(),'0.30 cm');
+  await page.locator('#sources').selectOption('s1');await page.waitForTimeout(150);
+  assert.equal(await page.locator('#envelope-value').innerText(),'0.15 cm');
+  await page.locator('#sources').selectOption('both');
+  await page.locator('#amplitude-mode').click();await page.waitForTimeout(150);
+  const envelopeImage=await snapshot('#screen');
+  await page.locator('#step').click();await page.waitForTimeout(150);
+  assert.equal(await snapshot('#screen'),envelopeImage,'amplitude map is time independent');
+  await page.locator('#lightOn').uncheck();await page.waitForTimeout(150);
+  assert.equal(await snapshot('#screen'),envelopeImage,'amplitude map does not depend on lamp');
+  await page.locator('#optical-mode').click();
+  await page.locator('#showNodes').uncheck();await page.waitForTimeout(150);
+  assert.deepEqual(await page.locator('#screen').evaluate(c=>Array.from(c.getContext('2d').getImageData(20,20,1,1).data)),[0,0,0,255],'lamp off makes physical screen dark');
+  await page.locator('#lightOn').check();
+  const range=async(id,value)=>{await page.locator('#'+id).evaluate((el,v)=>{el.value=v;el.dispatchEvent(new Event('input',{bubbles:true}));},value);await page.waitForTimeout(100);};
+  await range('amplitude',0);
+  assert.deepEqual(await page.locator('#screen').evaluate(c=>Array.from(c.getContext('2d').getImageData(20,20,1,1).data)),[128,128,128,255],'flat water yields uniform midgray');
+  await range('amplitude',.15);
+  await page.locator('#screen').focus();await page.keyboard.press('ArrowRight');await page.waitForTimeout(150);
+  assert.notEqual(await page.locator('#path-value').innerText(),'0.00 cm','probe moves with keyboard');
+  const beforeRotate=await snapshot('#scene');
+  await page.locator('#scene').focus();await page.keyboard.press('ArrowLeft');await page.waitForTimeout(150);
+  assert.notEqual(await snapshot('#scene'),beforeRotate);
+  for(const view of ['top','side','oblique']){await page.locator('[data-view="'+view+'"]').click();await page.waitForTimeout(100);}
+  await range('separation',36);await range('wavelength',12);await range('frequency',2);await range('amplitude',1);await range('phase',360);
+  assert.match(await page.locator('#envelope-value').innerText(),/cm/);
+  assert.equal(await page.locator('#wave-speed').innerText(),'24.0 cm/s');
+  await checkFixed(12);
+  await page.locator('#reset').click();await page.locator('#play').click();await page.waitForTimeout(150);
+  assert.equal(await page.locator('#phase').inputValue(),'0');
+  assert.equal(await page.locator('#separation').inputValue(),'10');
+  assert.equal(await page.locator('#frequency').inputValue(),'1');
+  assert.equal(await page.locator('#wavelength').inputValue(),'6');
+  assert.equal(await page.locator('#amplitude').inputValue(),'0.15');
+  await checkFixed();
+  const imageBeforeFrequency=await snapshot('#screen');
+  await page.locator('#frequency-out').fill('1.5');
+  await page.locator('#frequency-out').press('Tab');
+  await page.waitForTimeout(150);
+  assert.equal(await page.locator('#frequency').inputValue(),'1.5');
+  assert.equal(await page.locator('#wave-speed').innerText(),'9.0 cm/s');
+  await checkFixed();
+  const timeBeforeStep=Number((await page.locator('#clock').innerText()).split('=')[1].replace('s',''));
+  await page.locator('#step').click();await page.waitForTimeout(150);
+  const timeAfterStep=Number((await page.locator('#clock').innerText()).split('=')[1].replace('s',''));
+  assert.ok(Math.abs(timeAfterStep-timeBeforeStep-1/36)<.011,'step uses the adjusted frequency');
+  assert.notEqual(await snapshot('#screen'),imageBeforeFrequency);
+  await page.locator('#frequency-out').fill('9');await page.locator('#frequency-out').press('Tab');
+  assert.equal(await page.locator('#frequency').inputValue(),'2');
+  await page.locator('#frequency-out').fill('');await page.locator('#frequency-out').press('Tab');
+  assert.equal(await page.locator('#frequency-out').inputValue(),'2.00');
+  await page.locator('#frequency').focus();await page.keyboard.press('ArrowLeft');
+  assert.equal(await page.locator('#frequency-out').inputValue(),'1.95');
+  await page.locator('#reset').click();await page.locator('#play').click();await page.waitForTimeout(150);
+  assert.equal(await page.locator('#frequency-out').inputValue(),'1.00');
+  await checkFixed();
+  const stage=await page.locator('#scene').boundingBox();
+  await page.mouse.move(stage.x+stage.width/2,stage.y+stage.height/2);await page.mouse.down();await page.mouse.move(stage.x+stage.width/2+70,stage.y+stage.height/2+20);await page.mouse.up();
+  await page.waitForTimeout(150);
+  await page.screenshot({path:path.join(artifacts,'rotated.png'),fullPage:true});
+  await page.setViewportSize({width:390,height:844});await page.waitForTimeout(200);
+  assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),'mobile has no horizontal overflow');
+  await page.screenshot({path:path.join(artifacts,'mobile.png'),fullPage:true});
+  await page.locator('[data-phase="180"]').click();await page.waitForTimeout(150);
+  assert.equal(await page.locator('#phase').inputValue(),'180');
+  assert.equal(await page.locator('#envelope-value').innerText(),'0.00 cm');
+  await page.emulateMedia({reducedMotion:'reduce'});await page.reload();await page.waitForTimeout(200);
+  assert.equal(await page.locator('#play').innerText(),'▶ 播放');
+  const reducedStamp=await page.locator('#clock').innerText();await page.waitForTimeout(200);
+  assert.equal(await page.locator('#clock').innerText(),reducedStamp);
+  assert.deepEqual(errors,[]);
+  console.log('PASS: template styling, fixed physical parameters, new defaults, removed tasks, playback, optical projection, phase, sources, probe, camera, parameter extremes, mobile, reduced motion; no browser errors.');
+  console.log('Screenshots: '+artifacts);
+ }finally{await browser.close();}
+})().catch(e=>{console.error(e);process.exitCode=1;});

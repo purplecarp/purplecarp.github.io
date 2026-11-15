@@ -36,15 +36,15 @@
         <p class="privacy-note">◎ 出生資料僅在此瀏覽器計算，不上傳、不儲存。</p>
       </section>
       <section class="panel detail-panel" aria-labelledby="detail-title"><div class="section-heading"><span class="step">02</span><h2 id="detail-title">宮位細覽</h2></div><div id="palace-detail" aria-live="polite"><p>點選命盤中的任一宮位，查看星曜與三方四正。</p></div></section>
-      <details class="panel instructions"><summary>排盤設定與閱讀方式</summary><p>採用 iztro 預設安星規則：本命與運限皆以農曆正月初一分年；閏月前半按本月、後半按次月。晚子時（23:00–23:59）按次日早子時排盤，中央顯示換日後的排盤日期。</p><p>紫色為主星，綠色為吉曜，紅色為煞曜。星曜下方顯示廟旺亮度；祿、權、科、忌標示所選盤層的四化。</p><p>點選任一宮位可標示本宮、兩個三合宮與對宮。流年與流月疊加於本命盤，日期以國曆輸入、農曆對照顯示。</p><p>不同流派的安星與換日規則可能不同。本工具供傳統文化研究與娛樂參考。</p><a href="https://docs.iztro.com/posts/config-n-plugin" target="_blank" rel="noopener noreferrer">排盤引擎與規則說明 ↗</a></details>
+      <details class="panel instructions"><summary>排盤設定與閱讀方式</summary><p>採用 iztro 預設安星規則：本命與運限皆以農曆正月初一分年；閏月前半按本月、後半按次月。晚子時（23:00–23:59）按次日早子時排盤；國曆保留出生日期，農曆與干支顯示換日後結果。</p><p>紫色為主星，綠色為吉曜，紅色為煞曜。星曜下方顯示廟旺亮度；祿、權、科、忌標示所選盤層的四化。</p><p>點選任一宮位可標示本宮、兩個三合宮與對宮。流年與流月疊加於本命盤，日期以國曆輸入、農曆對照顯示。</p><p>不同流派的安星與換日規則可能不同。本工具供傳統文化研究與娛樂參考。</p><a href="https://docs.iztro.com/posts/config-n-plugin" target="_blank" rel="noopener noreferrer">排盤引擎與規則說明 ↗</a></details>
     </aside>
     <section class="chart-section" aria-labelledby="chart-title">
       <div class="chart-heading"><div><p class="eyebrow">YOUR ASTROLABE</p><h2 id="chart-title">十二宮命盤</h2></div><div class="export-actions"><button type="button" id="export" disabled>↓ 匯出資料</button><button type="button" id="print" disabled>列印命盤</button></div></div>
       <div class="chart-controls"><div class="view-switch" role="group" aria-label="命盤層次"><button type="button" data-view="origin" aria-pressed="true">本命盤</button><button type="button" data-view="yearly" aria-pressed="false">流年盤</button><button type="button" data-view="monthly" aria-pressed="false">流月盤</button></div><label class="check-label"><input type="checkbox" id="show-lines" checked>三方四正</label></div>
       <div class="period-controls" id="period-controls" hidden><button type="button" id="previous-period" aria-label="上一年">‹</button><div><label for="target-date">運限日期（國曆）</label><input id="target-date" type="date" min="1900-01-01" max="2100-12-31" required></div><button type="button" id="next-period" aria-label="下一年">›</button><button type="button" id="today">今天</button><p id="period-caption"></p></div>
       <p id="chart-status" class="status" role="status" aria-live="polite"></p>
-      <p class="mobile-hint">左右滑動查看完整命盤 · 點選宮位查看細節</p>
-      <div class="chart-scroll" tabindex="0" role="region" aria-label="十二宮命盤，可左右捲動"><div class="astrolabe" id="astrolabe"><p class="loading">正在準備命盤…</p></div></div>
+      <div class="mobile-toolbar"><p class="mobile-hint" id="scale-hint">命盤自動符合螢幕寬度 · 點選宮位查看細節</p><button type="button" id="chart-size" aria-pressed="false">放大查看</button></div>
+      <div class="chart-scroll" id="chart-scroll" tabindex="0" role="region" aria-label="十二宮命盤"><div class="chart-viewport" id="chart-viewport"><div class="astrolabe" id="astrolabe"><p class="loading">正在準備命盤…</p></div></div></div>
       <div class="chart-legend"><span><i class="dot natal"></i>本命</span><span><i class="dot body"></i>身宮</span><span><i class="dot decadal"></i>大限</span><span><i class="dot yearly"></i>流年</span><span><i class="dot monthly"></i>流月</span><span class="legend-note">四化：祿 · 權 · 科 · 忌</span></div>
       <p class="chart-footnote">星曜位置依出生資料計算。選取宮位的紅線表示三方四正，並非四化飛星。</p>
       <noscript><p class="error">請開啟 JavaScript，才能使用線上排盤功能。</p></noscript>

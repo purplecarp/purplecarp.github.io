@@ -3,6 +3,9 @@
   const core = window.ZiweiCore;
   const $ = id => document.getElementById(id);
   const state = { chart: null, horoscope: null, selected: 0, view: 'origin', name: '', input: null, target: '' };
+  let expanded = false;
+  let printing = false;
+  let layoutFrame = 0;
   const viewNames = { origin: '本命盤', yearly: '流年盤', monthly: '流月盤' };
   const topics = { '命宮': '觀察個性、處事方式與自我定位。', '兄弟': '觀察手足與同輩之間的互動。', '夫妻': '觀察伴侶關係與相處模式。', '子女': '觀察子女、晚輩與教養互動。', '財帛': '觀察資源運用與理財傾向。', '疾厄': '傳統上用於觀察身心與生活習慣。', '遷移': '觀察外出、環境變動與對外互動。', '僕役': '觀察朋友、團隊與合作關係。', '官祿': '觀察工作、志向與事業發展方式。', '田宅': '觀察居住、家庭環境與不動產議題。', '福德': '觀察內在感受、休閒與精神生活。', '父母': '觀察長輩、師長與家庭支持。' };
   const escape = value => String(value ?? '').replace(/[&<>"']/g, char => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[char]));
@@ -86,7 +89,7 @@
     if (state.horoscope) $('period-caption').textContent = `農曆 ${state.horoscope.lunarDate}${state.view === 'monthly' ? ' · 箭頭按國曆月切換' : ''}`;
     $('chart-title').textContent = state.view === 'origin' ? '十二宮命盤' : `十二宮 · ${viewNames[state.view]}`;
     $('astrolabe').innerHTML = state.chart.palaces.map(palaceHTML).join('') + centerHTML() + '<svg class="connections" id="connections" aria-hidden="true"></svg>';
-    renderDetail(); requestAnimationFrame(drawLines);
+    renderDetail(); scheduleLayout();
   }
   function renderDetail() {
     const p = state.chart.palaces[state.selected];
@@ -129,6 +132,31 @@
     const makeLine = (a, b) => `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}"/>`;
     svg.innerHTML = makeLine(points[0], points[1]) + makeLine(points[1], points[2]) + makeLine(points[2], points[0]) + makeLine(points[0], points[3]) + points.map(p => `<circle cx="${p.x}" cy="${p.y}" r="2.5"/>`).join('');
   }
+  function layoutChart() {
+    if (printing || window.matchMedia('print').matches) { drawLines(); return; }
+    const container = $('chart-scroll');
+    const viewport = $('chart-viewport');
+    const chart = $('astrolabe');
+    const available = container.clientWidth;
+    if (!available) return;
+    const mobile = window.matchMedia('(max-width:800px)').matches;
+    const width = Math.max(mobile ? 720 : 700, available);
+    const scale = expanded ? 1 : Math.min(1, available / width);
+    chart.style.width = `${width}px`;
+    chart.style.transform = `scale(${scale})`;
+    viewport.style.width = `${Math.min(width, width * scale)}px`;
+    viewport.style.height = `${Math.ceil(chart.offsetHeight * scale)}px`;
+    container.classList.toggle('fits-width', !expanded);
+    if (!expanded) container.scrollLeft = 0;
+    $('chart-size').setAttribute('aria-pressed', String(expanded));
+    $('chart-size').textContent = expanded ? '自動縮放' : '放大查看';
+    $('scale-hint').textContent = expanded ? '左右滑動閱讀星曜 · 點選宮位查看細節' : '命盤自動符合螢幕寬度 · 點選宮位查看細節';
+    drawLines();
+  }
+  function scheduleLayout() {
+    cancelAnimationFrame(layoutFrame);
+    layoutFrame = requestAnimationFrame(layoutChart);
+  }
   $('calendar').addEventListener('change', syncCalendar);
   $('birth-form').addEventListener('submit', event => { event.preventDefault(); submit(); });
   $('birth-form').addEventListener('input', () => { if (state.chart) status('form-status', '資料已修改，按「開始排盤」更新命盤。'); });
@@ -155,6 +183,7 @@
   });
   $('palace-detail').addEventListener('click', event => { const button = event.target.closest('[data-related]'); if (button) selectPalace(Number(button.dataset.related), true); });
   $('print').addEventListener('click', () => window.print());
+  $('chart-size').addEventListener('click', () => { expanded = !expanded; layoutChart(); });
   $('export').addEventListener('click', () => {
     if (!state.chart) return;
     const period = state.horoscope ? { date: state.target, lunarDate: state.horoscope.lunarDate, age: state.horoscope.age, ...Object.fromEntries(layers().map(layer => [layer, state.horoscope[layer]])) } : null;
@@ -164,10 +193,16 @@
     setTimeout(() => URL.revokeObjectURL(url), 1000);
     status('chart-status', '命盤資料已匯出為 JSON。');
   });
-  window.addEventListener('resize', drawLines);
-  window.addEventListener('beforeprint', drawLines);
-  window.addEventListener('afterprint', drawLines);
-  if (window.ResizeObserver) new ResizeObserver(drawLines).observe($('astrolabe'));
+  window.addEventListener('resize', scheduleLayout);
+  window.addEventListener('beforeprint', () => { printing = true; drawLines(); });
+  window.addEventListener('afterprint', () => { printing = false; scheduleLayout(); });
+  window.matchMedia('print').addEventListener('change', event => { printing = event.matches; scheduleLayout(); });
+  if (window.ResizeObserver) {
+    const observer = new ResizeObserver(scheduleLayout);
+    observer.observe($('astrolabe'));
+    observer.observe($('chart-scroll'));
+  }
+  if (document.fonts) document.fonts.ready.then(scheduleLayout);
   if (!core || !window.iztro) {
     $('astrolabe').innerHTML = '<p class="loading error">排盤引擎無法載入，請重新整理頁面後再試。</p>';
     status('form-status', '排盤引擎未載入，請重新整理頁面。', true);

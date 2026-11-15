@@ -1,0 +1,95 @@
+/* Page-specific layout; shared classroom.css owns the template theme and controls. */
+body.ripple-lesson { color-scheme:light; }
+.ripple-lesson .experiment { overflow:hidden; }
+.ripple-lesson .stage-head,
+.ripple-lesson .stage-head > div,
+.ripple-lesson .screen-title { display:flex; align-items:center; gap:10px; }
+.ripple-lesson .stage-head { justify-content:space-between; flex-wrap:wrap; margin:12px 0; }
+.ripple-lesson .stage-head h2,
+.ripple-lesson .screen-title h2 { margin:0; }
+.ripple-lesson .number { padding:2px 6px; border:1px solid #b8c7d6; border-radius:5px; color:#19659a; font-size:14px; }
+.ripple-lesson .view-buttons { display:flex; flex-wrap:wrap; gap:7px; }
+.ripple-lesson .view-buttons button { font-size:16px; }
+.ripple-lesson .visuals { display:grid; grid-template-columns:minmax(0,1.5fr) minmax(260px,1fr); gap:14px; }
+.ripple-lesson .scene-wrap { position:relative; min-height:510px; background:#101e2e; border-radius:8px; overflow:hidden; }
+.ripple-lesson #scene { position:absolute; inset:0; width:100%; height:100%; touch-action:none; cursor:grab; }
+.ripple-lesson #scene:active { cursor:grabbing; }
+.ripple-lesson canvas:focus-visible { outline:3px solid #b86a0d; outline-offset:-3px; }
+.ripple-lesson .scene-note { position:absolute; bottom:14px; left:8px; right:8px; text-align:center; color:#b9cddd; font-size:13px; pointer-events:none; }
+.ripple-lesson .surface-key { position:absolute; top:14px; left:14px; display:flex; gap:16px; font-size:14px; color:#d8e5ed; pointer-events:none; }
+.ripple-lesson .dot { display:inline-block; width:8px; height:8px; border-radius:50%; margin-right:5px; }
+.ripple-lesson .cyan { background:#70dbdc; }
+.ripple-lesson .coral { background:#f6a68d; }
+.ripple-lesson .line { display:inline-block; width:14px; border-top:2px dashed #f4d67c; vertical-align:middle; margin-right:5px; }
+.ripple-lesson .screen-column { min-width:0; }
+.ripple-lesson .screen-title { margin-bottom:10px; }
+.ripple-lesson .sync { margin-left:auto; font-size:13px; color:#19659a; }
+.ripple-lesson .segmented { display:flex; gap:7px; margin-bottom:10px; }
+.ripple-lesson .segmented button { flex:1; font-size:16px; padding:6px; }
+.ripple-lesson .screen-wrap { position:relative; aspect-ratio:1; border:1px solid #b8c7d6; background:#000; border-radius:8px; overflow:hidden; }
+.ripple-lesson #screen { width:100%; height:100%; touch-action:none; cursor:crosshair; }
+.ripple-lesson .screen-corner { position:absolute; bottom:6px; right:8px; font-size:12px; color:#e5edf3; background:#101e2ed9; padding:2px 6px; border-radius:3px; pointer-events:none; }
+.ripple-lesson .scale { display:flex; align-items:center; gap:9px; margin:7px 0; font-size:13px; color:#526477; }
+.ripple-lesson .color-scale { flex:1; height:6px; border:1px solid #b8c7d6; border-radius:3px; background:linear-gradient(to right,#050505,#fff); }
+.ripple-lesson .small { font-size:14px; line-height:1.6; color:#526477; margin:8px 0; }
+.ripple-lesson .probe-info { margin-top:14px; }
+.ripple-lesson .probe-title { display:block; font-size:16px; font-weight:600; }
+.ripple-lesson .probe-title span { font-size:13px; color:#526477; font-weight:400; margin-left:8px; }
+.ripple-lesson .probe-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; margin-top:8px; }
+.ripple-lesson .probe-grid strong { font-size:24px; }
+.ripple-lesson #probe-description { color:#526477; font-size:14px; margin-top:8px; }
+.ripple-lesson .playback { padding-bottom:12px; border-bottom:1px solid #d6dee7; }
+.ripple-lesson .transport { display:flex; flex-wrap:wrap; gap:7px; }
+.ripple-lesson .speed-label { display:flex; align-items:center; gap:7px; font-size:15px; margin-left:auto; }
+.ripple-lesson #clock { font:16px Consolas,monospace; color:#19659a; margin-left:4px; }
+.ripple-lesson .probe-chart { margin-top:14px; }
+.ripple-lesson .probe-chart > div { display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:8px; }
+.ripple-lesson .probe-chart h3 { font-size:16px; margin:0; }
+.ripple-lesson .probe-chart > div > span { font-size:14px; color:#526477; }
+.ripple-lesson .cyan-text { color:#147a85; }
+.ripple-lesson .coral-text { color:#ae5036; }
+.ripple-lesson .white-text { color:#26384b; }
+.ripple-lesson #chart { height:130px; background:#101e2e; border-radius:8px; margin-top:8px; }
+.ripple-lesson .controls-heading { display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; }
+.ripple-lesson .controls-heading h2 { margin:0; }
+.ripple-lesson .controls-heading span { color:#526477; font-size:13px; }
+.ripple-lesson .control-section { border-top:1px solid #d6dee7; padding:14px 0; }
+.ripple-lesson .control-section:last-child { padding-bottom:0; }
+.ripple-lesson .control-section h3 { font-size:18px; }
+.ripple-lesson .select-label { display:block; font-size:16px; margin-bottom:7px; }
+.ripple-lesson #sources { width:100%; min-height:48px; background:#fff; color:#26384b; border:1px solid #b8c7d6; border-radius:5px; padding:6px; font-size:16px; }
+.ripple-lesson .slider-label { display:flex; align-items:center; justify-content:space-between; gap:8px; font-size:16px; margin-top:14px; }
+.ripple-lesson .slider-label output { color:#19659a; white-space:nowrap; font-variant-numeric:tabular-nums; }
+.ripple-lesson .derived,
+.ripple-lesson .fixed-value { display:flex; justify-content:space-between; align-items:center; gap:8px; font-size:15px; margin-top:10px; padding:8px; border-radius:5px; background:#f0f5fa; }
+.ripple-lesson .fixed-value output,
+.ripple-lesson .derived strong { color:#19659a; font-weight:600; white-space:nowrap; }
+.ripple-lesson .phase-presets { display:flex; gap:7px; margin-top:5px; }
+.ripple-lesson .phase-presets button { flex:1; font-size:16px; }
+.ripple-lesson .toggle { display:flex; justify-content:space-between; align-items:center; gap:8px; margin:10px 0; font-size:16px; }
+.ripple-lesson input[type=checkbox] { width:24px; height:24px; accent-color:#226faa; }
+.ripple-lesson .model-notes article { font-size:16px; line-height:1.8; }
+@media(max-width:1100px) {
+  .ripple-lesson .visuals { grid-template-columns:minmax(0,1fr); }
+  .ripple-lesson .scene-wrap { min-height:440px; }
+  .ripple-lesson .screen-wrap { max-width:480px; margin:auto; }
+}
+@media(min-width:701px) and (max-width:900px) {
+  .ripple-lesson .visuals { grid-template-columns:minmax(0,1.25fr) minmax(260px,1fr); }
+}
+@media(max-width:600px) {
+  .ripple-lesson .stage-head h2 { font-size:18px; }
+  .ripple-lesson .stage-head { gap:8px; }
+  .ripple-lesson .stage-head > div { gap:7px; }
+  .ripple-lesson .view-buttons { gap:5px; }
+  .ripple-lesson .view-buttons button { font-size:15px; padding:6px 8px; }
+  .ripple-lesson .scene-wrap { min-height:380px; }
+  .ripple-lesson .speed-label { margin-left:0; }
+  .ripple-lesson #clock { margin-left:auto; }
+  .ripple-lesson .lesson-brand { gap:6px; }
+  .ripple-lesson .lesson-brand img { width:26px; height:26px; }
+}
+
+/* Direct frequency entry shares bounds and value with the slider. */
+.ripple-lesson .frequency-value { display:inline-flex; align-items:center; gap:6px; color:#19659a; }
+.ripple-lesson #frequency-out { width:82px; min-height:44px; padding:6px 8px; border:1px solid #b8c7d6; border-radius:5px; background:#fff; color:#19659a; font-size:16px; }

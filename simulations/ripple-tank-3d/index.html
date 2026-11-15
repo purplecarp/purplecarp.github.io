@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>3D 水波槽：雙點波源干涉 - 物鯉魚教學模擬</title>
+<meta name="description" content="同步觀察雙點波源的立體水波與折射光投影，調整頻率、相位與波源間距，探索水波干涉。">
+<link rel="icon" href="../../images/fish.png"><link rel="stylesheet" href="../../css/simulations.css">
+<link rel="stylesheet" href="../../css/classroom.css">
+<link rel="stylesheet" href="style.css">
+<script defer src="model.js"></script><script defer src="optics.js"></script><script defer src="app.js"></script>
+</head>
+<body class="classroom ripple-lesson">
+<nav class="lesson-nav" aria-label="網站導覽">
+<a class="lesson-brand" href="../../index.html"><img src="../../images/fish.png" alt="">物鯉魚教學模擬</a>
+<a href="../../physics-simulations.html">← 返回模擬列表</a>
+</nav>
+<main>
+<header class="lesson-heading">
+<h1>3D 水波槽：雙點波源干涉</h1>
+<p>調整波源間距、頻率與相位，同步觀察立體水波與下方屏幕的投影。</p>
+</header>
+<div class="lab lesson-grid">
+<section class="experiment lesson-panel" aria-label="同步水波與投影">
+<div class="playback lesson-toolbar"><div class="transport"><button id="play" class="primary" aria-label="暫停模擬">Ⅱ 暫停</button><button id="step" title="暫停並前進 1/24 週期">逐格 →</button><button id="reset" title="重設所有參數與視角">↺ 重設</button></div><label class="speed-label">播放 <select id="speed"><option value=".25">0.25×</option><option value=".5" selected>0.5×</option><option value="1">1×</option></select></label><output id="clock">t = 0.00 s</output></div>
+<div class="stage-head"><div><span class="number">01</span><h2>3D 水波槽</h2></div><div class="view-buttons" aria-label="觀察角度"><button data-view="oblique" class="active" aria-pressed="true">立體</button><button data-view="top" aria-pressed="false">俯視</button><button data-view="side" aria-pressed="false">側視</button></div></div>
+<div class="visuals">
+<div class="scene-wrap"><canvas id="scene" tabindex="0" role="img" aria-label="可旋轉的立體雙波源水面與下方投影屏幕。拖曳或按方向鍵旋轉，滾輪縮放。"></canvas><div class="scene-note">拖曳旋轉 · 滾輪縮放 · 方向鍵微調</div><div class="surface-key"><span><i class="dot cyan"></i> S₁</span><span><i class="dot coral"></i> S₂</span><span><i class="line yellow"></i> 節線</span></div></div>
+<div class="screen-column">
+<div class="screen-title"><span class="number">02</span><h2>屏幕正面</h2><span class="sync">同步</span></div>
+<div class="segmented" aria-label="屏幕顯示模式"><button id="optical-mode" class="active" aria-pressed="true">光影投影</button><button id="amplitude-mode" aria-pressed="false">振幅分布</button></div>
+<div class="screen-wrap"><canvas id="screen" tabindex="0" role="img" aria-label="屏幕正面視圖。點擊選取對應水面位置，方向鍵移動觀測點。"></canvas><span class="screen-corner">60 × 60 cm</span></div>
+<div class="scale"><span id="scale-min">暗</span><span id="color-scale" class="color-scale"></span><span id="scale-max">亮</span></div>
+<p id="screen-explanation" class="small">亮暗來自水面折射後光線的聚散，並非水波振幅的直接映射。</p>
+<div class="probe-info"><span class="probe-title">觀測點 P <span>點擊屏幕移動</span></span><div class="probe-grid"><div class="lesson-readout"><span>波程差 Δr</span><strong id="path-value">0.00 cm</strong></div><div class="lesson-readout"><span>合成振幅</span><strong id="envelope-value">0.30 cm</strong></div></div><p id="probe-description"></p></div>
+</div>
+</div>
+<div class="probe-chart"><div><h3>觀測點的位移</h3><span><b class="cyan-text">S₁</b> + <b class="coral-text">S₂</b> = <b class="white-text">合成波</b></span></div><canvas id="chart" role="img" aria-label="觀測點兩個波源與合成波的位移時間圖，顯示兩個週期。"></canvas></div>
+</section>
+<aside class="controls lesson-panel" aria-label="實驗參數">
+<div class="controls-heading"><h2>實驗設定</h2><span>即時更新</span></div>
+<div class="control-section"><h3>波源</h3>
+<label class="select-label" for="sources">啟用波源</label><select id="sources"><option value="both">S₁ + S₂ 雙波源</option><option value="s1">僅 S₁</option><option value="s2">僅 S₂</option></select>
+<label class="slider-label" for="separation">波源間距 d <output id="separation-out"></output></label><input type="range" id="separation" min="4" max="36" step="1" value="10">
+<label class="slider-label" for="wavelength">波長 λ <output id="wavelength-out">6.0 cm</output></label><input type="range" id="wavelength" min="4" max="20" step="0.5" value="6">
+<label class="slider-label" for="amplitude">單波源振幅 A <output id="amplitude-out"></output></label><input type="range" id="amplitude" min="0" max="1" step=".05" value=".15">
+<label class="slider-label" for="frequency">頻率 f <span class="frequency-value"><input id="frequency-out" type="number" min="0.25" max="2" step="0.05" value="1" aria-label="頻率數值（Hz）"><span>Hz</span></span></label><input type="range" id="frequency" aria-label="頻率滑桿（Hz）" min="0.25" max="2" step="0.05" value="1">
+<p class="derived">波速 v = fλ <strong id="wave-speed">6.0 cm/s</strong></p>
+<label class="slider-label" for="phase">S₂ 相位差 φ <output id="phase-out"></output></label><input type="range" id="phase" min="0" max="360" step="5" value="0">
+<div class="phase-presets"><button data-phase="0" class="active" aria-pressed="true">同相 0°</button><button data-phase="180" aria-pressed="false">反相 180°</button></div>
+</div>
+<div class="control-section"><h3>光源與屏幕</h3>
+<label class="toggle"><span>上方平行光</span><input id="lightOn" type="checkbox" checked></label>
+<p class="fixed-value"><span>槽底至屏幕（固定）</span><output id="screenGap-out">3 cm</output></p>
+<p class="fixed-value"><span>水深（固定）</span><output id="waterDepth-out">4 cm</output></p>
+</div>
+<div class="control-section"><h3>觀察輔助</h3>
+<label class="toggle"><span>顯示節線</span><input id="showNodes" type="checkbox" checked></label>
+<label class="toggle"><span>顯示折射光路</span><input id="showRays" type="checkbox" checked></label>
+<label class="slider-label" for="exaggeration">水面起伏放大 <output id="exaggeration-out"></output></label><input type="range" id="exaggeration" min="1" max="5" step=".5" value="3">
+<p class="small">放大只改變水面顯示；光路與投影皆依實際振幅計算。</p>
+</div>
+</aside>
+</div>
+<noscript>請啟用 JavaScript 以操作模擬；下方仍可閱讀物理原理。</noscript>
+<details class="model-notes lesson-panel lesson-notes"><summary>詳細說明與物理原理</summary><article>
+<p>水面：η = A₁ cos(kr₁ − ωt) + A₂ cos(kr₂ − ωt + φ)，k = 2π/λ，ω = 2πf。波程差定義為 Δr = r₂ − r₁；合成相位差 δ = kΔr + φ。同振幅雙源的合成振幅為 2A |cos(δ/2)|。黃色節線滿足 δ = (2m + 1)π。</p>
+<p>此為已建立的穩態、同頻等振幅圓形波模型；省略徑向衰減、邊界反射、黏滯與色散。可獨立調整波長 λ 與頻率 f，波速依 v = fλ 更新。水深固定為 4 cm，槽底至屏幕固定為 3 cm；本頁不模擬真實水深對波速的影響。</p>
+<p>投影依 Snell 定律追跡垂直平行光，經起伏水面（空氣 → 水）與水平槽底（水 → 空氣）後到達屏幕。水的折射率取 1.333；透明槽底視為光學薄層，忽略玻璃厚度、Fresnel 反射與吸收。光線落點按固定入射光強累加，有限解析度使細小焦散略有平滑；不逐幀自動調整亮度。</p>
+<p>水波節點的瞬時位移始終為零，但其附近水面仍可能傾斜。因此節線不一定是屏幕上的黑線。振幅分布是水波的數學圖，光影投影才是幾何光學計算的屏幕圖。P 標示水面與屏幕相同的水平座標，不代表通過 P 的光線落點。</p>
+<p>參考：<a href="https://openstax.org/books/university-physics-volume-1/pages/16-5-interference-of-waves" target="_blank" rel="noopener">OpenStax・波的干涉</a>、<a href="https://openstax.org/books/university-physics-volume-3/pages/1-3-refraction" target="_blank" rel="noopener">OpenStax・折射定律</a>。</p>
+</article></details>
+</main>
+</body></html>
