@@ -2,16 +2,21 @@
  'use strict';
  const M=PhysicsModel,C=LessonColors;
  function drawScene(a,s){
-  const end=M.state(a.p,M.DURATION),left=Math.min(-300,300,end.sx,end.ox)-160,right=Math.max(-300,300,end.sx,end.ox)+160;
+  const end=M.state(a.p,M.DURATION),left=Math.min(M.SOURCE_X,M.OBSERVER_X,end.sx,end.ox)-16,right=Math.max(M.SOURCE_X,M.OBSERVER_X,end.sx,end.ox)+16;
   const scale=(a.width-48)/(right-left),X=x=>24+(x-left)*scale,Y=y=>a.height*.5+y*scale;
   const ctx=a.ctx;
+  const sampling=M.wavefrontSampling(a.p,scale);
+  a.wavefrontSampling=sampling;
+  a.wavefrontScale=scale;
   // Real spatial scale is shared by x, y and all wavefront radii.
   ctx.save();ctx.beginPath();ctx.rect(0,88,a.width,Math.max(1,a.height-145));ctx.clip();
   a.line(0,Y(s.sy),a.width,Y(s.sy),C.grid,1,[6,8]);
   a.line(0,Y(s.oy),a.width,Y(s.oy),C.grid,1,[6,8]);
   if(a.p.waves){
-   ctx.lineWidth=1.5;ctx.strokeStyle=C.blue;ctx.globalAlpha=.45;
-   for(const w of M.wavefronts(a.p,s.t)){
+   ctx.lineWidth=1.8;ctx.strokeStyle=C.blue;ctx.globalAlpha=.8;
+   // Only request wavefront history that can still intersect the visible scene.
+   const history=((right-left)+a.height/scale)/(M.C-Math.abs(s.vs));
+   for(const w of M.wavefronts(a.p,s.t,history,sampling)){
     ctx.beginPath();ctx.arc(X(w.x),Y(w.y),w.radius*scale,0,Math.PI*2);ctx.stroke();
    }
    ctx.globalAlpha=1;
@@ -29,11 +34,11 @@
   a.text('S',labelX(X(s.sx)),Y(s.sy)-23,C.blue,24,'center');
   a.text('O',labelX(X(s.ox)),Y(s.oy)+40,C.green,24,'center');
   if(a.p.vectors){
-   const vectorScale=Math.min(.28,(4+160*scale)/200);
+   const vectorScale=Math.min(2.8,a.width/160);
    a.arrow(X(s.sx)+Math.sign(s.vs)*18,Y(s.sy),s.vs*vectorScale,0,C.blue);
    a.arrow(X(s.ox)+Math.sign(s.vo)*16,Y(s.oy),s.vo*vectorScale,0,C.green);
   }
-  const meters=(right-left)>1700?500:100,bar=meters*scale;
+  const span=right-left,meters=span>1700?500:span>340?100:span>170?50:10,bar=meters*scale;
   a.line(20,a.height-35,20+bar,a.height-35,C.ink,3);
   a.text(`${meters} m`,20,a.height-9,C.ink,24);
   const label=s.ratio>1.002?'音高升高':s.ratio<.998?'音高降低':'接近原音';
@@ -57,10 +62,13 @@
   a.text('t (s)',r,a.height-4,C.ink,font,'right');
   a.line(l,top,l,b,C.ink);a.line(l,b,r,b,C.ink);
   ctx.strokeStyle=C.blue;ctx.lineWidth=2;ctx.setLineDash([8,6]);ctx.beginPath();
-  data.forEach((d,i)=>i?ctx.lineTo(X(d.t),Y(d.sourceFrequency)):ctx.moveTo(X(d.t),Y(d.sourceFrequency)));
+  data.forEach((d,i)=>{
+   if(!i)ctx.moveTo(X(d.t),Y(d.sourceFrequency));
+   else {ctx.lineTo(X(d.t),Y(data[i-1].sourceFrequency));ctx.lineTo(X(d.t),Y(d.sourceFrequency));}
+  });
   ctx.stroke();ctx.setLineDash([]);
   const visible=data.filter(d=>d.t<s.t);visible.push(s);
-  const crossing=s.vs>s.vo?600/(s.vs-s.vo):Infinity;
+  const crossing=s.vs>s.vo?(M.OBSERVER_X-M.SOURCE_X)/(s.vs-s.vo):Infinity;
   if(a.p.offset===0 && crossing<=s.t){
    // End the approach branch at its left limit; do not interpolate across the jump.
    const before=M.state(a.p,crossing-1e-7);
@@ -71,7 +79,7 @@
   a.line(X(s.t),top,X(s.t),b,C.yellow,1,[4,4]);
   ctx.strokeStyle=C.green;ctx.lineWidth=3;ctx.beginPath();
   visible.forEach((d,i)=>{
-   const newBranch=i===0 || (a.p.offset===0 && d.t===crossing && !d.leftLimit);
+   const newBranch=i===0 || (a.p.offset===0 && d.t===crossing && !d.leftLimit) || (i>0 && d.emittedFrequency!==visible[i-1].emittedFrequency);
    if(newBranch)ctx.moveTo(X(d.t),Y(d.frequency));else ctx.lineTo(X(d.t),Y(d.frequency));
   });ctx.stroke();
   a.dot(X(s.t),Y(s.frequency),6,C.green);
@@ -88,6 +96,15 @@
   }
   render(){
    super.render();
+   if(this.wavefrontInfo){
+    const s=this.state,speed=Math.abs(s.vs),f=s.sourceFrequency;
+    const front=s.vs===0?'右側':s.vs>0?'前方（右）':'前方（左）';
+    const back=s.vs===0?'左側':s.vs>0?'後方（左）':'後方（右）';
+    this.$('wavelengthFront').textContent=`${front} λ = ${((M.C-speed)/f).toFixed(3)} m`;
+    this.$('wavelengthBack').textContent=`${back} λ = ${((M.C+speed)/f).toFixed(3)} m`;
+    const detail=this.p.waves?`每 ${this.wavefrontSampling} 個振動週期畫一圈；同音段的圈距 = ${this.wavefrontSampling} 倍波長。`:'波前已隱藏。';
+    if(this.$('wavefrontSampling').textContent!==detail)this.$('wavefrontSampling').textContent=detail;
+   }
    if(!this.audio)return;
    this.audio.update(this.p,this.state,this.running,document.hidden);
    const button=this.$('soundToggle'),status=this.$('soundStatus');
@@ -103,14 +120,14 @@
  }
  const lesson=new DopplerLesson({
   title:'都卜勒效應的移動聲源、觀察者與波前',
-  defaults:{mode:'source',frequency:440,sourceSpeed:100,observerSpeed:-100,offset:0,waves:true,vectors:true,ray:false,soundMode:'observer',soundType:'ambulance',soundEnabled:true,volume:20,speed:1},
+  defaults:{mode:'source',frequency:440,sourceSpeed:10,observerSpeed:-10,offset:0,waves:true,vectors:true,ray:false,soundMode:'observer',soundType:'ambulance',soundEnabled:true,volume:20,speed:1},
   controls:[
    {key:'mode',label:'移動方式',type:'select',options:[['source','聲源移動／觀察者靜止'],['observer','觀察者移動／聲源靜止'],['both','兩者都移動'],['stationary','兩者都靜止']]},
    {key:'soundType',label:'聲音種類',type:'select',options:[['ambulance','救護車警笛'],['tone','純音（固定頻率）']]},
-   {key:'frequency',label:'聲源基準頻率 f₀',min:100,max:1000,step:10,unit:'Hz'},
-   {key:'sourceSpeed',label:'聲源速度（右為正）',min:-200,max:200,step:10,unit:'m/s',disabled:p=>p.mode==='observer'||p.mode==='stationary'},
-   {key:'observerSpeed',label:'觀察者速度（右為正）',min:-200,max:200,step:10,unit:'m/s',disabled:p=>p.mode==='source'||p.mode==='stationary'},
-   {key:'offset',label:'兩條路徑的間隔',min:0,max:200,step:10,unit:'m'},
+   {key:'frequency',label:'純音頻率 f₀（僅純音模式）',min:100,max:1000,step:10,unit:'Hz',disabled:p=>p.soundType==='ambulance'},
+   {key:'sourceSpeed',label:'聲源速度（右為正）',min:-40,max:40,step:1,unit:'m/s',disabled:p=>p.mode==='observer'||p.mode==='stationary'},
+   {key:'observerSpeed',label:'觀察者速度（右為正）',min:-40,max:40,step:1,unit:'m/s',disabled:p=>p.mode==='source'||p.mode==='stationary'},
+   {key:'offset',label:'兩條路徑的間隔',min:0,max:20,step:1,unit:'m'},
    {key:'soundMode',label:'聆聽對象',type:'select',display:true,options:[['observer','觀察者聽到的聲音'],['source','聲源原音（比較）']]},
    {key:'volume',label:'音量',min:0,max:100,step:5,unit:'%',display:true},
    {key:'waves',label:'顯示抽樣波前',type:'check',display:true},
@@ -123,17 +140,20 @@
   comparisonTitle:'觀察者接收頻率與時間',
   comparisonViews:[{label:'綠線：接收頻率；藍虛線：聲源原頻率',draw:drawFrequency}],
   metrics:(p,s)=>[['聲源此刻頻率',s.sourceFrequency.toFixed(1),'Hz'],['觀察者聽到',s.frequency.toFixed(1),'Hz'],['都卜勒頻移比',s.ratio.toFixed(3),'f觀 / 發聲時頻率'],['傳播延遲',s.delay.toFixed(3),'s']],
-  note:()=> '聲速 343 m/s；每圈抽樣 100 週期；聲音播放真實 Hz。向右為正，12 s 後演示結束。',
+  note:p=> `${p.soundType==='ambulance'?'警笛基音 715 / 956 Hz，各 0.5 s，完整週期 1 s。':''}聲速 343 m/s；波前依畫面自動抽樣，倍率見波前圖下方；聲音播放真實 Hz。向右為正，12 s 後演示結束。`,
   onReset:a=>{a.audio?.silence();a.audioError=false;},
   presets:[
    {label:'① 聲源駛近，再經過',values:{},question:'聲源從左側接近，經過觀察者後遠離。試聽並觀察頻率如何改變？',answer:'接近時波前較密、接收頻率較高；遠離時較低。間隔為 0 時，交會前後的頻率跳變；增加間隔後，音高平滑變化。'},
-   {label:'② 只改為觀察者移動',values:{mode:'observer'},question:'接近速率同為 100 m/s，改成觀察者移動，接收頻率會完全相同嗎？',answer:'不會。聲源移動改變空氣中的波長；觀察者移動改變遇到波前的速率。兩者的都卜勒公式不同。'},
-   {label:'③ 同向同速',values:{mode:'both',sourceSpeed:100,observerSpeed:100},question:'兩者相對空氣都在移動，但同向同速，還會有頻率差嗎？',answer:'沒有都卜勒頻移。兩者距離保持固定；警笛仍會升降音高，接收的是傳播延遲之前的聲源頻率。'},
+   {label:'② 只改為觀察者移動',values:{mode:'observer'},question:'接近速率同為 10 m/s，改成觀察者移動，接收頻率會完全相同嗎？',answer:'不會。聲源移動改變空氣中的波長；觀察者移動改變遇到波前的速率。兩者的都卜勒公式不同。'},
+   {label:'③ 同向同速',values:{mode:'both',sourceSpeed:10,observerSpeed:10},question:'兩者相對空氣都在移動，但同向同速，還會有頻率差嗎？',answer:'沒有都卜勒頻移。兩者距離保持固定；警笛仍會交替高低音，接收的是傳播延遲之前的聲源頻率。'},
    {label:'④ 兩者相向移動',values:{mode:'both'},question:'聲源向右、觀察者向左時，頻率偏移會比只移動一方更大嗎？',answer:'接近時兩項效應一起提高接收頻率；經過彼此後，接收頻率轉為降低。'},
-   {label:'⑤ 兩者靜止',values:{mode:'stationary'},question:'只有聲波在傳播時，觀察者聽到多少 Hz？',answer:'兩者速度皆為零，沒有都卜勒頻移。純音為 440 Hz；救護車警笛在 440–660 Hz 間變化，觀察者延遲聽見。'}
+   {label:'⑤ 兩者靜止',values:{mode:'stationary'},question:'只有聲波在傳播時，觀察者聽到多少 Hz？',answer:'兩者速度皆為零，沒有都卜勒頻移。預設純音為 440 Hz；救護車警笛在 715 Hz 與 956 Hz 間交替，各持續 0.5 s，完整週期 1 s，觀察者延遲聽見。'}
   ]
  });
  window.lesson=lesson;
+ const wavefrontInfo=document.createElement('div');wavefrontInfo.className='wavefront-info';
+ wavefrontInfo.innerHTML='<p>此刻發出聲音的實際波長</p><div class="wavelength-values"><strong id="wavelengthFront"></strong><strong id="wavelengthBack"></strong></div><p id="wavefrontSampling"></p>';
+ lesson.canvas.parentElement.after(wavefrontInfo);lesson.wavefrontInfo=wavefrontInfo;
  const bar=document.createElement('div');bar.className='audio-bar';
  bar.innerHTML='<button id="soundToggle" aria-pressed="true">關閉聲音</button><p id="soundStatus" role="status"></p>';
  document.querySelector('.lesson-toolbar').after(bar);

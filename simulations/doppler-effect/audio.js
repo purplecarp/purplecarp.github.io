@@ -25,6 +25,7 @@
   update(p,s,running,hidden=false){
    if(!this.context)return;
    const hz=p.soundMode==='source'?s.sourceFrequency:s.frequency;
+   // Triangle timbre adds odd harmonics (3f, 5f, ...) to each alternating fundamental.
    const type=p.soundType==='ambulance'?'triangle':'sine';
    if(this.oscillator.type!==type)this.oscillator.type=type;
    const level=this.enabled&&p.soundEnabled!==false&&running&&!hidden?p.volume/100*.16:0;

@@ -18,3 +18,9 @@
 
 .doppler .comparison-grid { grid-template-columns:minmax(0,1fr); }
 .doppler .comparison-canvas-box { height:260px; }
+
+.doppler .wavefront-info { margin-top:10px; padding:10px 12px; border:1px solid #c9dcea; border-radius:8px; background:#edf5fb; color:#24465f; }
+.doppler .wavefront-info p { margin:0; font-size:14px; line-height:1.6; }
+.doppler .wavelength-values { display:flex; flex-wrap:wrap; gap:4px 18px; margin:4px 0; font-size:18px; font-variant-numeric:tabular-nums; }
+.doppler .wavelength-values strong { white-space:nowrap; }
+.doppler.large-type .wavelength-values { font-size:21px; }

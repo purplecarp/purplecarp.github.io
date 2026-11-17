@@ -25,19 +25,32 @@ const delay=ms=>new Promise(r=>setTimeout(r,ms));
     for(let i=0;i<100;i++){if(await evaluate('Boolean(window.lesson && lesson.audio)'))break;await delay(100);}
     assert.equal(await evaluate('Boolean(window.lesson && lesson.audio)'),true);
     assert.equal(await evaluate('lesson.p.offset'),0);
+    assert.equal(await evaluate('lesson.p.sourceSpeed'),10);
+    assert.equal(await evaluate('document.getElementById("frequency").disabled'),true);
+    assert.equal(await evaluate('lesson.state.sourceFrequency'),715);
     assert.equal(await evaluate('document.getElementById("offset").min'),'0');
     assert.equal(await evaluate('lesson.state.sy===lesson.state.oy'),true);
     assert.equal(await evaluate('lesson.comparisons.length'),1);
+    assert.match(await evaluate('document.getElementById("wavelengthFront").textContent'),/0\.466 m/);
+    assert.match(await evaluate('document.getElementById("wavelengthBack").textContent'),/0\.494 m/);
+    const sampling=await evaluate('lesson.wavefrontSampling');
+    await evaluate('lesson.time=.75;lesson.render()');
+    assert.equal(await evaluate('lesson.wavefrontSampling'),sampling);
+    assert.match(await evaluate('document.getElementById("wavelengthFront").textContent'),/0\.348 m/);
+    await evaluate('lesson.p.sourceSpeed=-10;lesson.render()');
+    assert.equal(await evaluate('document.getElementById("wavelengthFront").textContent.startsWith("前方（左）")'),true);
+    await evaluate('document.getElementById("defaults").click()');
     await evaluate(`window.chartTimes=[];const chart=lesson.config.comparisonViews[0],draw=chart.draw;chart.draw=(a,s)=>{chartTimes.push(s.t);draw(a,s);};`);
     for(const time of [0,5.99,6,6.01,12,2]){
      await evaluate(`lesson.time=${time};lesson.render();`);
      assert.equal(await evaluate('chartTimes.at(-1)'),time);
     }
-    await evaluate('document.getElementById("offset").value=60;document.getElementById("offset").dispatchEvent(new Event("input"));');
-    assert.equal(await evaluate('lesson.p.offset'),60);
+    await evaluate('document.getElementById("offset").value=6;document.getElementById("offset").dispatchEvent(new Event("input"));');
+    assert.equal(await evaluate('lesson.p.offset'),6);
     assert.equal(await evaluate('lesson.time'),0);
     await evaluate('document.getElementById("defaults").click()');
     assert.equal(await evaluate('lesson.p.offset'),0);
+    assert.equal(await evaluate('lesson.p.sourceSpeed'),10);
     const settle=()=>evaluate('new Promise(r=>requestAnimationFrame(()=>requestAnimationFrame(()=>r(true))))');
     const result={sizes:[],checks:[],screenshots:[]};
     for(const [width,height] of [[1024,768],[1180,820],[1366,768],[768,1024],[390,844],[320,640]]){
@@ -48,7 +61,10 @@ const delay=ms=>new Promise(r=>setTimeout(r,ms));
       const size=await evaluate(`(()=>{const c=document.getElementById('scene').getBoundingClientRect(),b=document.getElementById('play').getBoundingClientRect();return {width:innerWidth,scroll:document.documentElement.scrollWidth,canvas:c.height,playBottom:b.bottom,presenting:document.body.classList.contains('is-presenting')};})()`);
       assert.ok(size.scroll<=width+1,JSON.stringify(size));assert.ok(size.canvas>=130,JSON.stringify(size));
       if(presenting)assert.ok(size.playBottom<=height,JSON.stringify(size));
-      result.sizes.push(size);
+      const gap=await evaluate('lesson.wavefrontSampling*(PhysicsModel.C-Math.abs(lesson.state.vs))/956*lesson.wavefrontScale');
+      assert.ok(gap>=32-1e-8,String(gap));
+      assert.equal(await evaluate('document.getElementById("wavefrontSampling").textContent.includes(String(lesson.wavefrontSampling))'),true);
+      result.sizes.push({...size,wavefrontGap:gap});
      }
      await evaluate("document.body.classList.remove('is-presenting')");
     }
@@ -57,6 +73,8 @@ const delay=ms=>new Promise(r=>setTimeout(r,ms));
     await settle();
     const capture=async name=>{await settle();const {data}=await send('Page.captureScreenshot',{format:'png'});const file=path.join(temp,name+'.png');fs.writeFileSync(file,Buffer.from(data,'base64'));result.screenshots.push(file);};
     await capture('doppler-desktop');
+    await evaluate('lesson.time=3.75;lesson.render()');await capture('doppler-wavefronts');
+    await evaluate('lesson.reset()');
     assert.equal(await evaluate('document.getElementById("answer").hidden'),true);
     await evaluate('document.getElementById("reveal").click()');assert.equal(await evaluate('document.getElementById("answer").hidden'),false);
     await evaluate('document.getElementById("play").click()');await delay(250);await evaluate('document.getElementById("play").click()');
@@ -67,7 +85,7 @@ const delay=ms=>new Promise(r=>setTimeout(r,ms));
     await evaluate('document.getElementById("reset").click()');assert.equal(await evaluate('lesson.time'),0);
     await evaluate('document.getElementById("time").value=750;document.getElementById("time").dispatchEvent(new Event("input"));');assert.equal(await evaluate('lesson.time'),9);
     await evaluate('document.getElementById("time").value=250;document.getElementById("time").dispatchEvent(new Event("input"));');assert.equal(await evaluate('lesson.time'),3);
-    await evaluate('document.getElementById("sourceSpeed").value=200;document.getElementById("sourceSpeed").dispatchEvent(new Event("input"));');assert.equal(await evaluate('lesson.time'),0);assert.equal(await evaluate('lesson.running'),false);
+    await evaluate('document.getElementById("sourceSpeed").value=20;document.getElementById("sourceSpeed").dispatchEvent(new Event("input"));');assert.equal(await evaluate('lesson.time'),0);assert.equal(await evaluate('lesson.running'),false);
     for(const mode of ['source','observer','both','stationary']){
      await evaluate(`document.getElementById('mode').value='${mode}';document.getElementById('mode').dispatchEvent(new Event('change'));`);
      assert.equal(await evaluate('document.getElementById("sourceSpeed").disabled'),mode==='observer'||mode==='stationary');
@@ -76,6 +94,9 @@ const delay=ms=>new Promise(r=>setTimeout(r,ms));
     for(let i=0;i<5;i++){await evaluate(`document.querySelector('[data-preset="${i}"]').click();`);assert.equal(await evaluate('lesson.time'),0);}
     result.checks.push('play, pause, step, replay, rewind, defaults, presets, disabled controls, display parameters preserve time');
     await evaluate('document.getElementById("defaults").click();document.getElementById("speed").value=".25";document.getElementById("speed").dispatchEvent(new Event("input"));');
+    await evaluate('document.getElementById("soundType").value="tone";document.getElementById("soundType").dispatchEvent(new Event("change"));');
+    assert.equal(await evaluate('document.getElementById("frequency").disabled'),false);
+    await evaluate('document.getElementById("soundToggle").click()');
     // User-gesture evaluation permits the same AudioContext activation as a button click.
     await send('Runtime.evaluate',{expression:'document.getElementById("soundToggle").click()',userGesture:true});await delay(400);
     assert.equal(await evaluate('lesson.audio.context.state'),'running');assert.equal(await evaluate('lesson.audio.enabled'),true);assert.ok(await evaluate('lesson.audio.targetGain>0'));
@@ -85,8 +106,23 @@ const delay=ms=>new Promise(r=>setTimeout(r,ms));
     await evaluate('document.getElementById("soundMode").value="source";document.getElementById("soundMode").dispatchEvent(new Event("change"));');assert.equal(await evaluate('lesson.audio.targetFrequency'),440);
     await evaluate('lesson.pause()');assert.equal(await evaluate('lesson.audio.targetGain'),0);await delay(150);
     assert.ok(await evaluate('lesson.audio.gain.gain.value<.0001'));
+    // Hold each simulated phase to measure the actual synthesized fundamental and harmonics.
+    await evaluate('document.getElementById("soundType").value="ambulance";document.getElementById("soundType").dispatchEvent(new Event("change"));');
+    assert.equal(await evaluate('document.getElementById("frequency").disabled'),true);
+    result.sirenSignals=[];
+    for(const [time,hz] of [[.25,715],[.75,956],[1.25,715]]){
+     await evaluate(`lesson.time=${time};lesson.render();lesson.audio.update(lesson.p,lesson.state,true);`);
+     assert.equal(await evaluate('lesson.audio.oscillator.type'),'triangle');
+     assert.equal(await evaluate('lesson.audio.targetFrequency'),hz);
+     await delay(900);
+     const signal=await evaluate(`(()=>{const d=new Float32Array(analyser.fftSize);analyser.getFloatTimeDomainData(d);let n=0;for(let i=1;i<d.length;i++)if(d[i-1]<0&&d[i]>=0)n++;const bins=new Float32Array(analyser.frequencyBinCount);analyser.getFloatFrequencyData(bins);const peak=f=>{const k=Math.round(f*analyser.fftSize/lesson.audio.context.sampleRate);return Math.max(...bins.slice(k-1,k+2));};return {hz:n*lesson.audio.context.sampleRate/d.length,fundamental:peak(${hz}),third:peak(${hz}*3)};})()`);
+     assert.ok(Math.abs(signal.hz-hz)<4,JSON.stringify(signal));
+     assert.ok(signal.third>signal.fundamental-30,JSON.stringify(signal));
+     result.sirenSignals.push(signal);
+    }
+    await evaluate('lesson.pause()');
     await evaluate('lesson.play();Object.defineProperty(document,"hidden",{configurable:true,value:true});document.dispatchEvent(new Event("visibilitychange"));delete document.hidden;');assert.equal(await evaluate('lesson.running'),false);assert.equal(await evaluate('lesson.audio.targetGain'),0);
-    await evaluate('document.getElementById("defaults").click()');assert.equal(await evaluate('lesson.audio.enabled'),false);
+    await evaluate('document.getElementById("defaults").click()');assert.equal(await evaluate('lesson.p.soundEnabled'),true);assert.equal(await evaluate('lesson.audio.targetGain'),0);
     await evaluate('document.getElementById("time").value=1000;document.getElementById("time").dispatchEvent(new Event("input"));');
     assert.equal(await evaluate('document.getElementById("step").disabled'),true);
     await capture('doppler-frequency');
